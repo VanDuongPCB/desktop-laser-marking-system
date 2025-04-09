@@ -1,0 +1,35 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/save_48px.png</file>
+        <file>icons/add_file_48px.png</file>
+        <file>icons/doctors_folder_48px.png</file>
+        <file>icons/remove_48px.png</file>
+        <file>icons/settings_48px.png</file>
+        <file>icons/upload_to_ftp_48px.png</file>
+        <file>icons/3d_model_48px.png</file>
+        <file>icons/deviation_48px.png</file>
+        <file>icons/rss_48px.png</file>
+        <file>icons/microsoft_excel_2019_48px.png</file>
+        <file>icons/close_window_48px.png</file>
+        <file>icons/plus_48px.png</file>
+        <file>icons/reset_48px.png</file>
+        <file>icons/background.png</file>
+        <file>icons/female_profile_48px.png</file>
+        <file>icons/iris_scan_48px.png</file>
+        <file>icons/joystick_48px.png</file>
+        <file>icons/schedule_48px.png</file>
+        <file>icons/text_width_48px.png</file>
+        <file>icons/laser_beam_48px.png</file>
+        <file>icons/prototype_48px.png</file>
+        <file>icons/Blue Pointer_48px.png</file>
+        <file>icons/collect_48px.png</file>
+        <file>icons/play_48px.png</file>
+        <file>icons/stop_48px.png</file>
+        <file>icons/circled_right_48px.png</file>
+        <file>icons/firework_explosion_48px.png</file>
+        <file>icons/ok_48px.png</file>
+        <file>icons/sparkler_48px.png</file>
+        <file>icons/flash_on_48px.png</file>
+        <file>icons/data_transfer_48px.png</file>
+    </qresource>
+</RCC>
