@@ -76,6 +76,7 @@ HEADERS += \
     HxTabWidget.h \
     HxTableView.h \
     HxTcpSocket.h \
+    HxTheme.h \
     HxUIStyle.h
 
 SOURCES += \
@@ -121,6 +122,7 @@ SOURCES += \
     HxTabWidget.cpp \
     HxTableView.cpp \
     HxTcpSocket.cpp \
+    HxTheme.cpp \
     HxUIStyle.cpp
 
 
