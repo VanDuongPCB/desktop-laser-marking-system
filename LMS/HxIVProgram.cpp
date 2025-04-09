@@ -5,6 +5,8 @@
 #include <QFileInfoList>
 #include <QCoreApplication>
 
+#include "HxFileManager.h"
+
 HxIVProgram::HxIVProgram()
 {
 
@@ -18,7 +20,7 @@ HxIVProgram::~HxIVProgram()
 std::vector<std::shared_ptr<HxIVProgram>> HxIVProgram::items;
 void HxIVProgram::load()
 {
-    QString ivDir = QCoreApplication::applicationDirPath() + "/data/IV-PROGRAMS";
+    QString ivDir = GetFileManager()->GetPath(HxFileManager::eDBIVProgramDir);
     QDir().mkdir( ivDir );
     QFileInfoList files = QDir( ivDir ).entryInfoList( { "*.iva" } );
     for ( auto& file : files )
@@ -33,7 +35,7 @@ void HxIVProgram::load()
 QStringList HxIVProgram::names()
 {
     QStringList _names;
-    QString ivDir = QCoreApplication::applicationDirPath() + "/data/IV-PROGRAMS";
+    QString ivDir = GetFileManager()->GetPath(HxFileManager::eDBIVProgramDir);
     QDir().mkdir( ivDir );
     QFileInfoList files = QDir( ivDir ).entryInfoList( { "*.iva" } );
     for ( auto& file : files )

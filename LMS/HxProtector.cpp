@@ -1,6 +1,8 @@
 #include "HxProtector.h"
 #include "HxSettings.h"
 
+#include "HxFileManager.h"
+
 namespace
 {
 HxProtector s_instance;
@@ -9,7 +11,7 @@ HxProtector s_instance;
 HxProtector::HxProtector( QObject* parent ) : QObject( parent )
 {
     admin.name = "Admin";
-    admin.pass = NxSettings::password;
+    admin.pass = "Laser1";
     admin.isAdmin = true;
 }
 
@@ -20,8 +22,16 @@ HxProtector::~HxProtector()
 
 bool HxProtector::login( QString name, QString pass )
 {
+    auto settings = GetFileManager()->GetSettings(HxFileManager::eSettingProtect);
+    QString adminPass = settings->value("Password").toString();
+    if(adminPass.isEmpty())
+    {
+        adminPass = "Laser1";
+        settings->setValue("Password", adminPass);
+    }
+
     name = name.trimmed().toLower();
-    if ( name == "admin" && pass == NxSettings::password )
+    if ( name == "admin" && pass == adminPass )
     {
         _currentUser = &admin;
         emit loginChanged();

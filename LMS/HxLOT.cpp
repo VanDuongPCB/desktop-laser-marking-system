@@ -1,5 +1,4 @@
 #include "HxLOT.h"
-#include "HxSettings.h"
 #include "HxConvert.h"
 #include <QJsonObject>
 #include <QJsonArray>
@@ -9,7 +8,9 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QCoreApplication>
-#include <iostream>
+
+#include "HxFileManager.h"
+
 
 #include <HxDebugger.h>
 
@@ -107,13 +108,12 @@ void HxLOT::sort()
 void HxLOT::load()
 {
     items.clear();
-    QDir().mkdir( QCoreApplication::applicationDirPath() + "/data" );
-    QString dir = QCoreApplication::applicationDirPath() + "/data/LOTS";
-    QDir().mkdir( dir );
-    QFileInfoList files = QDir( dir ).entryInfoList( { "*.lot" } );
+
+    QString lotDir = GetFileManager()->GetPath(HxFileManager::eDBLOTDir);
+    QDir().mkdir( lotDir );
+    QFileInfoList files = QDir( lotDir ).entryInfoList( { "*.lot" } );
     for ( auto& file : files )
     {
-
         QDateTime lastWrite = file.lastModified();
 
         QFile fileReader( file.absoluteFilePath() );
@@ -182,8 +182,7 @@ void HxLOT::saveLot( std::shared_ptr<HxLOT> data )
     QJsonDocument doc;
     doc.setObject( obj );
 
-    QDir().mkdir( QCoreApplication::applicationDirPath() + "/data" );
-    QString dir = QCoreApplication::applicationDirPath() + "/data/LOTS";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBLOTDir);
     QDir().mkdir( dir );
     QString filePath = dir + "/" + data->name + ".lot";
     QFile fileWriter( filePath );
@@ -198,8 +197,7 @@ void HxLOT::remove( int index )
 {
     if ( index < 0 || index >= items.size() ) return;
     // delete
-    QDir().mkdir( QCoreApplication::applicationDirPath() + "/data" );
-    QString dir = QCoreApplication::applicationDirPath() + "/data/LOTS";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBLOTDir);
     QDir().mkdir( dir );
     QString filePath = dir + "/" + items[ index ]->name + ".lot";
     QFile( filePath ).remove();

@@ -13,6 +13,9 @@
 #include <QSerialPortInfo>
 #include <QFileDialog>
 
+#include "HxFileManager.h"
+
+
 HxSettingsWindow::HxSettingsWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::SettingsWindow )
 {
     ui->setupUi( this );
@@ -34,12 +37,12 @@ void HxSettingsWindow::showEvent( QShowEvent* )
 
 void HxSettingsWindow::showProtectSetting()
 {
-    ui->txtPassword->setText( NxSettings::password );
+    ui->txtPassword->setText( GetFileManager()->GetSettings(HxFileManager::eSettingProtect)->value("Password").toString() );
 }
 
 void HxSettingsWindow::showActuatorSettings()
 {
-    ui->txtDataDir->setText( QCoreApplication::applicationDirPath() + "/data" );
+    ui->txtDataDir->setText( GetFileManager()->GetPath( HxFileManager::eDBRootDir ) );
     ui->txtPLCIP->setText( NxSettings::plcIp );
     ui->spxPLCPort->setValue( NxSettings::plcPort );
 
@@ -98,17 +101,18 @@ void HxSettingsWindow::showUsers()
 
 void HxSettingsWindow::on_btnBrowseDataDir_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory();
-    if ( dir.length() > 1 )
+    QString dir = QFileDialog::getExistingDirectory(this, "Chọn thư mục dữ liệu", ui->txtDataDir->text());
+    if ( !dir.isEmpty() )
     {
         ui->txtDataDir->setText( dir );
+
     }
 }
 
 void HxSettingsWindow::on_actionSave_triggered()
 {
-    NxSettings::password = ui->txtPassword->text();
-
+    GetFileManager()->GetSettings(HxFileManager::eSettingData)->setValue("RootDataDir", ui->txtDataDir->text());
+    GetFileManager()->GetSettings(HxFileManager::eSettingProtect)->setValue("Password", ui->txtPassword->text());
 
     NxSettings::plcIp = ui->txtPLCIP->text();
     NxSettings::plcPort = ui->spxPLCPort->value();

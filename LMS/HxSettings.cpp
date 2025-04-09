@@ -7,8 +7,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-
-QString NxSettings::password = "Laser1";
+#include "HxFileManager.h"
 
 QString NxSettings::laserPort = "COM1";
 QString NxSettings::plcIp = "192.168.0.11";
@@ -41,7 +40,6 @@ QString NxSettings::markResultReg = "MR30101";
 void NxSettings::save()
 {
     QJsonObject obj;
-    obj.insert( "password", password );
     obj.insert( "laser-dir", laserPort );
     obj.insert( "plc-tcp-ip", plcIp );
     obj.insert( "plc-tcp-port", plcPort );
@@ -64,9 +62,7 @@ void NxSettings::save()
     doc.setObject( obj );
 
 
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
-    QDir().mkdir( dir );
-    QString path = dir + "/settings.json";
+    QString path = GetFileManager()->GetPath(HxFileManager::eDBSettingFile);
     QFile writer( path );
     if ( writer.open( QIODevice::WriteOnly ) )
     {
@@ -77,9 +73,7 @@ void NxSettings::save()
 
 void NxSettings::load()
 {
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
-    QDir().mkdir( dir );
-    QString path = dir + "/settings.json";
+    QString path = GetFileManager()->GetPath(HxFileManager::eDBSettingFile);
     QFile reader( path );
     if ( reader.open( QIODevice::ReadOnly ) )
     {
@@ -87,7 +81,6 @@ void NxSettings::load()
         reader.close();
         QJsonDocument doc = QJsonDocument::fromJson( json );
         QJsonObject obj = doc.object();
-        password = obj.value( "password" ).toString();
         laserPort = obj.value( "laser-dir" ).toString();
         plcIp = obj.value( "plc-tcp-ip" ).toString();
         plcPort = obj.value( "plc-tcp-port" ).toInt( 8501 );
@@ -106,6 +99,4 @@ void NxSettings::load()
         barcodeNGReg = obj.value( "reg-barcode-status-ng" ).toString();
         markResultReg = obj.value( "reg-mark-result" ).toString();
     }
-    if ( password.length() < 1 ) password = "Laser1";
-    QDir().mkdir( QCoreApplication::applicationDirPath() + "/data" );
 }

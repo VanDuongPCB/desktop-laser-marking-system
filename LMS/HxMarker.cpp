@@ -21,7 +21,7 @@
 
 #include "HxException.h"
 #include "HxSystemError.h"
-
+#include "HxFileManager.h"
 
 HxMarker::HxMarker( QObject* parent ) : QObject( parent )
 {
@@ -238,7 +238,7 @@ void HxMarker::save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model,
         return;
     }
 
-    QString dir = QCoreApplication::applicationDirPath() + "/data/" + ( lot->isRePrint ? "/REPRINT-LOGS" : "/PRINT-LOGS" );
+    QString dir = GetFileManager()->GetPath(lot->isRePrint ? HxFileManager::eDBRePrintLogDir : HxFileManager::eDBPrintLogDir);
     QDir().mkdir( dir );
 
     QString fileName = QDateTime::currentDateTime().toString( "yyyyMMdd" ) + ".csv";

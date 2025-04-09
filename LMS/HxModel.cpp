@@ -1,5 +1,4 @@
 #include "HxModel.h"
-#include "HxSettings.h"
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -8,7 +7,9 @@
 #include <QDir>
 #include <QFile>
 #include <QCoreApplication>
-#include <iostream>
+
+#include "HxFileManager.h"
+
 
 HxModel::HxModel()
 {
@@ -200,9 +201,7 @@ void HxModel::save( std::shared_ptr<HxModel> model )
     QJsonDocument doc;
     doc.setObject( obj );
 
-    QString dir = QCoreApplication::applicationDirPath() + "/data";
-    QDir().mkdir( dir );
-    dir += "/MODELS";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBModelDir);
     QDir().mkdir( dir );
     QString path = dir + "/" + model->name + ".model";
     QFile writer( path );
@@ -223,15 +222,9 @@ void HxModel::save()
 
 void HxModel::load()
 {
-    QString dir = QCoreApplication::applicationDirPath() + "/data";
-
-    QDir().mkdir( dir );
-    dir += "/MODELS";
-
-    QDir().mkdir( dir );
-    QFileInfoList files = QDir( dir ).entryInfoList( { "*.model" } );
-
-
+    QString modelDir = GetFileManager()->GetPath(HxFileManager::eDBModelDir);
+    QDir().mkdir( modelDir );
+    QFileInfoList files = QDir( modelDir ).entryInfoList( { "*.model" } );
 
     for ( auto& file : files )
     {
