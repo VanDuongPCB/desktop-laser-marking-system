@@ -5,7 +5,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <iostream>
+
+#include "HxFileManager.h"
 
 HxStopper::HxStopper()
 {
@@ -25,9 +26,9 @@ void HxStopper::load()
     if ( !items.contains( 2 ) ) items.insert( 2, std::make_shared<HxStopper>( HxStopper() ) );
     if ( !items.contains( 3 ) ) items.insert( 3, std::make_shared<HxStopper>( HxStopper() ) );
 
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBSettingDir);
     QDir().mkdir( dir );
-    QString path = dir + "/stoppers.json";
+    QString path = GetFileManager()->GetPath(HxFileManager::eDBStopperFile);
     QFile reader( path );
     if ( reader.open( QIODevice::ReadOnly ) )
     {
@@ -63,9 +64,9 @@ void HxStopper::save()
     doc.setArray( arr );
 
 
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBSettingDir);
     QDir().mkdir( dir );
-    QString path = dir + "/stoppers.json";
+    QString path = GetFileManager()->GetPath(HxFileManager::eDBStopperFile);
     QFile writer( path );
     if ( writer.open( QIODevice::WriteOnly ) )
     {

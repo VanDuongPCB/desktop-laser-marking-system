@@ -6,6 +6,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
+#include "HxFileManager.h"
+
 HxProfile::HxProfile()
 {
 
@@ -21,9 +23,10 @@ std::vector<std::shared_ptr<HxProfile>> HxProfile::items;
 void HxProfile::load()
 {
     items.clear();
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBSettingDir);
     QDir().mkdir( dir );
-    QFile fileReader( dir + "/user.dat" );
+
+    QFile fileReader( GetFileManager()->GetPath(HxFileManager::eDBSettingFile) );
     if ( fileReader.open( QIODevice::ReadOnly ) )
     {
         QByteArray json = fileReader.readAll();
@@ -41,7 +44,7 @@ void HxProfile::load()
 }
 void HxProfile::save()
 {
-    QString dir = QCoreApplication::applicationDirPath() + "/settings";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBSettingDir);
     QDir().mkdir( dir );
 
     QJsonArray arr;
@@ -56,7 +59,7 @@ void HxProfile::save()
     QJsonDocument doc;
     doc.setArray( arr );
 
-    QFile fileWriter( dir + "/user.dat" );
+    QFile fileWriter( GetFileManager()->GetPath(HxFileManager::eDBSettingFile));
     if ( fileWriter.open( QIODevice::WriteOnly ) )
     {
         fileWriter.write( doc.toJson() );

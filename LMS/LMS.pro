@@ -46,6 +46,7 @@ HEADERS += \
     HxDesign.h \
     HxDesignWindow.h \
     HxException.h \
+    HxFileManager.h \
     HxIVProgram.h \
     HxLOT.h \
     HxLOTPropertyDialog.h \
@@ -75,8 +76,7 @@ HEADERS += \
     HxTabWidget.h \
     HxTableView.h \
     HxTcpSocket.h \
-    HxUIStyle.h \
-    NxFileManager.h
+    HxUIStyle.h
 
 SOURCES += \
     HxAddParamsDialog.cpp \
@@ -90,6 +90,7 @@ SOURCES += \
     HxDesign.cpp \
     HxDesignWindow.cpp \
     HxException.cpp \
+    HxFileManager.cpp \
     HxIVProgram.cpp \
     HxLOT.cpp \
     HxLOTPropertyDialog.cpp \
@@ -120,7 +121,6 @@ SOURCES += \
     HxTabWidget.cpp \
     HxTableView.cpp \
     HxTcpSocket.cpp \
-    HxUIStyle.cpp \
-    NxFileManager.cpp
+    HxUIStyle.cpp
 
 

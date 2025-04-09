@@ -4,7 +4,6 @@
 class NxSettings
 {
 public:
-    static QString password;
     static QString laserPort;
     static QString plcIp;
     static int plcPort;

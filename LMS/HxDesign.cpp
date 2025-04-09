@@ -1,5 +1,4 @@
 #include "HxDesign.h"
-#include "HxSettings.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -7,7 +6,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QCoreApplication>
-#include <iostream>
+
+#include "HxFileManager.h"
 
 HxDesign::HxDesign()
 {
@@ -54,7 +54,7 @@ void HxDesign::load()
 {
     items.clear();
 
-    QString designDir = QCoreApplication::applicationDirPath() + "/data/DESIGNS";
+    QString designDir = GetFileManager()->GetPath(HxFileManager::eDBDesignDir);
     QDir().mkdir( designDir );
 
     for ( int i = 0; i < 2000; i++ )
@@ -93,7 +93,7 @@ void HxDesign::load()
 
 void HxDesign::save( std::shared_ptr<HxDesign> design )
 {
-    QString designDir = QCoreApplication::applicationDirPath() + "/data/DESIGNS";
+    QString designDir = GetFileManager()->GetPath(HxFileManager::eDBDesignDir);
     QDir().mkdir( designDir );
 
     QJsonObject objDesign;
@@ -131,7 +131,7 @@ void HxDesign::save( std::shared_ptr<HxDesign> design )
 
 void HxDesign::save()
 {
-    QString designDir = QCoreApplication::applicationDirPath() + "/data/DESIGNS";
+    QString designDir = GetFileManager()->GetPath(HxFileManager::eDBDesignDir);
     QDir().mkdir( designDir );
 
     for ( auto& item : items )

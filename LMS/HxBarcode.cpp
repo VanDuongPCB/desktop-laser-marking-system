@@ -8,6 +8,8 @@
 #include "QDir"
 #include "QFile"
 
+#include "HxFileManager.h"
+
 namespace
 {
     HxBarcode s_instance;
@@ -71,7 +73,7 @@ bool HxBarcode::sendFeedback( bool status )
 
 void HxBarcode::save( QString code )
 {
-    QString dir = QCoreApplication::applicationDirPath() + "/data/BARCODE-LOGS";
+    QString dir = GetFileManager()->GetPath(HxFileManager::eDBBarcodeDir);
     QDir().mkdir( dir );
 
     QString fileName = QDateTime::currentDateTime().toString( "yyyyMMdd" ) + ".csv";
