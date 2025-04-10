@@ -41,12 +41,8 @@ int main( int argc, char* argv[] )
     HxStopper::load();
     HxDesign::load();
     HxIVProgram::load();
-    HxModel::load();
-    HxLOT::load();
     HxProfile::load();
-
     HxMarker::initialize();
-
     w.show();
     int code = a.exec();
     HxMarker::terminate();

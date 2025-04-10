@@ -35,7 +35,7 @@
     <item row="0" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="pageSelector">
        <property name="font">
@@ -60,7 +60,7 @@
          <widget class="HxTableView" name="tbvSelector">
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>9</pointsize>
            </font>
           </property>
           <property name="toolTip">
@@ -79,10 +79,10 @@
            <number>150</number>
           </attribute>
           <attribute name="verticalHeaderMinimumSectionSize">
-           <number>24</number>
+           <number>22</number>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>24</number>
+           <number>22</number>
           </attribute>
          </widget>
         </item>
@@ -600,6 +600,9 @@ font-size:32px;</string>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
    </property>
    <property name="iconSize">
     <size>

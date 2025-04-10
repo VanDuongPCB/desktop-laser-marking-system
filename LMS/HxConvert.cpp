@@ -34,3 +34,33 @@ QString HexStringFromUint64( uint64_t value, int length )
     }
     return QString::fromStdString( base );
 }
+
+QString ProductStatusToString(HxLOT::ProductStatus status)
+{
+    switch (status) {
+    case HxLOT::ePending:
+        return "Chưa sản xuất";
+    case HxLOT::eProduct:
+        return "Đang sản xuất";
+    case HxLOT::eCompleted:
+        return "Đã hoàn thành";
+    default:
+        break;
+    }
+    return "?";
+}
+
+QColor ProductStatusToColor(HxLOT::ProductStatus status)
+{
+    switch (status) {
+    case HxLOT::ePending:
+        return QColor(255, 255, 255);
+    case HxLOT::eProduct:
+        return QColor(255, 255, 128);
+    case HxLOT::eCompleted:
+        return QColor(128, 255, 128);
+    default:
+        break;
+    }
+    return QColor(255, 255, 255);
+}

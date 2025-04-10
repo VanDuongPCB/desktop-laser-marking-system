@@ -4,11 +4,24 @@
 #include "HxModel.h"
 #include "HxDesign.h"
 #include "HxConvert.h"
-#include <iostream>
+#include "HxMessage.h"
 
-HxLOTPropertyDialog::HxLOTPropertyDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::LotPropertiesDialog )
+HxLOTPropertyDialog::HxLOTPropertyDialog( const QString& lotName, HxLOTPtrMap LOTs, QWidget* parent ) : QDialog( parent ), ui( new Ui::LotPropertiesDialog )
 {
     ui->setupUi( this );
+    m_LOTs = LOTs;
+    ui->tbvParams->setHeaders( { "Thông tin","Giá trị" } );
+    ui->tbvBlocks->setHeaders( { "Block","Nội dung","Độ dài","Định dạng" } );
+    ui->tbvBlocks->setColumnWidth( 1, 300 );
+
+    OnInit(lotName);
+    showInfo();
+    ShowPrintLo();
+    showParams();
+    showBlocks();
+
+    connect(ui->cbxModel, &QComboBox::currentTextChanged, this, &HxLOTPropertyDialog::OnModelChanged);
+    connect(ui->btnCreateOrChange, &QPushButton::clicked, this, &HxLOTPropertyDialog::OnApply);
 }
 
 HxLOTPropertyDialog::~HxLOTPropertyDialog()
@@ -16,131 +29,98 @@ HxLOTPropertyDialog::~HxLOTPropertyDialog()
     delete ui;
 }
 
-void HxLOTPropertyDialog::pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot )
+void HxLOTPropertyDialog::OnInit(const QString& lotName)
 {
-    if ( dstLot == nullptr ) return;
-    if ( newLot )
+    QSignalBlocker blocker(this);
+    m_pLOT = GetLOTManager()->GetLOT(lotName);
+    m_bIsCreate = m_pLOT == nullptr;
+    if(m_bIsCreate)
     {
-        dstLot->progress = 0;
-        dstLot->dateCreate = QDateTime::currentDateTime().toString( "yyyy-MM-dd HH:mm:ss" );
-        dstLot->isRePrint = ui->chxRePrint->isChecked();
-        dstLot->name = ui->txtName->text().trimmed().toUpper();
-        if ( dstLot->isRePrint )
-        {
-            dstLot->name += "--RE" + QDateTime::currentDateTime().toString( "HHmmss" );
-        }
+        m_pLOT = GetLOTManager()->Create();
+        setWindowTitle("Tạo LOT mới");
+        ui->btnCreateOrChange->setText("Tạo LOT mới");
+        ui->txtName->setReadOnly(false);
+    }
+    else
+    {
+        setWindowTitle("Thay đổi thông tin LOT");
+        ui->btnCreateOrChange->setText("Cập nhật LOT");
+        ui->txtName->setReadOnly(true);
     }
 
+    ui->cbxModel->addItem("");
+    ui->cbxModel->addItems(GetModelManager()->Names());
 
-    dstLot->modelName = ui->cbxModel->currentText();
-    dstLot->macStart = ui->txtMACStart->text();
-    dstLot->macEnd = ui->txtMACEnd->text();
-    dstLot->quantity = ui->spxQuantity->value();
-    dstLot->counterStart = ui->txtCounterStart->text().trimmed();
+    switch (m_pLOT->Status()) {
+    case HxLOT::ePending:
+        ui->cbxModel->setEnabled( true );
+        ui->txtMACStart->setEnabled( true );
+        ui->txtCounter->setEnabled( true );
+        ui->txtMACEnd->setEnabled( true );
+        ui->spxQuantity->setEnabled( true );
+        ui->txtCounterStart->setEnabled( true );
+        break;
+    case HxLOT::eProduct:
+        ui->cbxModel->setEnabled( false );
+        ui->txtMACStart->setEnabled( false );
+        ui->txtCounter->setEnabled( true );
+        ui->txtMACEnd->setEnabled( true );
+        ui->spxQuantity->setEnabled( true );
+        ui->txtCounterStart->setEnabled( false );
+        break;
 
-
-    // param
-    int rows = ui->tbvParams->dataTable()->rowCount();
-    for ( int row = 0; row < rows; row++ )
-    {
-        QString key = ui->tbvParams->item( row, 0 )->text();
-        QString value = ui->tbvParams->item( row, 1 )->text();
-        if ( dstLot->comments.contains( key ) )
-        {
-            dstLot->comments[ key ] = value;
-        }
-        else
-        {
-            dstLot->comments.insert( key, value );
-        }
+    case HxLOT::eCompleted:
+        ui->cbxModel->setEnabled( false );
+        ui->txtMACStart->setEnabled( false );
+        ui->txtCounter->setEnabled( true );
+        ui->txtMACEnd->setEnabled( true );
+        ui->spxQuantity->setEnabled( true );
+        ui->txtCounterStart->setEnabled( false );
+        break;
+    default:
+        break;
     }
+
+    m_pModel = GetModelManager()->GetModel(m_pLOT->m_modelName);
 }
 
 void HxLOTPropertyDialog::showInfo()
 {
-    if ( lot != nullptr )
-    {
-        this->setWindowTitle( "Thông tin lot" );
-        ui->chxRePrint->setChecked( lot->isRePrint );
-        ui->txtName->setEnabled( false );
-        ui->chxRePrint->setEnabled( false );
-        ui->txtName->setText( lot->name );
-        ui->cbxModel->setCurrentText( lot->modelName );
-        ui->txtMACStart->setText( lot->macStart );
-        ui->txtCounter->setText( lot->counter() );
-        ui->txtMACEnd->setText( lot->macEnd );
-        ui->spxQuantity->setValue( lot->quantity );
-        ui->txtCounterStart->setText( lot->counterStart );
+    QSignalBlocker blocker(this);
+    ui->txtName->setText( m_pLOT->m_name );
+    ui->cbxModel->setCurrentText( m_pLOT->m_modelName );
+    ui->txtCounter->setText( m_pLOT->Counter() );
+    ui->txtMACEnd->setText( m_pLOT->m_macEnd );
+    ui->spxQuantity->setValue( m_pLOT->m_quantity );
+    ui->txtCounterStart->setText( m_pLOT->m_counterStart );
+}
 
-        if ( lot->status() == "Chưa sản xuất" )
-        {
-            ui->cbxModel->setEnabled( true );
-            ui->txtMACStart->setEnabled( true );
-            ui->txtCounter->setEnabled( true );
-            ui->txtMACEnd->setEnabled( true );
-            ui->spxQuantity->setEnabled( true );
-            ui->txtCounterStart->setEnabled( true );
-        }
-        else if ( lot->status() == "Đang sản xuất" )
-        {
-            ui->cbxModel->setEnabled( false );
-            ui->txtMACStart->setEnabled( false );
-            ui->txtCounter->setEnabled( true );
-            ui->txtMACEnd->setEnabled( true );
-            ui->spxQuantity->setEnabled( true );
-            ui->txtCounterStart->setEnabled( false );
-        }
-        else
-        {
-            ui->cbxModel->setEnabled( false );
-            ui->txtMACStart->setEnabled( false );
-            ui->txtCounter->setEnabled( true );
-            ui->txtMACEnd->setEnabled( true );
-            ui->spxQuantity->setEnabled( true );
-            ui->txtCounterStart->setEnabled( false );
-        }
-
-        ui->btnCreateOrChange->setText( "Thay đổi" );
-    }
-    else
-    {
-        this->setWindowTitle( "Tạo lot" );
-        clear();
-
-        ui->btnCreateOrChange->setText( "Tạo mới" );
-    }
+void HxLOTPropertyDialog::ShowPrintLo()
+{
+    ui->chxRePrint->setVisible(false);
+    auto pModel = GetModelManager()->GetModel(m_pLOT->m_modelName);
+    if(pModel == nullptr || pModel->IsPrintLo() == false)
+        return;
+    ui->chxRePrint->setVisible(true);
 }
 
 void HxLOTPropertyDialog::showParams()
 {
-    disconnect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::paramChanged );
-    if ( ui->tbvParams->headers.empty() )
-    {
-        ui->tbvParams->setHeaders( { "Thông tin","Giá trị" } );
-    }
+    QSignalBlocker blocker(this);
+    disconnect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::OnParamChanged );
 
     QStringList paramNames = {};
-    if ( lot != nullptr )
     {
-        QStringList keys = lot->comments.keys();
-        for ( auto& key : keys )
-        {
-            if ( !paramNames.contains( key ) ) paramNames.push_back( key );
-        }
-    }
-    else
-    {
-        HxLOT lt;
-        QStringList keys = lt.comments.keys();
+        QStringList keys = m_pLOT->m_comments.keys();
         for ( auto& key : keys )
         {
             if ( !paramNames.contains( key ) ) paramNames.push_back( key );
         }
     }
 
-    for ( auto& lt : HxLOT::items )
+    for ( auto& [name, pLOT] : m_LOTs )
     {
-        QStringList keys = lt->comments.keys();
+        QStringList keys = pLOT->m_comments.keys();
         for ( auto& key : keys )
         {
             if ( !paramNames.contains( key ) ) paramNames.push_back( key );
@@ -154,31 +134,27 @@ void HxLOTPropertyDialog::showParams()
     {
         ui->tbvParams->setText( row, 0, paramNames[ row ] );
         ui->tbvParams->setText( row, 1, "" );
-        if ( lot != nullptr && lot->comments.contains( paramNames[ row ] ) )
+        if ( m_pLOT->m_comments.contains( paramNames[ row ] ) )
         {
-            ui->tbvParams->setText( row, 1, lot->comments.value( paramNames[ row ] ) );
+            ui->tbvParams->setText( row, 1, m_pLOT->m_comments.value( paramNames[ row ] ) );
         }
     }
-    connect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::paramChanged );
+    connect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::OnParamChanged );
 }
 
 void HxLOTPropertyDialog::showBlocks()
 {
-    if ( ui->tbvBlocks->headers.empty() )
-    {
-        ui->tbvBlocks->setHeaders( { "Block","Nội dung","Độ dài","Định dạng" } );
-        ui->tbvBlocks->setColumnWidth( 1, 300 );
-    }
+    QSignalBlocker blocker(this);
     ui->tbvBlocks->setRowCount( 0 );
-    auto tmp = std::make_shared<HxLOT>( HxLOT() );
-    pasteToLot( tmp, lot == nullptr );
+    auto pModel = GetModelManager()->GetModel( m_pLOT->m_modelName );
+    if(!pModel)
+        return;
 
-    auto model = HxModel::find( tmp->modelName );
-    if ( model == nullptr ) return;
-    auto design = HxDesign::find( model->design );
-    if ( design == nullptr ) return;
-    QList<int> nums = design->blocks.keys();
-    std::sort( nums.begin(), nums.end() );
+    auto pDesign = HxDesign::find( pModel->Design() );
+    if(!pDesign)
+        return;
+
+    QList<int> nums = pDesign->blocks.keys();
 
     ui->tbvBlocks->setRowCount( nums.size() );
     for ( int i = 0; i < nums.size(); i++ )
@@ -186,13 +162,13 @@ void HxLOTPropertyDialog::showBlocks()
         int blockIdx = nums[ i ];
         ui->tbvBlocks->setText( i, "Block", QString::number( nums[ i ] ).rightJustified( 3, '0' ) );
 
-        QString data = HxBlockInfo::gen( design->blocks[ blockIdx ].data, tmp, model );
+        QString data = HxBlockInfo::gen( pDesign->blocks[ blockIdx ].data, m_pLOT, pModel );
         ui->tbvBlocks->setText( i, "Nội dung", data );
 
-        ui->tbvBlocks->setText( i, "Định dạng", design->blocks[ blockIdx ].data );
+        ui->tbvBlocks->setText( i, "Định dạng", pDesign->blocks[ blockIdx ].data );
 
         int len = data.length();
-        int setupLen = design->blocks[ blockIdx ].textLen;
+        int setupLen = pDesign->blocks[ blockIdx ].textLen;
         bool match = len == setupLen;
         ui->tbvBlocks->setText( i, "Độ dài", QString::number( len ) + "/" + QString::number( setupLen ) );
 
@@ -207,14 +183,27 @@ void HxLOTPropertyDialog::showBlocks()
 
 bool HxLOTPropertyDialog::checkLotName()
 {
-    if ( ui->chxRePrint->isChecked() ) return true;
+    if(!m_bIsCreate)
+        return true;
+
     QString lotName = ui->txtName->text().trimmed().toUpper();
-    if ( lotName.length() < 1 ) return false;
-    for ( auto& it : HxLOT::items )
+
+    if(lotName.isEmpty())
     {
-        if ( it == lot ) continue;
-        if ( it->name.toUpper() == lotName )
+        HxMsgError(tr("Tên LOT không được để trống!"),
+                   tr("Lỗi"));
+        return false;
+    }
+
+    for ( auto& [name, pLOT] : m_LOTs )
+    {
+        if(pLOT->m_name == lotName)
         {
+            HxMsgError(tr("Phát hiện trùng tên LOT!\n"
+                          "Trường hợp bắt buộc tên LOT phải giống, hãy thêm vào phía sau một cụm từ bắt đầu bằng \"-RE\".\n"
+                          "Ví dụ:\n"
+                          "TÊN LOT-RE01"),
+                       tr("Trùng lặp tên LOT"));
             return false;
         }
     }
@@ -223,124 +212,217 @@ bool HxLOTPropertyDialog::checkLotName()
 
 bool HxLOTPropertyDialog::checkSeriRange()
 {
-    if ( ui->chxRePrint->isChecked() ) return true;
-    QString modelName = ui->cbxModel->currentText().trimmed().toUpper();
-    auto model = HxModel::find( modelName );
-    if ( model == nullptr ) return false;
+    if ( ui->chxRePrint->isVisible() )
+        return true;
 
-    auto design = HxDesign::find( model->design );
-    if ( design == nullptr ) return false;
-    int indexBlockCode = design->indexOfBlockCode();
-    if ( indexBlockCode < 1 ) return false;
-    HxBlockInfo block = design->blocks[ indexBlockCode ];
+    auto pModel = GetModelManager()->GetModel(m_pLOT->Model());
+    if(!pModel)
+        return true;
 
-    auto fromLot = std::make_shared<HxLOT>( HxLOT() );
-    pasteToLot( fromLot, true );
-    fromLot->progress = 0;
-    QString startSerial = HxBlockInfo::gen( block.data, fromLot, model );
-    fromLot->progress = fromLot->quantity - 1;
-    QString endSerial = HxBlockInfo::gen( block.data, fromLot, model );
+    auto pDesign = HxDesign::find(pModel->Design());
+    if(!pDesign)
+        return true;
 
-    for ( auto& it : HxLOT::items )
+    int indexBlockCode = pDesign->indexOfBlockCode();
+    if ( indexBlockCode < 1 )
+        return true;
+    HxBlockInfo block = pDesign->blocks[ indexBlockCode ];
+
+    HxLOTPtr pFrom = m_pLOT->Clone();
+    pFrom->SetProgress(0);
+    QString startSerial = HxBlockInfo::gen( block.data, pFrom, pModel );
+    pFrom->SetProgress(pFrom->Quantity()-1);
+    QString endSerial = HxBlockInfo::gen( block.data, pFrom, pModel );
+
+
+    for(auto &[name, pLOT] : m_LOTs)
     {
-        if ( it == lot ) continue;
-        if ( it->modelName != model->name ) continue;
-        if ( it->name == fromLot->name ) continue;
-        auto toLot = it;
+        if(pFrom->Name() == pLOT->Name())
+            continue;
 
-        //        // con mẹ nó, chỗ này không backup progress nên mới xảy ra progess = quantity - 1
-        //        // khi tạo hoặc sửa lot
-        //        toLot->progress = 0;
-        //        QString startSerial2 = BlockInfo::gen(block.data, toLot,model);
-        //        toLot->progress = toLot->quantity - 1;
-        //        QString endSerial2 = BlockInfo::gen(block.data, toLot, model);
+        if(pFrom->Model() != pLOT->Model())
+            continue;
 
-                // phải sửa lại như thế này
-        int backupProgress = toLot->progress;
-        toLot->progress = 0;
-        QString startSerial2 = HxBlockInfo::gen( block.data, toLot, model );
-        toLot->progress = toLot->quantity - 1;
-        QString endSerial2 = HxBlockInfo::gen( block.data, toLot, model );
-        // backup
-        toLot->progress = backupProgress;
+        if(pFrom->CounterStart().length() != pLOT->CounterStart().length())
+            continue;
 
-        QStringList checkItems = { startSerial, endSerial };
-        if ( checkItems.contains( startSerial2 ) ) return false;
-        if ( checkItems.contains( endSerial2 ) ) return false;
-        checkItems.push_back( startSerial2 );
-        checkItems.push_back( endSerial2 );
-        checkItems.sort();
+        HxLOTPtr pTo = pLOT->Clone();
+        pTo->SetProgress( 0);
+        QString startSerial2 = HxBlockInfo::gen( block.data, pTo, pModel );
+        pTo->SetProgress(pTo->Quantity() - 1);
+        QString endSerial2 = HxBlockInfo::gen( block.data, pTo, pModel );
 
-        if ( startSerial == checkItems[ 0 ] && endSerial == checkItems[ 1 ] ) continue;
-        if ( startSerial == checkItems[ 2 ] && endSerial == checkItems[ 3 ] ) continue;
-        return false;
+        std::vector<QString> serials {startSerial,endSerial,startSerial2,endSerial2};
+        std::sort(serials.begin(), serials.end());
+        bool bIsInter = (serials[1] == serials[2]) || (startSerial == serials[0] && endSerial != serials[1]) || (startSerial == serials[2] && endSerial != serials[3]);
+        if(bIsInter)
+        {
+            HxMsgError(tr("Phát hiện trùng lặp dải seri với lot: %1!\n"
+                          "Hãy liên lạc với quản đốc!").arg(pLOT->m_name),
+                       tr("Tên LOT: %1\n"
+                          "Dải serial: %2 - %3").arg(pLOT->m_name).arg(startSerial2).arg(endSerial2),
+                       tr("Trùng lặp dải MAC"),
+                       true);
+            return false;
+        }
     }
+
+
+
+
+
+    // if ( ui->chxRePrint->isChecked() ) return true;
+    // QString modelName = ui->cbxModel->currentText().trimmed().toUpper();
+    // auto model = GetModelManager()->GetModel( modelName );
+    // if ( model == nullptr ) return false;
+
+    // auto design = HxDesign::find( model->Design() );
+    // if ( design == nullptr ) return false;
+    // int indexBlockCode = design->indexOfBlockCode();
+    // if ( indexBlockCode < 1 ) return false;
+    // HxBlockInfo block = design->blocks[ indexBlockCode ];
+
+    // auto fromLot = std::make_shared<HxLOT>( HxLOT() );
+    // pasteToLot( fromLot, true );
+    // fromLot->progress = 0;
+    // QString startSerial = HxBlockInfo::gen( block.data, fromLot, model );
+    // fromLot->progress = fromLot->quantity - 1;
+    // QString endSerial = HxBlockInfo::gen( block.data, fromLot, model );
+
+    // for ( auto& it : HxLOT::items )
+    // {
+    //     if ( it == lot ) continue;
+    //     if ( it->modelName != model->Name() ) continue;
+    //     if ( it->name == fromLot->name ) continue;
+    //     auto toLot = it;
+
+    //     //        // con mẹ nó, chỗ này không backup progress nên mới xảy ra progess = quantity - 1
+    //     //        // khi tạo hoặc sửa lot
+    //     //        toLot->progress = 0;
+    //     //        QString startSerial2 = BlockInfo::gen(block.data, toLot,model);
+    //     //        toLot->progress = toLot->quantity - 1;
+    //     //        QString endSerial2 = BlockInfo::gen(block.data, toLot, model);
+
+    //             // phải sửa lại như thế này
+    //     int backupProgress = toLot->progress;
+    //     toLot->progress = 0;
+    //     QString startSerial2 = HxBlockInfo::gen( block.data, toLot, model );
+    //     toLot->progress = toLot->quantity - 1;
+    //     QString endSerial2 = HxBlockInfo::gen( block.data, toLot, model );
+    //     // backup
+    //     toLot->progress = backupProgress;
+
+    //     QStringList checkItems = { startSerial, endSerial };
+    //     if ( checkItems.contains( startSerial2 ) ) return false;
+    //     if ( checkItems.contains( endSerial2 ) ) return false;
+    //     checkItems.push_back( startSerial2 );
+    //     checkItems.push_back( endSerial2 );
+    //     checkItems.sort();
+
+    //     if ( startSerial == checkItems[ 0 ] && endSerial == checkItems[ 1 ] ) continue;
+    //     if ( startSerial == checkItems[ 2 ] && endSerial == checkItems[ 3 ] ) continue;
+    //     return false;
+    // }
     return true;
 }
 
 bool HxLOTPropertyDialog::checkMacs()
 {
+    if ( ui->chxRePrint->isVisible() )
+        return true;
+
     QString lotName = ui->txtName->text().trimmed().toUpper();
     QString macStart = ui->txtMACStart->text().trimmed();
     QString macEnd = ui->txtMACEnd->text().trimmed();
-    int macStartLen = macStart.length();
-    int macEndLen = macEnd.length();
-    if ( macStartLen != 0 && macStartLen != 12 ) return false;
-    if ( macEndLen != 0 && macEndLen != 12 ) return false;
-    if ( macStartLen == 0 ) return true;
+    if(macStart.isEmpty() && macEnd.isEmpty())
+        return true;
 
-    if ( macStart != macEnd )
+    if(macStart.length() != 12)
     {
-        QStringList checkItems = { macStart, macEnd };
-        checkItems.sort();
-        if ( macStart == checkItems[ 1 ] ) return false;
+        HxMsgError(tr("MAC bắt đầu không hợp lệ!"),tr("MAC không hợp lệ"));
+        return false;
     }
 
+    if(macEnd.length() != 12)
+    {
+        HxMsgError(tr("MAC kết thúc không hợp lệ!"),tr("MAC không hợp lệ"));
+        return false;
+    }
 
     std::string smac = ( macStart + macEnd ).toStdString();
     for ( int i = 0; i < smac.length(); i++ )
     {
         char c = smac[ i ];
         if ( ( c >= '0' && c <= '9' ) || ( c >= 'A' && c <= 'F' ) ) continue;
+        HxMsgError(tr("MAC chứa ký tự không hợp lệ!"),tr("MAC không hợp lệ"));
         return false;
     }
 
-    for ( auto& it : HxLOT::items )
+    uint64_t numMACStart = Uint64FromHexString(macStart);
+    uint64_t numMACEnd = Uint64FromHexString(macEnd);
+    if(numMACStart > numMACEnd)
     {
-        if ( it == lot ) continue;
-        if ( it->isRePrint ) continue;
-        if ( it->name == lotName ) continue;
-        if ( it->macStart.length() != 12 ) continue;
-        if ( it->macEnd.length() != 12 ) continue;
-
-        QStringList checkItems = { macStart, macEnd };
-        if ( checkItems.contains( it->macStart ) ) return false;
-        if ( checkItems.contains( it->macEnd ) ) return false;
-        checkItems.push_back( it->macStart );
-        checkItems.push_back( it->macEnd );
-        checkItems.sort();
-
-        if ( macStart == checkItems[ 0 ] && macEnd == checkItems[ 1 ] ) continue;
-        if ( macStart == checkItems[ 2 ] && macEnd == checkItems[ 3 ] ) continue;
+        HxMsgError(tr("MAC bắt đầu không được lớn hơn MAC kết thúc!"),tr("MAC không hợp lệ"));
         return false;
     }
 
+    for(auto &[name, pLOT] : m_LOTs)
+    {
+        if(pLOT->m_name == lotName)
+            continue;
+
+        if(pLOT->m_macStart.length() + pLOT->m_macEnd.length() != 24)
+            continue;
+
+        uint64_t checkMACStart = Uint64FromHexString(pLOT->m_macStart);
+        uint64_t checkMACEnd = Uint64FromHexString(pLOT->m_macEnd);
+        if(checkMACStart > checkMACEnd)
+            continue;
+
+        std::vector<uint64_t> macs = {numMACStart, numMACEnd, checkMACStart, checkMACEnd};
+        std::sort(macs.begin(), macs.end());
+
+        bool bIsInter = (macs[1] == macs[2]) || (numMACStart == macs[0] && numMACEnd != macs[1]) || (numMACStart == macs[2] && numMACEnd != macs[3]);
+
+        if(bIsInter)
+        {
+            HxMsgError(tr("Phát hiện trùng lặp dải MAC với lot: %1!\n"
+                          "Hãy liên lạc với quản đốc!").arg(pLOT->m_name),
+                       tr("Tên LOT: %1\n"
+                          "Dải MAC: %2 - %3").arg(pLOT->m_name).arg(pLOT->m_macStart).arg(pLOT->m_macEnd),
+                       tr("Trùng lặp dải MAC"),
+                       true);
+            return false;
+        }
+    }
     return true;
 }
 
 bool HxLOTPropertyDialog::checkModelInfo()
 {
     QString modelName = ui->cbxModel->currentText();
-    auto model = HxModel::find( modelName );
-    if ( model == nullptr ) return false;
-    auto design = HxDesign::find( model->design );
-    if ( design == nullptr ) return false;
+    auto pModel = GetModelManager()->GetModel( modelName );
+    if(!pModel)
+    {
+        HxMsgError(tr("Không tồn tại model: %1!").arg(modelName),
+                   tr("Thông tin cài đặt không đúng"));
+        return false;
+    }
+
+    auto pDesign = HxDesign::find( pModel->Design() );
+    if(!pDesign)
+    {
+        HxMsgError(tr("Không tồn tại mẫu tem: %1!").arg(pModel->Design()),
+                   tr("Tên mẫu tem: %1").arg(pModel->Design()),
+                   tr("Thông tin cài đặt không đúng"));
+        return false;
+    }
+
     return true;
 }
 
 bool HxLOTPropertyDialog::checkBlocks()
 {
-    bool match = true;
     int rows = ui->tbvBlocks->dataTable()->rowCount();
     for ( int row = 0; row < rows; row++ )
     {
@@ -349,150 +431,53 @@ bool HxLOTPropertyDialog::checkBlocks()
         int g = color.green();
         if ( r > g )
         {
-            match = false;
-            break;
+            HxMsgError(tr("Phát hiện một số block có dữ liệu không đúng!"),
+                       tr("Thông tin block không đúng"));
+            return false;
         }
     }
-    return match;
+    return true;
 }
 
-void HxLOTPropertyDialog::checkInputs()
+bool HxLOTPropertyDialog::checkInputs()
 {
-    bool available = true;
-    QStringList errors;
-
-    if ( !checkLotName() )
-    {
-        errors.push_back( "Tên lot trống hoặc bị trùng" );
-        available = false;
-    }
-
-    if ( !checkSeriRange() )
-    {
-        errors.push_back( "Dải seri bị trùng" );
-        available = false;
-    }
-
-    if ( !checkMacs() )
-    {
-        errors.push_back( "Dải mac không hợp lệ hoặc bị trùng" );
-        available = false;
-    }
-
-    if ( !checkModelInfo() )
-    {
-        errors.push_back( "Thông tin model chưa đúng" );
-        available = false;
-    }
-
-    if ( !checkBlocks() )
-    {
-        errors.push_back( "Phát hiện dữ liệu block sai quy cách" );
-        available = false;
-    }
-
-    ui->lblError->setText( errors.join( "; " ) );
-    ui->btnCreateOrChange->setEnabled( available );
+    return checkLotName() && checkModelInfo() && checkSeriRange() && checkMacs() && checkBlocks();
 }
 
-
-void HxLOTPropertyDialog::setData( std::shared_ptr<HxLOT> data )
+void HxLOTPropertyDialog::OnParamChanged( QStandardItem* item)
 {
-    // model list
-    QStringList names = HxModel::names();
-    ui->cbxModel->clear();
-    ui->cbxModel->addItem( "" );
-    ui->cbxModel->addItems( names );
-
-    lot = data;
-    showInfo();
-    showParams();
+    int row = item->row();
+    QString key = ui->tbvParams->item(row,0)->text();
+    QString value = ui->tbvParams->item(row,1)->text().trimmed().toUpper();
+    m_pLOT->SetValue(key,value);
     showBlocks();
     checkInputs();
 }
 
-void HxLOTPropertyDialog::clear()
+void HxLOTPropertyDialog::OnModelChanged()
 {
-    lot = nullptr;
-    ui->txtName->setText( "" );
-    ui->cbxModel->setCurrentText( "" );
-    ui->txtMACStart->setText( "" );
-    ui->txtMACEnd->setText( "" );
-    ui->spxQuantity->setValue( 0 );
-}
-
-
-
-void HxLOTPropertyDialog::on_txtMACStart_textChanged( const QString& )
-{
-    showBlocks();
-    checkInputs();
-}
-
-void HxLOTPropertyDialog::on_txtMACEnd_textEdited( const QString& )
-{
-    showBlocks();
-    checkInputs();
-}
-
-void HxLOTPropertyDialog::on_spxQuantity_valueChanged( int )
-{
-    showBlocks();
-    checkInputs();
-}
-
-void HxLOTPropertyDialog::on_txtCounterStart_textChanged( const QString& )
-{
-    showBlocks();
-    checkInputs();
-}
-
-void HxLOTPropertyDialog::on_cbxModel_currentTextChanged( const QString& arg1 )
-{
-    auto model = HxModel::find( arg1 );
-    if ( model == nullptr )
+    m_pLOT->m_modelName = ui->cbxModel->currentText();
+    auto pModel = GetModelManager()->GetModel( m_pLOT->m_modelName );
+    if(pModel)
     {
-        ui->txtDesign->setText( "-" );
-        ui->txtProgram->setText( "-" );
+        ui->txtDesign->setText( pModel->Design() );
+        ui->txtProgram->setText( pModel->IVProgram() );
+        ui->chxRePrint->setVisible(pModel->IsPrintLo());
     }
     else
     {
-        ui->txtDesign->setText( model->design );
-        ui->txtProgram->setText( model->ivProgram );
+        ui->txtDesign->setText( "-" );
+        ui->txtProgram->setText( "-" );
+        ui->chxRePrint->setVisible(false);
     }
     showBlocks();
-    checkInputs();
 }
 
-void HxLOTPropertyDialog::on_txtName_textChanged( const QString& )
+void HxLOTPropertyDialog::OnApply()
 {
-    showBlocks();
-    checkInputs();
+    if(!checkInputs())
+        return;
+    GetLOTManager()->Save(m_pLOT);
+    close();
+    setResult(1);
 }
-
-void HxLOTPropertyDialog::paramChanged( QStandardItem* )
-{
-    showBlocks();
-    checkInputs();
-}
-
-void HxLOTPropertyDialog::on_btnCreateOrChange_clicked()
-{
-    bool create = lot == nullptr;
-    if ( create )
-    {
-        lot = HxLOT::create();
-    }
-    pasteToLot( lot, create );
-    HxLOT::saveLot( lot );
-    emit dataChanged();
-    this->close();
-    this->setResult( 1 );
-}
-
-void HxLOTPropertyDialog::on_chxRePrint_toggled( bool )
-{
-    showBlocks();
-    checkInputs();
-}
-

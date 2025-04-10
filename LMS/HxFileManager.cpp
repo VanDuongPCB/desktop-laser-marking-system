@@ -43,7 +43,7 @@ QString HxFileManager::GetPath(FileType fileType) const
     case eDBModelDir:
         return GetPath( eDBRootDir ) + "/data/models";
     case eDBDesignDir:
-        return GetPath( eDBRootDir ) + "/data/models";
+        return GetPath( eDBRootDir ) + "/data/designs";
     case eDBPrintLogDir:
         return GetPath( eDBRootDir ) + "/data/print-logs";
     case eDBRePrintLogDir:

@@ -88,6 +88,10 @@ void HxDesign::load()
                 design->blocks[ index ].textLen = objBlock.value( "text-length" ).toInt( 1 );
             }
         }
+        else
+        {
+            qDebug() << fileReader.errorString();
+        }
     }
 }
 

@@ -9,7 +9,7 @@
 #include <HxLaser.h>
 #include <HxPLC.h>
 
-#include <iostream>
+#include "HxConvert.h"
 #include <HxDebugger.h>
 
 
@@ -18,17 +18,20 @@ HxMarkWindow::HxMarkWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
 {
     mainWindow = ( HxMainWindow* )parent;
     ui->setupUi( this );
+
+    ui->tbvSelector->setHeaders( { "Tên","Model","MAC đầu","MAC cuối","Sản lượng","Tiến độ","Trạng thái" } );
+
     connect( HxMarker::instance(), &HxMarker::printed, this, &HxMarkWindow::controllerPrinted );
     connect( HxMarker::instance(), &HxMarker::started, this, &HxMarkWindow::markStarted );
     connect( HxMarker::instance(), &HxMarker::stopped, this, &HxMarkWindow::markStopped );
     connect( HxSystemError::instance(), &HxSystemError::reported, this, &HxMarkWindow::handleException );
 
-    showLots();
-    showLotInfo( nullptr );
-    showLotStatus( nullptr );
-    showLotBlocks();
-    showExceptions();
-    updateUI();
+    // showLots();
+    // showLotInfo( nullptr );
+    // showLotStatus( nullptr );
+    // showLotBlocks();
+    // showExceptions();
+    // updateUI();
 }
 
 HxMarkWindow::~HxMarkWindow()
@@ -39,48 +42,46 @@ HxMarkWindow::~HxMarkWindow()
 void HxMarkWindow::showEvent( QShowEvent* )
 {
     showLots();
-    showLotInfo( HxMarker::instance()->lot );
-    showLotStatus( HxMarker::instance()->lot );
-    updateUI();
+    // showLotInfo( HxMarker::instance()->lot );
+    // showLotStatus( HxMarker::instance()->lot );
+    // updateUI();
 }
 
 void HxMarkWindow::showLots()
 {
-    if ( ui->tbvSelector->headers.empty() )
+    auto LOTs = GetLOTManager()->GetLOTs();
+    std::vector<HxLOTPtr> needShowLots;
+    for(auto [name, pLOT]: LOTs)
     {
-        ui->tbvSelector->setHeaders( { "Tên","Model","MAC đầu","MAC cuối","Sản lượng","Tiến độ","Trạng thái" } );
+        if(name.startsWith("2_"))
+            break;
+        needShowLots.push_back(pLOT);
     }
 
-    HxLOT::sort();
-
-    int rows = ( int )HxLOT::items.size();
-    ui->tbvSelector->setRowCount( rows );
-    for ( int row = 0; row < rows; row++ )
+    int rows = needShowLots.size();
+    ui->tbvSelector->setRowCount(rows);
+    int row = 0;
+    for(auto &pLOT : needShowLots)
     {
-        QString status = HxLOT::items[ row ]->status();
+        auto status = pLOT->Status();
+        QString statusName = ProductStatusToString(status);
+        QColor statusColor = ProductStatusToColor(status);
 
-        ui->tbvSelector->setText( row, "Tên", HxLOT::items[ row ]->name );
-        ui->tbvSelector->setText( row, "Model", HxLOT::items[ row ]->modelName );
-        ui->tbvSelector->setText( row, "MAC đầu", HxLOT::items[ row ]->macStart );
-        ui->tbvSelector->setText( row, "MAC cuối", HxLOT::items[ row ]->macEnd );
-        ui->tbvSelector->setText( row, "Sản lượng", QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvSelector->setText( row, "Tiến độ", QString::number( HxLOT::items[ row ]->progress ) + "/" + QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvSelector->setText( row, "Trạng thái", status );
+        ui->tbvSelector->setText( row, "Tên", pLOT->m_name );
+        ui->tbvSelector->setText( row, "Model", pLOT->m_modelName );
+        ui->tbvSelector->setText( row, "MAC đầu", pLOT->m_macStart );
+        ui->tbvSelector->setText( row, "MAC cuối", pLOT->m_macEnd );
+        ui->tbvSelector->setText( row, "Sản lượng", QString::number( pLOT->m_quantity ) );
+        ui->tbvSelector->setText( row, "Tiến độ", QString::number( pLOT->m_progress ) + "/" + QString::number( pLOT->m_quantity ) );
+        ui->tbvSelector->setText( row, "Trạng thái", statusName );
 
-        QColor background = QColor( 255, 255, 255 );
-        if ( status == "Đang sản xuất" )
-        {
-            background = QColor( 255, 255, 128 );
-        }
-        else if ( status == "Đã hoàn thành" )
-        {
-            background = QColor( 128, 255, 128 );
-        }
 
         for ( int col = 0; col < ui->tbvSelector->dataTable()->columnCount(); col++ )
         {
-            ui->tbvSelector->item( row, col )->setBackground( background );
+            ui->tbvSelector->item( row, col )->setBackground( statusColor );
         }
+
+        row++;
     }
 }
 
@@ -100,18 +101,18 @@ void HxMarkWindow::showLotInfo( std::shared_ptr<HxLOT> lot )
     }
     else
     {
-        ui->lblLotName->setText( lot->name );
-        ui->lblSerialStart->setText( lot->macStart );
-        ui->lblSerialEnd->setText( lot->macEnd );
-        ui->lblQuantity->setText( QString::number( lot->quantity ) );
-        ui->lblStatus->setText( lot->status() );
-        ui->lblModelName->setText( lot->modelName );
-        auto model = HxModel::find( lot->modelName );
+        ui->lblLotName->setText( lot->m_name );
+        ui->lblSerialStart->setText( lot->m_macStart );
+        ui->lblSerialEnd->setText( lot->m_macEnd );
+        ui->lblQuantity->setText( QString::number( lot->m_quantity ) );
+        ui->lblStatus->setText( ProductStatusToString( lot->Status() ).toUpper() );
+        ui->lblModelName->setText( lot->m_modelName );
+        auto model = GetModelManager()->GetModel( lot->m_modelName );
         if ( model != nullptr )
         {
-            ui->lblModelCode->setText( model->code );
-            ui->lblDesign->setText( model->design );
-            ui->lblIVProgram->setText( model->ivProgram );
+            ui->lblModelCode->setText( model->Code() );
+            ui->lblDesign->setText( model->Design() );
+            ui->lblIVProgram->setText( model->IVProgram() );
         }
         else
         {
@@ -133,23 +134,37 @@ void HxMarkWindow::showLotStatus( std::shared_ptr<HxLOT> lot )
     }
     else
     {
-        ui->lblStatus->setText( lot->status() );
-        ui->lblCount->setText( QString::number( lot->progress ) );
-        ui->pgbProgress->setMaximum( lot->quantity );
-        ui->pgbProgress->setValue( lot->progress );
+        ui->lblStatus->setText( ProductStatusToString( lot->Status() ).toUpper() );
+        ui->lblCount->setText( QString::number( lot->m_progress ) );
+        ui->pgbProgress->setMaximum( lot->m_quantity );
+        ui->pgbProgress->setValue( lot->m_progress );
 
-        if ( lot->status() == "Chưa sản xuất" )
-        {
+        switch (lot->Status()) {
+        case HxLOT::ePending:
             ui->lblStatus->setStyleSheet( "background:#888" );
-        }
-        else if ( lot->status() == "Đang sản xuất" )
-        {
+            break;
+        case HxLOT::eProduct:
             ui->lblStatus->setStyleSheet( "background:#ff8" );
-        }
-        else
-        {
+            break;
+        case HxLOT::eCompleted:
             ui->lblStatus->setStyleSheet( "background:#8f8" );
+            break;
+        default:
+            break;
         }
+
+        // if ( lot->status() == "Chưa sản xuất" )
+        // {
+        //     ui->lblStatus->setStyleSheet( "background:#888" );
+        // }
+        // else if ( lot->status() == "Đang sản xuất" )
+        // {
+        //     ui->lblStatus->setStyleSheet( "background:#ff8" );
+        // }
+        // else
+        // {
+        //     ui->lblStatus->setStyleSheet( "background:#8f8" );
+        // }
     }
 }
 
@@ -160,9 +175,9 @@ void HxMarkWindow::showLotBlocks()
         ui->tbvBlocks->setHeaders( { "Block","Dữ liệu" } );
     }
     ui->tbvBlocks->setRowCount( 0 );
-    auto lot = HxMarker::instance()->lot;
+    auto lot = HxMarker::instance()->m_pLOT;
     if ( lot == nullptr ) return;
-    auto model = HxMarker::instance()->model;
+    auto model = HxMarker::instance()->m_pModel;
     auto design = HxMarker::instance()->design;
     int codeIndex = -1;
     if ( design != nullptr )
@@ -171,10 +186,10 @@ void HxMarkWindow::showLotBlocks()
     }
     auto tempLot = std::make_shared<HxLOT>( HxLOT() );
     tempLot.get()[ 0 ] = lot.get()[ 0 ];
-    tempLot->progress--;
-    if ( tempLot->progress < 0 )
+    tempLot->m_progress--;
+    if ( tempLot->m_progress < 0 )
     {
-        tempLot->progress = 0;
+        tempLot->m_progress = 0;
     }
 
     QMap<int, QString> blockdatas = HxBlockInfo::gen( design, tempLot, model );
@@ -217,7 +232,7 @@ void HxMarkWindow::showExceptions()
 
 void HxMarkWindow::updateUI()
 {
-    auto lot = HxMarker::instance()->lot;
+    auto lot = HxMarker::instance()->m_pLOT;
     bool hasData = lot != nullptr;
     bool canMark = hasData && lot->isCompleted() == false;
     bool busy = HxMarker::instance()->isBusy();
@@ -329,12 +344,12 @@ void HxMarkWindow::on_tbvSelector_doubleClicked( const QModelIndex& index )
 {
     int row = index.row();
     QString lotName = ui->tbvSelector->item( row, 0 )->text();
-    auto lot = HxLOT::find( lotName );
-    if ( HxMarker::instance()->select( lot ) )
+    auto pLOT = GetLOTManager()->GetLOT(lotName);
+    if(HxMarker::instance()->Select(pLOT))
     {
         ui->stackedWidget->setCurrentWidget( ui->pageMark );
-        showLotInfo( HxMarker::instance()->lot );
-        showLotStatus( HxMarker::instance()->lot );
+        showLotInfo( HxMarker::instance()->m_pLOT );
+        showLotStatus( HxMarker::instance()->m_pLOT );
         showLotBlocks();
         updateUI();
     }
@@ -343,8 +358,8 @@ void HxMarkWindow::on_tbvSelector_doubleClicked( const QModelIndex& index )
 void HxMarkWindow::on_actionLoad_triggered()
 {
     showLots();
-    showLotInfo( HxMarker::instance()->lot );
-    showLotStatus( HxMarker::instance()->lot );
+    showLotInfo( HxMarker::instance()->m_pLOT );
+    showLotStatus( HxMarker::instance()->m_pLOT );
     showLotBlocks();
 }
 

@@ -12,6 +12,7 @@ class HxRemoveParamDialog : public QDialog
 
 public:
     bool isApplyAll = false;
+    QStringList names;
     explicit HxRemoveParamDialog( QWidget* parent = nullptr );
     ~HxRemoveParamDialog();
     void setParams( QStringList names );

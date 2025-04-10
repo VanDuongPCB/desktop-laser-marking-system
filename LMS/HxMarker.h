@@ -16,8 +16,8 @@ class HxMarker : public QObject
 private:
     std::atomic_bool runFlag = false;
 public:
-    std::shared_ptr<HxLOT> lot;
-    std::shared_ptr<HxModel> model;
+    HxLOTPtr m_pLOT;
+    HxModelPtr m_pModel;
     std::shared_ptr<HxDesign> design;
     std::shared_ptr<HxStopper> stopper;
 
@@ -25,7 +25,7 @@ public:
     ~HxMarker();
 
     void clear();
-    bool select( std::shared_ptr<HxLOT> lot );
+    bool Select( HxLOTPtr pLOT );
     bool mark( bool test = false );
 
 
@@ -34,7 +34,7 @@ public:
     void start();
     void stop();
 
-    void save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design );
+    void Save( HxLOTPtr pLOT, HxModelPtr pModel, std::shared_ptr<HxDesign> design );
 signals:
     void started();
     void printed( std::shared_ptr<HxLOT> lot );

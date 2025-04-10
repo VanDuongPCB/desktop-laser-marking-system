@@ -131,6 +131,7 @@ void HxTheme::Refresh()
     OnThemeChanged(m_themeDir);
     connect(m_pThemeWatcher, &QFileSystemWatcher::directoryChanged, this, &HxTheme::OnThemeChanged);
     connect(m_pThemeWatcher, &QFileSystemWatcher::fileChanged, this, &HxTheme::OnThemeChanged);
+
 }
 
 void HxTheme::Reset()

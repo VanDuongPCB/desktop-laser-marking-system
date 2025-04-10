@@ -14,38 +14,41 @@ class HxLOTPropertyDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit HxLOTPropertyDialog( QWidget* parent = 0 );
+    explicit HxLOTPropertyDialog( const QString& lotName, HxLOTPtrMap LOTs, QWidget* parent = 0 );
     ~HxLOTPropertyDialog();
-    void setData( std::shared_ptr<HxLOT> data );
-    void clear();
+
 signals:
     void dataChanged();
 private slots:
-    void paramChanged( QStandardItem* );
+    void OnParamChanged( QStandardItem* );
 
-    void on_btnCreateOrChange_clicked();
+    // void on_btnCreateOrChange_clicked();
 
-    void on_txtMACStart_textChanged( const QString& arg1 );
+    // void on_txtMACStart_textChanged( const QString& arg1 );
 
-    void on_txtMACEnd_textEdited( const QString& arg1 );
+    // void on_txtMACEnd_textEdited( const QString& arg1 );
 
-    void on_spxQuantity_valueChanged( int arg1 );
+    // void on_spxQuantity_valueChanged( int arg1 );
 
-    void on_txtCounterStart_textChanged( const QString& arg1 );
+    // void on_txtCounterStart_textChanged( const QString& arg1 );
 
-    void on_cbxModel_currentTextChanged( const QString& arg1 );
+    // void on_cbxModel_currentTextChanged( const QString& arg1 );
 
-    void on_txtName_textChanged( const QString& arg1 );
-
-    void on_chxRePrint_toggled( bool checked );
+    // void on_txtName_textChanged( const QString& arg1 );
 
 private:
     Ui::LotPropertiesDialog* ui;
-    std::shared_ptr<HxLOT> lot;
 
-    void pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot );
+    bool m_bIsCreate;
+    HxLOTPtrMap m_LOTs;
+    HxLOTPtr m_pLOT;
+    HxModelPtr m_pModel;
+
+    void OnInit(const QString& lotName);
+
 
     void showInfo();
+    void ShowPrintLo();
     void showParams();
     void showBlocks();
 
@@ -56,7 +59,8 @@ private:
     bool checkBlocks();
 
 
-    void checkInputs();
-
+    bool checkInputs();
+    void OnModelChanged();
+    void OnApply();
 };
 

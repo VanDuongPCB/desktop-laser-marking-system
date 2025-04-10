@@ -47,6 +47,11 @@ void HxTableView::setRowCount( int count )
     dataTable()->setRowCount( count );
 }
 
+int HxTableView::RowCount()
+{
+    return dataTable()->rowCount();
+}
+
 QStandardItem* HxTableView::item( int row, int col )
 {
     return ( ( QStandardItemModel* )model() )->item( row, col );
