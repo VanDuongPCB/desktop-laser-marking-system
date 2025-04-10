@@ -22,6 +22,7 @@ class HxTheme: public QObject
     Q_OBJECT
 public:
     HxTheme();
+    ~HxTheme();
     QStringList GetThemes();
     QString GetStyleSheets(const QStringList& names = {});
     QColor GetColor(const QString& profile);
@@ -30,7 +31,7 @@ public:
     void Refresh();
 private:
     QString m_themeDir;
-    QFileSystemWatcher m_themeWatcher;
+    QFileSystemWatcher* m_pThemeWatcher = nullptr;
     std::map<QString, QString> m_styleSheets;
     std::map<QString, QString> m_colorMap;
     std::map<NxColorPalette, QColor> m_colorPalettes;

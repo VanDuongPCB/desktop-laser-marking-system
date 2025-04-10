@@ -42,6 +42,7 @@ public:
     };
 
     HxFileManager();
+    void Init();
     QString GetPath(FileType fileType) const;
     QStringList GetFilesAndFolders(const QString &path, QDir::Filters filters = QDir::Dirs| QDir::Files) const;
     NxRegSettingsPtr GetSettings(SettingType type) const;

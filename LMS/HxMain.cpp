@@ -12,6 +12,7 @@
 #include "HxMarker.h"
 #include "HxLicense.h"
 #include "HxTheme.h"
+#include "HxFileManager.h"
 #include "HxRegisterDialog.h"
 #include <HxDebugger.h>
 
@@ -19,9 +20,8 @@ int main( int argc, char* argv[] )
 {
     QApplication a( argc, argv );
     a.setStyle( new HxUIStyle() );
-
+    GetFileManager()->Init();
     GetTheme()->Refresh();
-
     bool bIsLicensed = GetLicensing()->isRegistered();
 
     if ( !bIsLicensed )

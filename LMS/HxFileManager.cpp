@@ -10,6 +10,9 @@ HxFileManager s_instance;
 }
 
 HxFileManager::HxFileManager()
+{}
+
+void HxFileManager::Init()
 {
     auto settings = GetSettings(eSettingData);
     QString rootDir = settings->value("RootDataDir").toString();
