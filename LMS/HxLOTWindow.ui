@@ -35,6 +35,11 @@
     </property>
     <item row="0" column="0">
      <widget class="HxTableView" name="tbvLots">
+      <property name="font">
+       <font>
+        <bold>false</bold>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true"/>
       </property>
@@ -51,7 +56,7 @@
        <number>80</number>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
-       <number>24</number>
+       <number>22</number>
       </attribute>
       <attribute name="verticalHeaderDefaultSectionSize">
        <number>24</number>

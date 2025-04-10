@@ -34,8 +34,12 @@ private slots:
 
 private:
     Ui::LotWindow* ui;
+    HxLOTPtrMap m_LOTs;
+
+
     void showEvent( QShowEvent* );
     void showLot( QString filter );
+    void OnRefresh();
 
 };
 

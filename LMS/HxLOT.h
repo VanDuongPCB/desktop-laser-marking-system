@@ -4,39 +4,87 @@
 #include <vector>
 #include <memory>
 
-class HxLOT
+#include "HxObject.h"
+
+class HxLOT;
+using HxLOTPtr = std::shared_ptr<HxLOT>;
+using HxLOTPtrArray = std::vector<HxLOTPtr>;
+using HxLOTPtrMap = std::map<QString,HxLOTPtr>;
+
+class HxLOT : public HxObject
 {
 public:
-    QString name;
-    QString dateCreate;
-    QString macStart = "000000000000";
-    QString macEnd = "000000000000";
-    QString counterStart = "0000";
-    int quantity = 1;
-    int progress = 0;
-    bool isRePrint = false;
-    QString modelName;
-    QMap<QString, QString> comments;
-    int sIndex = 0;
+    enum ProductStatus
+    {
+        ePending = 1,
+        eProduct = 0,
+        eCompleted = 2
+    };
+
+    QString m_name;
+    QString m_macStart = "";
+    QString m_macEnd = "";
+    QString m_counterStart = "";
+    int m_quantity = 1;
+    int m_progress = 0;
+    bool m_isRePrint = false;
+    QString m_modelName;
+    QMap<QString, QString> m_comments;
+
+    ProductStatus m_status = ePending;
+
+    QString Name();
+    QString CounterStart();
+    QString CounterEnd();
+    QString Counter();
+    QString MACStart();
+    QString MACEnd();
+    QString MAC();
+    int Quantity();
+    int Progress();
+    QString Model();
+    QString Value( QString paramName );
+    ProductStatus Status();
+    void Evaluate();
+
+    void SetName(const QString& value);
+    void SetCounterStart(const QString& value);
+    void SetMACStart(const QString& value);
+    void SetMACEnd(const QString& value);
+    void SetQuantity(int value);
+    void SetProgress(int value);
+    void SetModel(const QString& value);
+    void SetValue( const QString& name, const QString& value );
+
+    HxLOTPtr Clone();
 
 public:
     HxLOT();
     ~HxLOT();
-    QString counter();
-    QString mac();
-    QString status();
     bool nextItem();
     bool isCompleted();
-    QString value( QString paramName );
+
+
+
+
+
 public:
-    static std::vector<std::shared_ptr<HxLOT>> items;
-    static void sort();
-    static void load();
-    static void remove( int index );
-    static void saveAll();
-    static void saveLot( std::shared_ptr<HxLOT> data );
-    static std::shared_ptr<HxLOT> create();
-    static std::shared_ptr<HxLOT> find( QString name );
+    // static std::vector<std::shared_ptr<HxLOT>> items;
+    // static void remove( int index );
+    // static void saveAll();
+    // static void saveLot( std::shared_ptr<HxLOT> data );
     static QStringList paramNames();
 };
 
+class HxLOTManager
+{
+public:
+    HxLOTPtr Create();
+    HxLOTPtr GetLOT(const QString& lotName);
+    HxLOTPtrMap GetLOTs();
+    void Save(HxLOTPtr pLOT);
+    void Removes(const QStringList& names);
+    QStringList Parameters();
+};
+
+HxLOTManager* GetLOTManager();

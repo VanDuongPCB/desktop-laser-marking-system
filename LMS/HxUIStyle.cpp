@@ -65,9 +65,9 @@ void HxUIStyle::polish( QPalette& palette )
 void HxUIStyle::polish( QApplication* app )
 {
     if ( !app ) return;
-    QFont defaultFont = QApplication::font();
-    defaultFont.setPointSize( 10 );
-    app->setFont( defaultFont );
+    // QFont defaultFont = QApplication::font();
+    // defaultFont.setPointSize( 10 );
+    // app->setFont( defaultFont );
 
     app->setStyleSheet( "QToolTip{border:1px solid #888; padding:7px 7px;}" );
 }

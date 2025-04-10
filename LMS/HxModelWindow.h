@@ -20,9 +20,10 @@ public:
     ~HxModelWindow();
 private:
     Ui::ModelWindow* ui;
+    HxModelPtrMap m_models;
+    HxModelPtr m_pModel;
+
     QLineEdit* txtSearch = nullptr;
-    std::shared_ptr<HxModel> selected;
-    std::vector<std::shared_ptr<HxModel>> filtereds;
 
     void showEvent( QShowEvent* );
 
@@ -34,34 +35,17 @@ private:
 
 
 private slots:
-    void modelFilterTextChanged( QString filter );
+    void OnFilter();
+    void OnSelectModel( const QModelIndex& index );
 
-    void modelSelectionChanged( const QModelIndex& index );
+    void OnNew();
+    void OnRemove();
+    void OnSave();
+    void OnRefresh();
+    void OnAddParam();
+    void OnRemoveParam();
 
-    void markPositionChanged( QStandardItem* item );
-
-    void commentChanged( QStandardItem* item );
-
-    void on_actionNew_triggered();
-
-    void on_actionRemove_triggered();
-
-    void on_actionSave_triggered();
-
-    void on_actionLoad_triggered();
-
-    void on_actionFromFile_triggered();
-
-    void on_actionToFile_triggered();
-
-
-
-    void on_txtModelNo_textChanged( const QString& arg1 );
-    void on_spxProgram_valueChanged( int arg1 );
-    void on_spxCvWidth_valueChanged( double arg1 );
-    void on_btnAddParam_clicked();
-    void on_btnRemoveParam_clicked();
-    void on_cbxStopper_currentTextChanged( const QString& arg1 );
-    void on_cbxIVPrograms_currentTextChanged( const QString& arg1 );
-
+    void OnInfoChanged();
+    void OnPositionChanged( QStandardItem* item );
+    void OnCommentChanged( QStandardItem* item );
 };

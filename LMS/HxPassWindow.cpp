@@ -45,7 +45,7 @@ void HxPassWindow::on_btnReload_clicked()
     ui->cbxModel->clear();
     for ( auto& md : HxModel::items )
     {
-        ui->cbxModel->addItem( md->name );
+        ui->cbxModel->addItem( md->Name() );
     }
     ui->cbxModel->setCurrentText( old );
     ui->cbxModel->setEnabled( true );
@@ -68,10 +68,10 @@ void HxPassWindow::on_spxCvWidth_valueChanged( double arg1 )
 void HxPassWindow::on_cbxModel_currentTextChanged( const QString& arg1 )
 {
     if ( ui->cbxModel->isEnabled() == false ) return;
-    auto model = HxModel::find( arg1 );
+    auto model = GetModelManager()->GetModel( arg1 );
     if ( model != nullptr )
     {
-        ui->spxCvWidth->setValue( model->cvWidth );
+        ui->spxCvWidth->setValue( model->CvWidth() );
     }
 }
 

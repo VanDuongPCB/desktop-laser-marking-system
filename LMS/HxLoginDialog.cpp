@@ -1,10 +1,14 @@
 #include "HxLoginDialog.h"
 #include "ui_HxLoginDialog.h"
 #include "HxProtector.h"
+#include "HxFileManager.h"
 
 HxLoginDialog::HxLoginDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::LoginDialog )
 {
     ui->setupUi( this );
+#ifdef DEBUGGING
+    ui->txtPassword->setText( GetFileManager()->GetSettings(HxFileManager::eSettingProtect)->value("Password").toString());
+#endif
 }
 
 HxLoginDialog::~HxLoginDialog()

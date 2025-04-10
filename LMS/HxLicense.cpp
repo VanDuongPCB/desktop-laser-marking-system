@@ -32,7 +32,7 @@ bool HxLicensing::isRegistered()
 
 QString HxLicensing::id()
 {
-    return QSysInfo::machineUniqueId().toUpper() + "-R2024";
+    return QSysInfo::machineUniqueId().toUpper() + "-R2025";
 }
 
 QString HxLicensing::keyFromId( QString id )

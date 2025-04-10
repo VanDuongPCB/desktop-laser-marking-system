@@ -13,6 +13,8 @@ TEMPLATE = app
 RC_ICONS = lms.ico
 CONFIG += c++11
 
+DEFINES += DEBUGGING
+
 RESOURCES += \
     ../Assets/icons.qrc \
     icons.qrc
@@ -61,6 +63,7 @@ HEADERS += \
     HxModel.h \
     HxModelWindow.h \
     HxNewModelDialog.h \
+    HxObject.h \
     HxPLC.h \
     HxPassWindow.h \
     HxPosition.h \
@@ -107,6 +110,7 @@ SOURCES += \
     HxModel.cpp \
     HxModelWindow.cpp \
     HxNewModelDialog.cpp \
+    HxObject.cpp \
     HxPLC.cpp \
     HxPassWindow.cpp \
     HxPosition.cpp \

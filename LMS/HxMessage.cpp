@@ -116,8 +116,8 @@ int HxMsgQuestion( const QString& content )
     msgBox.setWindowTitle( QObject::tr("Xác nhận") );
     msgBox.setText( content );
     msgBox.setIcon(HxMsgIcon::Question);
-    msgBox.setStandardButtons( QMessageBox::Ok );
-    msgBox.setDefaultButton( QMessageBox::Ok );
+    msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
+    msgBox.setDefaultButton( QMessageBox::Yes );
     ApplyTheme( msgBox, "HxMsgQuestion" );
     return msgBox.exec();
 }
@@ -127,8 +127,8 @@ int HxMsgQuestion( const QString& content, const QString& title )
     msgBox.setWindowTitle( title );
     msgBox.setText( content );
     msgBox.setIcon(HxMsgIcon::Question);
-    msgBox.setStandardButtons( QMessageBox::Ok );
-    msgBox.setDefaultButton( QMessageBox::Ok );
+    msgBox.setStandardButtons( QMessageBox::Yes | QMessageBox::No );
+    msgBox.setDefaultButton( QMessageBox::Yes );
     ApplyTheme( msgBox, "HxMsgQuestion" );
     return msgBox.exec();
 }

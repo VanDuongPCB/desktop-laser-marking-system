@@ -35,13 +35,13 @@ HxMarker::~HxMarker()
 
 void HxMarker::clear()
 {
-    lot.reset();
-    model.reset();
+    m_pLOT.reset();
+    m_pModel.reset();
     design.reset();
     stopper.reset();
 }
 
-bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
+bool HxMarker::Select( HxLOTPtr lotinf )
 {
     if ( lotinf == nullptr )
     {
@@ -57,26 +57,26 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
         return false;
     }
 
-    auto _model = HxModel::find( lotinf->modelName );
+    auto _model = GetModelManager()->GetModel( lotinf->m_modelName );
     if ( _model == nullptr )
     {
-        HxMsgError( "Không tìm thấy thông tin model : " + lotinf->modelName );
+        HxMsgError( "Không tìm thấy thông tin model : " + lotinf->m_modelName );
         clear();
         return false;
     }
 
-    auto _design = HxDesign::find( _model->design );
+    auto _design = HxDesign::find( _model->Design() );
     if ( _design == nullptr )
     {
-        HxMsgError( "Không tìm thấy thông tin thiết kế : " + _model->design );
+        HxMsgError( "Không tìm thấy thông tin thiết kế : " + _model->Design() );
         clear();
         return false;
     }
 
-    auto _stopper = HxStopper::find( _model->stopper );
+    auto _stopper = HxStopper::find( _model->Stopper() );
     if ( _stopper == nullptr )
     {
-        HxMsgError( "Không tìm thấy thông tin stopper : " + QString::number( _model->stopper ) );
+        HxMsgError( "Không tìm thấy thông tin stopper : " + QString::number( _model->Stopper() ) );
         clear();
         return false;
     }
@@ -85,11 +85,11 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
     try
     {
         GetLaserMachine()->setProgram( _design->name );
-        GetPLC()->setCvWidth( _model->cvWidth );
-        GetPLC()->setStopper( _model->stopper );
+        GetPLC()->setCvWidth( _model->CvWidth() );
+        GetPLC()->setStopper( _model->Stopper() );
 
-        lot = lotinf;
-        model = _model;
+        m_pLOT = lotinf;
+        m_pModel = _model;
         design = _design;
         stopper = _stopper;
         return true;
@@ -106,21 +106,21 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
 bool HxMarker::mark( bool test )
 {
     auto tempLot = std::make_shared<HxLOT>( HxLOT() );
-    tempLot.get()[ 0 ] = lot.get()[ 0 ];
-    int patternCnt = model->positions.size();
+    tempLot.get()[ 0 ] = m_pLOT.get()[ 0 ];
+    int patternCnt = m_pModel->Positions().size();
 
     if ( test )
     {
         for ( int i = 0; i < patternCnt; i++ )
         {
-            HxPosition pos = model->positions[ i ];
-            QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, model );
+            HxPosition pos = m_pModel->Position( i );
+            QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
 
 
-            GetLaserMachine()->setupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
+            GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
             GetLaserMachine()->setupBlockData( design->name, blockDatas );
             GetLaserMachine()->burn();
-            tempLot->progress++;
+            tempLot->m_progress++;
         }
     }
     else
@@ -128,17 +128,18 @@ bool HxMarker::mark( bool test )
         for ( int i = 0; i < patternCnt; i++ )
         {
             if ( tempLot->isCompleted() ) continue;
-            HxPosition pos = model->positions[ i ];
-            QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, model );
+            HxPosition pos = m_pModel->Position( i );
+            QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
 
-            GetLaserMachine()->setupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
+            GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
             GetLaserMachine()->setupBlockData( design->name, blockDatas );
             GetLaserMachine()->burn();
-            save( tempLot, model, design );
-            tempLot->progress++;
+            Save( tempLot, m_pModel, design );
+            tempLot->m_progress++;
         }
-        lot.get()[ 0 ] = tempLot.get()[ 0 ];
-        HxLOT::saveLot( lot );
+        m_pLOT.get()[ 0 ] = tempLot.get()[ 0 ];
+        // HxLOT::saveLot( m_pLOT );
+        GetLOTManager()->Save(m_pLOT);
     }
     return true;
 }
@@ -204,11 +205,11 @@ void HxMarker::task()
                 GetPLC()->confirmTrigger();
                 bool status = mark( false );
                 GetPLC()->setMarkResult( status );
-                if ( lot->isCompleted() )
+                if ( m_pLOT->isCompleted() )
                 {
                     GetPLC()->setCompleteBit();
                 }
-                emit printed( lot );
+                emit printed( m_pLOT );
             }
         }
         catch ( HxException ex )
@@ -221,24 +222,12 @@ void HxMarker::task()
     emit stopped();
 }
 
-void HxMarker::save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design )
+void HxMarker::Save( HxLOTPtr pLOT, HxModelPtr pModel, std::shared_ptr<HxDesign> design )
 {
-    if ( lot == nullptr )
-    {
+    if ( !pLOT || !pModel || !design)
         return;
-    }
 
-    if ( model == nullptr )
-    {
-        return;
-    }
-
-    if ( design == nullptr )
-    {
-        return;
-    }
-
-    QString dir = GetFileManager()->GetPath(lot->isRePrint ? HxFileManager::eDBRePrintLogDir : HxFileManager::eDBPrintLogDir);
+    QString dir = GetFileManager()->GetPath(pModel->IsPrintLo() ? HxFileManager::eDBRePrintLogDir : HxFileManager::eDBPrintLogDir);
     QDir().mkdir( dir );
 
     QString fileName = QDateTime::currentDateTime().toString( "yyyyMMdd" ) + ".csv";
@@ -256,8 +245,8 @@ void HxMarker::save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model,
 
     QStringList itemData;
     itemData.push_back( "\n" + QDateTime::currentDateTime().toString( "HH:mm:ss" ) );
-    itemData.push_back( lot->name );
-    itemData.push_back( model->name );
+    itemData.push_back( pLOT->m_name );
+    itemData.push_back( pModel->Name() );
     itemData.push_back( design->name );
 
 
@@ -266,7 +255,7 @@ void HxMarker::save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model,
     {
         if ( design->blocks.contains( i ) )
         {
-            itemData.push_back( HxBlockInfo::gen( design->blocks[ i ].data, lot, model ) );
+            itemData.push_back( HxBlockInfo::gen( design->blocks[ i ].data, pLOT, pModel ) );
         }
         else
         {
