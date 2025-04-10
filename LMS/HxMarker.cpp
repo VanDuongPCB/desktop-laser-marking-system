@@ -45,14 +45,14 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
 {
     if ( lotinf == nullptr )
     {
-        HxShowError( "Dữ liệu lot không hợp lệ !" );
+        HxMsgError( "Dữ liệu lot không hợp lệ !" );
         clear();
         return false;
     }
 
     if ( lotinf->isCompleted() )
     {
-        HxShowError( "Lot này đã hoàn thành !" );
+        HxMsgError( "Lot này đã hoàn thành !" );
         clear();
         return false;
     }
@@ -60,7 +60,7 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
     auto _model = HxModel::find( lotinf->modelName );
     if ( _model == nullptr )
     {
-        HxShowError( "Không tìm thấy thông tin model : " + lotinf->modelName );
+        HxMsgError( "Không tìm thấy thông tin model : " + lotinf->modelName );
         clear();
         return false;
     }
@@ -68,7 +68,7 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
     auto _design = HxDesign::find( _model->design );
     if ( _design == nullptr )
     {
-        HxShowError( "Không tìm thấy thông tin thiết kế : " + _model->design );
+        HxMsgError( "Không tìm thấy thông tin thiết kế : " + _model->design );
         clear();
         return false;
     }
@@ -76,7 +76,7 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
     auto _stopper = HxStopper::find( _model->stopper );
     if ( _stopper == nullptr )
     {
-        HxShowError( "Không tìm thấy thông tin stopper : " + QString::number( _model->stopper ) );
+        HxMsgError( "Không tìm thấy thông tin stopper : " + QString::number( _model->stopper ) );
         clear();
         return false;
     }

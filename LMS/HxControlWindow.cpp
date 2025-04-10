@@ -36,7 +36,7 @@ void HxControlWindow::on_btnBarcodeRead_clicked()
     }
     catch ( HxException ex )
     {
-        HxShowError( ex.message );
+        HxMsgError( ex.message );
     }
 }
 
@@ -48,7 +48,7 @@ void HxControlWindow::on_spxCvWidth_valueChanged( double arg1 )
     }
     catch ( HxException ex )
     {
-        HxShowError( ex.message );
+        HxMsgError( ex.message );
     }
 }
 
@@ -60,7 +60,7 @@ void HxControlWindow::on_cbxStopper_currentIndexChanged( int index )
     }
     catch ( HxException ex )
     {
-        HxShowError( ex.message );
+        HxMsgError( ex.message );
     }
 }
 

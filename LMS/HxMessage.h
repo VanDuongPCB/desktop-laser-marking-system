@@ -3,24 +3,24 @@
 #include "QMessageBox"
 #include "QObject"
 
+using HxMsgIcon = QMessageBox::Icon;
+using HxMsgButton = QMessageBox::StandardButton;
+using HxMsgButtons = QMessageBox::StandardButtons;
 
-class Message
-{
-public:
-    // static int show(QString content);
-    // static int show(QString content,QString title);
-    static int show( QString content, QString title, QMessageBox::Icon icon );
-    static int show( QString content, QString title, QMessageBox::Icon icon, QMessageBox::StandardButtons buttons );
-    // static int error(QString content);
-    // static int error(QString content, QString title);
-    static int warning( QString content, QString title );
-};
+int HxMsgShow( const QString& content );
+int HxMsgShow( const QString& content, const QString& title );
+int HxMsgShow( const QString& content, const QString& title, HxMsgIcon icon );
 
+int HxMsgInfo( const QString& content );
+int HxMsgInfo( const QString& content, const QString& title );
 
+int HxMsgQuestion( const QString& content );
+int HxMsgQuestion( const QString& content, const QString& title );
+int HxMsgQuestion( const QString& content, const QString& title, HxMsgButtons buttons );
 
-int HxShowMsg( const QString& content );
-int HxShowMsg( const QString& content, const QString& title );
+int HxMsgWarning( const QString& content, bool bIsHighlight = false );
+int HxMsgWarning( const QString& content, const QString& title, bool bIsHighlight = false );
 
-int HxShowError( const QString& error );
-int HxShowError( const QString& error, const QString& title );
-int HxShowError( const QString& error, const QString& details, const QString& title );
+int HxMsgError( const QString& content, bool bIsHighlight = false );
+int HxMsgError( const QString& content, const QString& title, bool bIsHighlight = false );
+int HxMsgError( const QString& content, const QString& details, const QString& title, bool bIsHighlight = false );

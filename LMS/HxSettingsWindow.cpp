@@ -151,7 +151,7 @@ void HxSettingsWindow::on_actionSave_triggered()
 
     HxProfile::save();
 
-    HxShowMsg( "Đã lưu cài đặt !", "Thông báo" );
+    HxMsgInfo( "Đã lưu cài đặt !", "Thông báo" );
 }
 
 void HxSettingsWindow::on_actionLoad_triggered()

@@ -80,7 +80,7 @@ void HxMainWindow::closeEvent( QCloseEvent* )
 
 void HxMainWindow::errorReported( HxException ex )
 {
-    HxShowError( ex.message, ex.where );
+    HxMsgError( ex.message, ex.where );
 }
 
 void HxMainWindow::loginChanged()
@@ -141,7 +141,7 @@ void HxMainWindow::on_actionLogin_triggered()
 {
     if ( GetProtector()->currentUser() != nullptr )
     {
-        int res = Message::warning( "Bạn có chắc chắn muốn đăng xuất không ?", "Khoan đã" );
+        int res = HxMsgQuestion( "Bạn có chắc chắn muốn đăng xuất không ?", "Khoan đã" );
         if ( res == QMessageBox::StandardButton::Yes )
         {
             GetProtector()->logout();
