@@ -38,9 +38,15 @@ void MakeShadow(QWidget* pWidget, QPoint offset, double radius, QColor color)
 
 HxTheme::HxTheme()
 {
-    Reset();
-    connect(&m_themeWatcher, &QFileSystemWatcher::directoryChanged, this, &HxTheme::OnThemeChanged);
-    connect(&m_themeWatcher, &QFileSystemWatcher::fileChanged, this, &HxTheme::OnThemeChanged);
+}
+
+HxTheme::~HxTheme()
+{
+    if(m_pThemeWatcher)
+    {
+        delete m_pThemeWatcher;
+        m_pThemeWatcher = nullptr;
+    }
 }
 
 QStringList HxTheme::GetThemes()
@@ -113,20 +119,24 @@ void HxTheme::Refresh()
     if(!QDir(themeDir).exists())
         return;
 
+    disconnect(m_pThemeWatcher, &QFileSystemWatcher::directoryChanged, this, &HxTheme::OnThemeChanged);
+    disconnect(m_pThemeWatcher, &QFileSystemWatcher::fileChanged, this, &HxTheme::OnThemeChanged);
     m_themeDir = themeDir;
-    m_themeWatcher.blockSignals(true);
-    QStringList currentDirs = m_themeWatcher.files();
+    QStringList currentDirs = m_pThemeWatcher->files();
     if(!currentDirs.empty())
-        m_themeWatcher.removePaths(currentDirs);
+        m_pThemeWatcher->removePaths(currentDirs);
 
     QStringList items = GetFileManager()->GetFilesAndFolders(m_themeDir);
-    m_themeWatcher.addPaths(items);
-    m_themeWatcher.blockSignals(false);
+    m_pThemeWatcher->addPaths(items);
     OnThemeChanged(m_themeDir);
+    connect(m_pThemeWatcher, &QFileSystemWatcher::directoryChanged, this, &HxTheme::OnThemeChanged);
+    connect(m_pThemeWatcher, &QFileSystemWatcher::fileChanged, this, &HxTheme::OnThemeChanged);
 }
 
 void HxTheme::Reset()
 {
+    if(!m_pThemeWatcher)
+        m_pThemeWatcher = new QFileSystemWatcher();
     auto settings = GetFileManager()->GetSettings(HxFileManager::eSettingTheme);
     QString rootDir = settings->value("RootThemeDir").toString();
     if(rootDir.isEmpty() || !QDir(rootDir).exists())
