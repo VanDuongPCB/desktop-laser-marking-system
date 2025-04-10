@@ -305,7 +305,7 @@ void HxModelWindow::on_actionRemove_triggered()
     std::sort( indexs.begin(), indexs.end(), []( int i1, int i2 ) { return i1 > i2; } );
 
     if ( indexs.size() <= 0 ) return;
-    int ret = Message::warning( "Xóa các model đang chọn ?", "Khoan đã" );
+    int ret = HxMsgQuestion( "Xóa các model đang chọn ?", "Khoan đã" );
     if ( ret == QMessageBox::Yes )
     {
         for ( auto index : indexs )

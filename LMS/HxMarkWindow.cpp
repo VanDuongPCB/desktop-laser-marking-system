@@ -315,7 +315,7 @@ void HxMarkWindow::on_actionMark_triggered()
     try
     {
         HxMarker::instance()->mark( true );
-        HxShowMsg( "Đã khắc xong !", "In test" );
+        HxMsgInfo( "Đã khắc xong !", "In test" );
     }
     catch ( HxException ex )
     {
