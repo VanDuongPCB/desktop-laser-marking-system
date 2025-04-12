@@ -46,6 +46,7 @@ public:
     void SetStopper( int value );
     void SetPositions( const std::map<int, HxPosition>& value );
     void SetPosition( int index, const HxPosition& value );
+    void RemovePosition( int index );
     void SetComments( const std::map<QString, QString>& comments );
     void SetComment( const QString& key, const QString& value );
     void AddComments( const QStringList& keys);
@@ -55,7 +56,7 @@ public:
 private:
     QString m_code;
     QString m_name;
-    bool m_bIsPrintLo;
+    bool m_bIsPrintLo = false;
     QString m_kNo;
     QString m_ivProgram;
     QString m_design;
@@ -66,9 +67,9 @@ private:
     QString filePath;
 
 public:
-    static std::vector<std::shared_ptr<HxModel>> items;
+    // static std::vector<std::shared_ptr<HxModel>> items;
     // static std::shared_ptr<HxModel> create( QString name, QString code );
-    static void save( std::shared_ptr<HxModel> model );
+    // static void save( std::shared_ptr<HxModel> model );
     // static void save();
     // static void load();
     // static QStringList names();

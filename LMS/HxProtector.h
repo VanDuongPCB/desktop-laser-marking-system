@@ -7,14 +7,14 @@ class HxProtector : public QObject
 {
     Q_OBJECT
 private:
-    HxProfile admin;
-    HxProfile* _currentUser = nullptr;
+    HxProfilePtr admin;
+    HxProfilePtr _currentUser = nullptr;
 public:
     explicit HxProtector( QObject* parent = 0 );
     ~HxProtector();
     bool login( QString name, QString pass );
     void logout();
-    HxProfile* currentUser();
+    HxProfilePtr currentUser();
 
 signals:
     void loginChanged();

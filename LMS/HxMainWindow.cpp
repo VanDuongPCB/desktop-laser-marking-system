@@ -12,6 +12,7 @@
 
 #include "HxProtector.h"
 #include "HxMessage.h"
+#include "HxLicense.h"
 
 #include "HxSystemError.h"
 
@@ -55,6 +56,9 @@ HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     connect( HxSystemError::instance(), &HxSystemError::reported, this, &HxMainWindow::errorReported );
     connect( GetProtector(), &HxProtector::loginChanged, this, &HxMainWindow::loginChanged );
 
+    QLabel* lblVersion = new QLabel(GetLicensing()->GetVersion());
+    lblVersion->setStyleSheet("color:green");
+    ui->statusBar->addWidget(lblVersion);
     setWindowState( Qt::WindowMaximized );
 }
 
@@ -90,7 +94,7 @@ void HxMainWindow::loginChanged()
 
 void HxMainWindow::updateUI()
 {
-    HxProfile* user = GetProtector()->currentUser();
+    HxProfilePtr user = GetProtector()->currentUser();
     if ( user == nullptr )
     {
         ui->actionLogin->setText( "Đăng nhập" );

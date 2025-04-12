@@ -19,6 +19,7 @@
 HxSettingsWindow::HxSettingsWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::SettingsWindow )
 {
     ui->setupUi( this );
+    ui->tbvUsers->setHeaders( { "ID" } );
 }
 
 HxSettingsWindow::~HxSettingsWindow()
@@ -85,15 +86,12 @@ void HxSettingsWindow::showStoppers()
 
 void HxSettingsWindow::showUsers()
 {
-    if ( ui->tbvUsers->headers.empty() )
-    {
-        ui->tbvUsers->setHeaders( { "ID" } );
-    }
-    int rows = HxProfile::items.size();
+    HxProfilePtrArray profiles = GetProfileManager()->GetProfiles();
+    int rows = profiles.size();
     ui->tbvUsers->setRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvUsers->setText( row, 0, HxProfile::items[ row ]->name );
+        ui->tbvUsers->setText( row, 0, profiles[ row ]->name );
         ui->tbvUsers->setText( row, 1, "" );
         ui->tbvUsers->setText( row, 2, "" );
     }
@@ -149,8 +147,6 @@ void HxSettingsWindow::on_actionSave_triggered()
     }
     HxStopper::save();
 
-    HxProfile::save();
-
     HxMsgInfo( "Đã lưu cài đặt !", "Thông báo" );
 }
 
@@ -158,7 +154,6 @@ void HxSettingsWindow::on_actionLoad_triggered()
 {
     NxSettings::load();
     HxStopper::load();
-    HxProfile::load();
     showActuatorSettings();
     showLaserSettings();
     showStoppers();
@@ -177,7 +172,8 @@ void HxSettingsWindow::on_tbnRemoveUser_clicked()
 {
     int row = ui->tbvUsers->currentIndex().row();
     if ( row < 0 ) return;
-    HxProfile::items.erase( HxProfile::items.begin() + row );
+    QString userName = ui->tbvUsers->item(row,0)->text();
+    GetProfileManager()->Remove(userName);
     showUsers();
 }
 
@@ -186,7 +182,12 @@ void HxSettingsWindow::on_btnResetUser_clicked()
 {
     int row = ui->tbvUsers->currentIndex().row();
     if ( row < 0 ) return;
-    HxProfile::items[ row ]->pass = "";
+    QString userName = ui->tbvUsers->item(row,0)->text();
+    HxProfilePtr profile = GetProfileManager()->GetProfile(userName);
+    if(!profile)
+        return;
+    profile->pass = "";
+    GetProfileManager()->Save(profile);
 }
 
 

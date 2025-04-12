@@ -19,7 +19,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LASER MARKER SYSTEM (release 2024-10-22)</string>
+   <string>LASER MARKER SYSTEM</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>

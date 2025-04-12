@@ -14,20 +14,21 @@ HxAddProfileDialog::~HxAddProfileDialog()
 
 void HxAddProfileDialog::on_btnAdd_clicked()
 {
+    HxProfilePtrArray items = GetProfileManager()->GetProfiles();
     QString user = ui->txtUser->text().trimmed();
-    QString userLower = user.toLower();
-    for ( auto& it : HxProfile::items )
+    QString userLower = user.toUpper();
+    for ( auto& it : items )
     {
-        if ( it->name.toLower() == userLower )
+        if ( it->name.toUpper() == userLower )
         {
             ui->lblError->setText( "Đã có user này !" );
             return;
         }
     }
-    HxProfile* us = new HxProfile();
+    HxProfilePtr us = std::make_shared<HxProfile>();
     us->name = user;
-
-    HxProfile::items.emplace_back( us );
+    us->pass = user;
+    GetProfileManager()->Save(us);
     this->close();
     this->setResult( 1 );
 }
@@ -36,19 +37,19 @@ void HxAddProfileDialog::on_btnAdd_clicked()
 void HxAddProfileDialog::on_txtUser_textChanged( const QString& arg1 )
 {
     ui->btnAdd->setEnabled( false );
-    QString user = arg1.trimmed().toLower();
-    if ( user.length() < 1 )
-    {
+    // QString user = arg1.trimmed().toLower();
+    // if ( user.length() < 1 )
+    // {
 
-        return;
-    }
-    for ( auto& usr : HxProfile::items )
-    {
-        if ( usr->name == user )
-        {
-            return;
-        }
-    }
+    //     return;
+    // }
+    // for ( auto& usr : HxProfile::items )
+    // {
+    //     if ( usr->name == user )
+    //     {
+    //         return;
+    //     }
+    // }
     ui->btnAdd->setEnabled( true );
 }
 

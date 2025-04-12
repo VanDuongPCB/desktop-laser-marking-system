@@ -43,8 +43,12 @@ void HxLotWindow::OnRefresh()
         QString statusName = ProductStatusToString(status);
         QColor statusColor = ProductStatusToColor(status);
 
+        auto pModel = GetModelManager()->GetModel(pLOT->Model());
+        if(!pModel)
+            pModel = GetModelManager()->Create();
+
         ui->tbvLots->setText( row, "Tên", pLOT->m_name );
-        ui->tbvLots->setText( row, "Kiểu in", pLOT->m_isRePrint ? "In lại" : "" );
+        ui->tbvLots->setText( row, "Kiểu in", (pLOT->m_isRePrint || pModel->IsPrintLo()) ? "In mã lô" : "" );
         ui->tbvLots->setText( row, "Model", pLOT->m_modelName );
         ui->tbvLots->setText( row, "Sản lượng", QString::number( pLOT->m_quantity ) );
         ui->tbvLots->setText( row, "Seri đầu", pLOT->m_counterStart );
@@ -132,7 +136,8 @@ void HxLotWindow::on_actionNew_triggered()
     HxLOTPropertyDialog dialog("", m_LOTs, this );
     if ( dialog.exec() )
     {
-        showLot( "" );
+        // showLot( "" );
+        OnRefresh();
     }
 }
 
@@ -183,7 +188,8 @@ void HxLotWindow::on_actionSave_triggered()
 
 void HxLotWindow::on_actionLoad_triggered()
 {
-    showLot( "" );
+    // showLot( "" );
+    OnRefresh();
 }
 
 void HxLotWindow::on_tbvLots_doubleClicked( const QModelIndex& index )
@@ -195,5 +201,6 @@ void HxLotWindow::on_tbvLots_doubleClicked( const QModelIndex& index )
     HxLOTPropertyDialog dialog( lotName, m_LOTs, this );
     if ( dialog.exec() )
     {
+        OnRefresh();
     }
 }

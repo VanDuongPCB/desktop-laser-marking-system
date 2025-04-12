@@ -7,20 +7,22 @@
 
 namespace
 {
+QString s_Version = "2025.SP0";
+double s_Kernel = 0.202500;
 HxLicensing s_instance;
 }
 
 QString HxLicensing::readKey()
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
-    QString key = settings.value( "Key" ).toString();
+    QString key = settings.value( s_Version ).toString();
     return key;
 }
 
 void HxLicensing::writeKey( QString key )
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
-    settings.setValue( "Key", key );
+    settings.setValue( s_Version, key );
 }
 
 bool HxLicensing::isRegistered()
@@ -32,12 +34,12 @@ bool HxLicensing::isRegistered()
 
 QString HxLicensing::id()
 {
-    return QSysInfo::machineUniqueId().toUpper() + "-R2025";
+    return QSysInfo::machineUniqueId().toUpper();
 }
 
 QString HxLicensing::keyFromId( QString id )
 {
-    std::string sid = id.toStdString();
+    std::string sid = (id).toStdString();
     std::vector<char> buff;
     for ( int i = 0; i < sid.length(); i++ )
     {
@@ -47,6 +49,7 @@ QString HxLicensing::keyFromId( QString id )
         }
 
         int val = sid[ i ] * 69 + i;
+        val *= s_Kernel;
         val = val % 36;
         if ( val < 10 )
         {
@@ -75,6 +78,10 @@ bool HxLicensing::registerKey( QString key )
     }
 }
 
+QString HxLicensing::GetVersion()
+{
+    return s_Version;
+}
 
 HxLicensing* GetLicensing()
 {

@@ -1,12 +1,15 @@
 #include "HxLoginDialog.h"
 #include "ui_HxLoginDialog.h"
 #include "HxProtector.h"
+#include "HxMessage.h"
 #include "HxFileManager.h"
 
 HxLoginDialog::HxLoginDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::LoginDialog )
 {
     ui->setupUi( this );
+    ui->txtUserName->setFocus();
 #ifdef DEBUGGING
+    ui->txtUserName->setText("Admin");
     ui->txtPassword->setText( GetFileManager()->GetSettings(HxFileManager::eSettingProtect)->value("Password").toString());
 #endif
 }
@@ -41,5 +44,9 @@ void HxLoginDialog::on_btnLogin_clicked()
     {
         this->close();
         this->setResult( 1 );
+    }
+    else
+    {
+        HxMsgError("Mật khẩu hoặc tên không đúng!","Từ chối", false);
     }
 }

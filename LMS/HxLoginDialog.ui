@@ -112,7 +112,7 @@
    <item row="1" column="0">
     <widget class="QLineEdit" name="txtUserName">
      <property name="text">
-      <string>Admin</string>
+      <string/>
      </property>
     </widget>
    </item>

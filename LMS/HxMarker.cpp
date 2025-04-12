@@ -111,12 +111,22 @@ bool HxMarker::mark( bool test )
 
     if ( test )
     {
-        for ( int i = 0; i < patternCnt; i++ )
+        // for ( int i = 0; i < patternCnt; i++ )
+        // {
+        //     HxPosition pos = m_pModel->Position( i );
+        //     QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
+
+
+        //     GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
+        //     GetLaserMachine()->setupBlockData( design->name, blockDatas );
+        //     GetLaserMachine()->burn();
+        //     tempLot->m_progress++;
+        // }
+
+        auto positions = m_pModel->Positions();
+        for(auto [index, pos]: positions)
         {
-            HxPosition pos = m_pModel->Position( i );
             QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
-
-
             GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
             GetLaserMachine()->setupBlockData( design->name, blockDatas );
             GetLaserMachine()->burn();
@@ -125,10 +135,24 @@ bool HxMarker::mark( bool test )
     }
     else
     {
-        for ( int i = 0; i < patternCnt; i++ )
+        // for ( int i = 0; i < patternCnt; i++ )
+        // {
+        //     if ( tempLot->isCompleted() ) continue;
+        //     HxPosition pos = m_pModel->Position( i );
+        //     QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
+
+        //     GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
+        //     GetLaserMachine()->setupBlockData( design->name, blockDatas );
+        //     GetLaserMachine()->burn();
+        //     Save( tempLot, m_pModel, design );
+        //     tempLot->m_progress++;
+        // }
+
+        auto positions = m_pModel->Positions();
+        for ( auto [index, pos]: positions )
         {
-            if ( tempLot->isCompleted() ) continue;
-            HxPosition pos = m_pModel->Position( i );
+            if ( tempLot->isCompleted() )
+                continue;
             QMap<int, QString> blockDatas = HxBlockInfo::gen( design, tempLot, m_pModel );
 
             GetLaserMachine()->setupPosition( design->name, pos, m_pModel->Stopper(), design.get()[ 0 ] );
@@ -137,8 +161,8 @@ bool HxMarker::mark( bool test )
             Save( tempLot, m_pModel, design );
             tempLot->m_progress++;
         }
+
         m_pLOT.get()[ 0 ] = tempLot.get()[ 0 ];
-        // HxLOT::saveLot( m_pLOT );
         GetLOTManager()->Save(m_pLOT);
     }
     return true;

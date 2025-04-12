@@ -13,7 +13,7 @@ TEMPLATE = app
 RC_ICONS = lms.ico
 CONFIG += c++11
 
-DEFINES += DEBUGGING
+# DEFINES += DEBUGGING
 
 RESOURCES += \
     ../Assets/icons.qrc \
