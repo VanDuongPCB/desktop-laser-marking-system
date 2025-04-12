@@ -10,6 +10,7 @@ public:
      QString id();
      QString keyFromId( QString id );
      bool registerKey( QString key );
+     QString GetVersion();
 };
 
 HxLicensing* GetLicensing();

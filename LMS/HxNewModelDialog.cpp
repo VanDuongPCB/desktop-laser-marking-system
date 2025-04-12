@@ -2,7 +2,7 @@
 #include "ui_HxNewModelDialog.h"
 #include "HxModel.h"
 #include "HxMessage.h"
-
+#include "HxIVProgram.h"
 
 HxNewModelDialog::HxNewModelDialog(HxModelPtrMap models, QWidget* parent ) :
     QDialog( parent ),
@@ -10,6 +10,7 @@ HxNewModelDialog::HxNewModelDialog(HxModelPtrMap models, QWidget* parent ) :
 {
     ui->setupUi( this );
     m_models = models;
+    ui->cbxIV->addItems(HxIVProgram::names());
     connect(ui->btnCreate, &QPushButton::clicked, this, &HxNewModelDialog::OnCreate);
 }
 

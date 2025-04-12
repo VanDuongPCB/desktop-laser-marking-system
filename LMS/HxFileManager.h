@@ -20,6 +20,7 @@ public:
         eDBRootDir,
         eDBDataDir,
         eDBSettingDir,
+        eDBProfileDir,
         eDBLOTDir,
         eDBModelDir,
         eDBDesignDir,

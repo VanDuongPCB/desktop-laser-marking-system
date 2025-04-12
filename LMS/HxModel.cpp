@@ -13,6 +13,16 @@
 namespace
 {
 HxModelManager s_instance;
+bool IsDiff(const QString& val1, const QString val2)
+{
+    return val1 != val2;
+}
+
+bool IsDiff(int val1, int val2)
+{
+    return val1 != val2;
+}
+
 }
 HxModel::HxModel() : HxObject()
 {
@@ -109,67 +119,73 @@ QString HxModel::Value( QString paramName ) const
 
 void HxModel::SetCode( const QString& value )
 {
+    SetModified(IsDiff(m_code, value));
     m_code = value;
-    SetModified(1);
 }
 
 void HxModel::SetName( const QString& value )
 {
+    SetModified(IsDiff(m_name, value));
     m_name = value;
-    SetModified(1);
 }
 
 void HxModel::SetPrintLo( bool bIsEnable )
 {
+    SetModified(IsDiff(m_bIsPrintLo, bIsEnable));
     m_bIsPrintLo = bIsEnable;
-    SetModified(1);
 }
 
 void HxModel::SetkNo( const QString& value )
 {
+    SetModified(IsDiff(m_kNo, value));
     m_kNo = value;
-    SetModified(1);
 }
 
 void HxModel::SetIVProgram( const QString& value )
 {
+    SetModified(IsDiff(m_ivProgram, value));
     m_ivProgram = value;
-    SetModified(1);
 }
 
 void HxModel::SetDesign( const QString& value )
 {
+    SetModified(IsDiff(m_design, value));
     m_design = value;
-    SetModified(1);
 }
 
 void HxModel::SetDesign( size_t value )
 {
-    SetDesign(QString::number(value).leftJustified(4,'0'));
+    SetDesign(QString::number(value).rightJustified(4,'0'));
 }
 
 void HxModel::SetCvWidth( double value )
 {
+    SetModified(IsDiff(m_cvWidth, value));
     m_cvWidth = value;
-    SetModified(1);
 }
 
 void HxModel::SetStopper( int value )
 {
+    SetModified(IsDiff(m_stopper, value));
     m_stopper = value;
-    SetModified(1);
 }
 
 void HxModel::SetPositions( const std::map<int, HxPosition>& value )
 {
+    SetModified(true);
     m_positions = value;
-    SetModified(1);
 }
 
 void HxModel::SetPosition( int index, const HxPosition& value )
 {
-    m_positions[index] = value;
     SetModified(1);
+    m_positions[index] = value;
+}
+
+void HxModel::RemovePosition( int index )
+{
+    SetModified(1);
+    m_positions.erase(index);
 }
 
 void HxModel::SetComments( const std::map<QString, QString>& comments )
@@ -224,7 +240,7 @@ void HxModel::SetValue( const QString& key, const QString& value )
 }
 
 /* -------------------------------------------------- */
-std::vector<std::shared_ptr<HxModel>> HxModel::items;
+// std::vector<std::shared_ptr<HxModel>> HxModel::items;
 
 
 // std::shared_ptr<HxModel> HxModel::create( QString name, QString code )
@@ -238,52 +254,52 @@ std::vector<std::shared_ptr<HxModel>> HxModel::items;
 //     return ex;
 // }
 
-void HxModel::save( std::shared_ptr<HxModel> model )
-{
-    if ( model == nullptr ) return;
-    QJsonObject obj;
-    // common
-    obj.insert( "code", model->m_code );
-    obj.insert( "is-print-lo", model->IsPrintLo());
-    obj.insert( "cv-width", model->m_cvWidth );
-    obj.insert( "stopper", model->m_stopper );
-    obj.insert( "iv-program", model->m_ivProgram );
-    obj.insert( "design", model->m_design );
-    obj.insert( "k-no", model->m_kNo );
+// void HxModel::save( std::shared_ptr<HxModel> model )
+// {
+//     if ( model == nullptr ) return;
+//     QJsonObject obj;
+//     // common
+//     obj.insert( "code", model->m_code );
+//     obj.insert( "is-print-lo", model->IsPrintLo());
+//     obj.insert( "cv-width", model->m_cvWidth );
+//     obj.insert( "stopper", model->m_stopper );
+//     obj.insert( "iv-program", model->m_ivProgram );
+//     obj.insert( "design", model->m_design );
+//     obj.insert( "k-no", model->m_kNo );
 
-    // pos
-    QJsonArray posArr;
-    for ( auto& [index, pos] : model->m_positions )
-    {
-        QJsonObject posObj;
-        posObj.insert( "index", index );
-        posObj.insert( "x", pos.x );
-        posObj.insert( "y", pos.y );
-        posObj.insert( "angle", pos.angle );
-        posArr.push_back( posObj );
-    }
-    obj.insert( "pos", posArr );
+//     // pos
+//     QJsonArray posArr;
+//     for ( auto& [index, pos] : model->m_positions )
+//     {
+//         QJsonObject posObj;
+//         posObj.insert( "index", index );
+//         posObj.insert( "x", pos.x );
+//         posObj.insert( "y", pos.y );
+//         posObj.insert( "angle", pos.angle );
+//         posArr.push_back( posObj );
+//     }
+//     obj.insert( "pos", posArr );
 
-    // comments
-    QJsonObject commentObj;
-    for ( auto& [key, value] : model->m_comments )
-    {
-        commentObj.insert( key, value );
-    }
-    obj.insert( "comments", commentObj );
-    QJsonDocument doc;
-    doc.setObject( obj );
+//     // comments
+//     QJsonObject commentObj;
+//     for ( auto& [key, value] : model->m_comments )
+//     {
+//         commentObj.insert( key, value );
+//     }
+//     obj.insert( "comments", commentObj );
+//     QJsonDocument doc;
+//     doc.setObject( obj );
 
-    QString dir = GetFileManager()->GetPath(HxFileManager::eDBModelDir);
-    QDir().mkdir( dir );
-    QString path = dir + "/" + model->m_name + ".model";
-    QFile writer( path );
-    if ( writer.open( QIODevice::WriteOnly ) )
-    {
-        writer.write( doc.toJson() );
-        writer.close();
-    }
-}
+//     QString dir = GetFileManager()->GetPath(HxFileManager::eDBModelDir);
+//     QDir().mkdir( dir );
+//     QString path = dir + "/" + model->m_name + ".model";
+//     QFile writer( path );
+//     if ( writer.open( QIODevice::WriteOnly ) )
+//     {
+//         writer.write( doc.toJson() );
+//         writer.close();
+//     }
+// }
 
 // void HxModel::save()
 // {
@@ -349,16 +365,16 @@ void HxModel::save( std::shared_ptr<HxModel> model )
 QStringList HxModel::paramNames()
 {
     QStringList names = { "NAME","CODE","NO","FIX1","FIX2","FIX3","FIX4","FIX5" };
-    for ( auto& it : items )
-    {
-        for ( auto& [key, value] : it->m_comments )
-        {
-            if ( names.contains( key ) == false )
-            {
-                names.push_back( key );
-            }
-        }
-    }
+    // for ( auto& it : items )
+    // {
+    //     for ( auto& [key, value] : it->m_comments )
+    //     {
+    //         if ( names.contains( key ) == false )
+    //         {
+    //             names.push_back( key );
+    //         }
+    //     }
+    // }
     return names;
 }
 

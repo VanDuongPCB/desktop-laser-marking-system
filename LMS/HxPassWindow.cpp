@@ -43,7 +43,8 @@ void HxPassWindow::on_btnReload_clicked()
     QString old = ui->cbxModel->currentText();
     ui->cbxModel->setEnabled( false );
     ui->cbxModel->clear();
-    for ( auto& md : HxModel::items )
+    auto Models = GetModelManager()->GetModels();
+    for ( auto& [name, md] : Models )
     {
         ui->cbxModel->addItem( md->Name() );
     }

@@ -7,6 +7,8 @@ HxRegisterDialog::HxRegisterDialog( QWidget* parent ) : QDialog( parent ), ui( n
 {
     ui->setupUi( this );
     ui->txtID->setText( GetLicensing()->id() );
+    ui->txtVersion->setText(GetLicensing()->GetVersion());
+    ui->txtKey->setFocus();
     connect(ui->btnRegister, &QPushButton::clicked, this, &HxRegisterDialog::OnRegister);
     connect(ui->txtKey, &QLineEdit::returnPressed, this, &HxRegisterDialog::OnMakeKeyOrRegister);
 }

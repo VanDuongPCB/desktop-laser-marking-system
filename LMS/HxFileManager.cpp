@@ -38,6 +38,8 @@ QString HxFileManager::GetPath(FileType fileType) const
         return GetPath( eDBRootDir ) + "/data";
     case eDBSettingDir:
         return GetPath( eDBRootDir ) + "/settings";
+    case eDBProfileDir:
+        return GetPath(eDBRootDir) + "/profiles";
     case eDBLOTDir:
         return GetPath( eDBRootDir ) + "/data/lots";
     case eDBModelDir:

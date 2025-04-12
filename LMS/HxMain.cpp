@@ -22,6 +22,15 @@ int main( int argc, char* argv[] )
     a.setStyle( new HxUIStyle() );
     GetFileManager()->Init();
     GetTheme()->Refresh();
+
+
+    // HxLOTPtr p = GetLOTManager()->GetLOT("(960K 97880)BOTAN IT PF2L GPF BT RS");
+    // HxLOTPtr p = GetLOTManager()->GetLOT("961K-97880_B12222");
+    // p->SetQuantity(3);
+    // p->SetCounterStart("0000");
+    // p->SetValue("FIX1","FFFFF");
+    // qDebug () << p->Value("FIX1");
+
     bool bIsLicensed = GetLicensing()->isRegistered();
 
     if ( !bIsLicensed )
@@ -41,7 +50,6 @@ int main( int argc, char* argv[] )
     HxStopper::load();
     HxDesign::load();
     HxIVProgram::load();
-    HxProfile::load();
     HxMarker::initialize();
     w.show();
     int code = a.exec();

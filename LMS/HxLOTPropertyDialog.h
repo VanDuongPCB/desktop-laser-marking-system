@@ -58,8 +58,9 @@ private:
     bool checkModelInfo();
     bool checkBlocks();
 
-
+    void GetInputs();
     bool checkInputs();
+    void OnInfoChanged();
     void OnModelChanged();
     void OnApply();
 };

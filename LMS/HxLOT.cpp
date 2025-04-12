@@ -392,7 +392,7 @@ HxLOTPtr HxLOTManager::GetLOT(const QString& lotName)
     QStringList keys = cmtObj.keys();
     for ( auto& key : keys )
     {
-        pLOT->m_comments.insert( key, cmtObj.value( key ).toString() );
+        pLOT->m_comments[ key ] = cmtObj.value( key ).toString();
     }
 
     int days = lastWrite.daysTo( QDateTime::currentDateTime() );

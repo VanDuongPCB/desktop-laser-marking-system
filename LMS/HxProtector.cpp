@@ -10,9 +10,11 @@ HxProtector s_instance;
 
 HxProtector::HxProtector( QObject* parent ) : QObject( parent )
 {
-    admin.name = "Admin";
-    admin.pass = "Laser1";
-    admin.isAdmin = true;
+    auto settings = GetFileManager()->GetSettings(HxFileManager::eSettingProtect);
+    admin = std::make_shared<HxProfile>();
+    admin->name = "Admin";
+    admin->pass = settings->value("Password").toString();
+    admin->isAdmin = true;
 }
 
 HxProtector::~HxProtector()
@@ -33,25 +35,26 @@ bool HxProtector::login( QString name, QString pass )
     name = name.trimmed().toLower();
     if ( name == "admin" && pass == adminPass )
     {
-        _currentUser = &admin;
+        _currentUser = admin;
         emit loginChanged();
         return true;
     }
 
-    for ( auto& user : HxProfile::items )
+    HxProfilePtrArray items = GetProfileManager()->GetProfiles();
+    for ( auto& user : items )
     {
         if ( user->name.trimmed().toLower() == name )
         {
             if ( user->pass == "" )
             {
-                _currentUser = user.get();
+                _currentUser = user;
                 _currentUser->pass = pass;
-                HxProfile::save();
+                GetProfileManager()->Save(_currentUser);
                 emit loginChanged();
             }
             else if ( user->pass == pass )
             {
-                _currentUser = user.get();
+                _currentUser = user;
                 emit loginChanged();
                 return true;
             }
@@ -68,7 +71,7 @@ void HxProtector::logout()
     emit loginChanged();
 }
 
-HxProfile* HxProtector::currentUser()
+HxProfilePtr HxProtector::currentUser()
 {
     return _currentUser;
 }
