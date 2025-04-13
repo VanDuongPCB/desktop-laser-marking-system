@@ -1,6 +1,6 @@
 
 #include "HxPLC.h"
-#include <QString>
+#include "QString"
 #include "HxTcpSocket.h"
 #include "HxSettings.h"
 #include "HxMessage.h"

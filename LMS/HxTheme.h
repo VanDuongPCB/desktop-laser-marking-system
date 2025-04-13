@@ -1,10 +1,10 @@
 #pragma once
-#include <QApplication>
-#include <QFile>
-#include <QFont>
-#include <QProxyStyle>
-#include <QStyleFactory>
-#include <QFileSystemWatcher>
+#include "QApplication"
+#include "QFile"
+#include "QFont"
+#include "QProxyStyle"
+#include "QStyleFactory"
+#include "QFileSystemWatcher"
 
 
 void MakeTransparentWindow(QWidget* pWidget);

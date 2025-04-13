@@ -1,5 +1,5 @@
 #pragma once
-#include <QDialog>
+#include "QDialog"
 
 namespace Ui
 {

@@ -1,9 +1,10 @@
 #pragma once
-#include <QString>
-#include <QMap>
-#include <HxPosition.h>
-#include <HxDesign.h>
-#include <HxStopper.h>
+#include "QString"
+#include "QMap"
+
+#include "HxPosition.h"
+#include "HxDesign.h"
+#include "HxStopper.h"
 
 class HxLaserMachine
 {

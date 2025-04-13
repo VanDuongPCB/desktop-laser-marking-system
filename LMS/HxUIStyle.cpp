@@ -1,5 +1,5 @@
 #include "HxUIStyle.h"
-#include <QToolTip>
+#include "QToolTip"
 
 HxUIStyle::HxUIStyle( bool light ) : QProxyStyle( QStyleFactory::create( "fusion" ) )
 {

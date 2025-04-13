@@ -1,8 +1,8 @@
 #pragma once
-#include <QString>
-#include <QMap>
-#include <vector>
-#include <memory>
+#include "QString"
+#include "QMap"
+#include "vector"
+#include "memory"
 
 #include "HxObject.h"
 

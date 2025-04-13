@@ -1,7 +1,7 @@
 #include "HxLicense.h"
-#include <QSysInfo>
-#include <QCoreApplication>
-#include <QFile>
+#include "QSysInfo"
+#include "QCoreApplication"
+#include "QFile"
 #include "HxMessage.h"
 #include "QSettings"
 

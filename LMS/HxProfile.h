@@ -1,7 +1,7 @@
 #pragma once
-#include <QString>
-#include <vector>
-#include <memory>
+#include "QString"
+#include "vector"
+#include "memory"
 
 class HxProfile;
 using HxProfilePtr = std::shared_ptr<HxProfile>;

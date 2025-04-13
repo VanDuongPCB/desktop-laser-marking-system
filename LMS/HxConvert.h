@@ -1,7 +1,7 @@
 #pragma once
-#include <stdint.h>
-#include <QString>
-#include <QColor>
+#include "stdint.h"
+#include "QString"
+#include "QColor"
 #include "HxLOT.h"
 
 

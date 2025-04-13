@@ -1,5 +1,5 @@
 #pragma once
-#include <QTableView>
+#include "QTableView"
 #include "HxDataTable.h"
 
 class HxTableView : public QTableView

@@ -5,8 +5,8 @@
 #include "HxException.h"
 #include "HxSystemError.h"
 #include "HxMessage.h"
-#include <QFile>
-#include <QMap>
+#include "QFile"
+#include "QMap"
 #include "HxPLC.h"
 #include "HxBarcode.h"
 

@@ -1,6 +1,6 @@
 #include "HxTableView.h"
-#include <QKeyEvent>
-#include <iostream>
+#include "QKeyEvent"
+#include "iostream"
 
 HxTableView::HxTableView( QWidget* parent ) : QTableView( parent )
 {

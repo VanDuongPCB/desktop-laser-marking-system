@@ -1,6 +1,6 @@
 #include "HxMainWindow.h"
-#include <QApplication>
-#include <QStyleFactory>
+#include "QApplication"
+#include "QStyleFactory"
 #include "HxUIStyle.h"
 #include "HxSettings.h"
 #include "HxDesign.h"
@@ -14,7 +14,7 @@
 #include "HxTheme.h"
 #include "HxFileManager.h"
 #include "HxRegisterDialog.h"
-#include <HxDebugger.h>
+#include "HxDebugger.h"
 
 int main( int argc, char* argv[] )
 {
@@ -23,24 +23,13 @@ int main( int argc, char* argv[] )
     GetFileManager()->Init();
     GetTheme()->Refresh();
 
-
-    // HxLOTPtr p = GetLOTManager()->GetLOT("(960K 97880)BOTAN IT PF2L GPF BT RS");
-    // HxLOTPtr p = GetLOTManager()->GetLOT("961K-97880_B12222");
-    // p->SetQuantity(3);
-    // p->SetCounterStart("0000");
-    // p->SetValue("FIX1","FFFFF");
-    // qDebug () << p->Value("FIX1");
-
-    bool bIsLicensed = GetLicensing()->isRegistered();
-
-    if ( !bIsLicensed )
+    if ( !GetLicensing()->isRegistered() )
     {
         HxRegisterDialog licenseDialog;
-        if ( licenseDialog.exec() )
-            bIsLicensed = true;
+        licenseDialog.exec();
     }
 
-    if ( !bIsLicensed )
+    if ( !GetLicensing()->isRegistered() )
     {
         return 0;
     }

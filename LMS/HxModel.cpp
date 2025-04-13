@@ -1,12 +1,12 @@
 #include "HxModel.h"
-#include <QFileInfo>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QStringList>
-#include <QDir>
-#include <QFile>
-#include <QCoreApplication>
+#include "QFileInfo"
+#include "QJsonDocument"
+#include "QJsonArray"
+#include "QJsonObject"
+#include "QStringList"
+#include "QDir"
+#include "QFile"
+#include "QCoreApplication"
 
 #include "HxFileManager.h"
 

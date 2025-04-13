@@ -1,5 +1,5 @@
 #pragma once
-#include <QTcpSocket>
+#include "QTcpSocket"
 
 class TcpSocket : public QTcpSocket
 {

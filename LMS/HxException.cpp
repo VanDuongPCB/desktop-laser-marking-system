@@ -1,6 +1,6 @@
 
 #include "HxException.h"
-#include <QDateTime>
+#include "QDateTime"
 
 HxException::HxException() : QException()
 {

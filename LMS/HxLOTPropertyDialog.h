@@ -1,6 +1,6 @@
 #pragma once
-#include <QDialog>
-#include <QStandardItem>
+#include "QDialog"
+#include "QStandardItem"
 #include "HxLOT.h"
 #include "HxModel.h"
 

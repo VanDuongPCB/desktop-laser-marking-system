@@ -1,9 +1,9 @@
 #include "HxIVProgram.h"
 #include "HxSettings.h"
-#include <QDir>
-#include <QFileInfo>
-#include <QFileInfoList>
-#include <QCoreApplication>
+#include "QDir"
+#include "QFileInfo"
+#include "QFileInfoList"
+#include "QCoreApplication"
 
 #include "HxFileManager.h"
 

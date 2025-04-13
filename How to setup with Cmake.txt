@@ -1,0 +1,3 @@
+set QT_VERSION=6
+set QT_ROOT_DIR=D:/Workspaces/LMS/ThirdParty/libqt/Windows
+generate-windows.x64.release.bat
