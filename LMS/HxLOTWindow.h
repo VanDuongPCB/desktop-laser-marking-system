@@ -1,6 +1,6 @@
 #pragma once
-#include <QMainWindow>
-#include <QStandardItem>
+#include "QMainWindow"
+#include "QStandardItem"
 #include "HxLOT.h"
 #include "HxLOTPropertyDialog.h"
 

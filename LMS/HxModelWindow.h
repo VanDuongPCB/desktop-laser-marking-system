@@ -1,8 +1,8 @@
 #pragma once
-#include <QMainWindow>
-#include <QLabel>
-#include <QLineEdit>
-#include <QStandardItem>
+#include "QMainWindow"
+#include "QLabel"
+#include "QLineEdit"
+#include "QStandardItem"
 
 #include "HxModel.h"
 

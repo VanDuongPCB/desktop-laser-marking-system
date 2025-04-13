@@ -1,18 +1,17 @@
 #include "HxLOT.h"
+
+#include "QJsonObject"
+#include "QJsonArray"
+#include "QJsonDocument"
+#include "QFile"
+#include "QDir"
+#include "QFileInfo"
+#include "QFileInfoList"
+#include "QCoreApplication"
+
 #include "HxConvert.h"
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QFile>
-#include <QDir>
-#include <QFileInfo>
-#include <QFileInfoList>
-#include <QCoreApplication>
-
 #include "HxFileManager.h"
-
-
-#include <HxDebugger.h>
+#include "HxDebugger.h"
 
 namespace
 {

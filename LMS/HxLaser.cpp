@@ -1,14 +1,13 @@
 #include "HxLaser.h"
-#include <assert.h>
-#include <QSerialPort>
-#include <QSerialPortInfo>
+
+#include "QSerialPort"
+#include "QSerialPortInfo"
+
 #include "HxException.h"
 #include "HxSystemError.h"
 #include "HxSettings.h"
 #include "HxMessage.h"
 #include "HxDebugger.h"
-
-#include <iostream>
 
 namespace
 {

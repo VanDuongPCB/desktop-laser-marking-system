@@ -1,7 +1,7 @@
 #include "HxModelWindow.h"
 #include "ui_HxModelWindow.h"
-#include <QSpacerItem>
-#include <QFileDialog>
+#include "QSpacerItem"
+#include "QFileDialog"
 
 #include "QSignalBlocker"
 

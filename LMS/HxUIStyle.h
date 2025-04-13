@@ -1,9 +1,9 @@
 #pragma once
-#include <QApplication>
-#include <QFile>
-#include <QFont>
-#include <QProxyStyle>
-#include <QStyleFactory>
+#include "QApplication"
+#include "QFile"
+#include "QFont"
+#include "QProxyStyle"
+#include "QStyleFactory"
 
 class HxUIStyle : public QProxyStyle
 {

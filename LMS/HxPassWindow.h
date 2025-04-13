@@ -1,5 +1,5 @@
 #pragma once
-#include <QMainWindow>
+#include "QMainWindow"
 #include "HxMainWindow.h"
 
 namespace Ui

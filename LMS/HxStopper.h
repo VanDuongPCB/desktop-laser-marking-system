@@ -1,9 +1,9 @@
 #pragma once
-#include <QString>
-#include <QStringList>
-#include <QMap>
-#include <vector>
-#include <memory>
+#include "QString"
+#include "QStringList"
+#include "QMap"
+#include "vector"
+#include "memory"
 
 class HxStopper
 {

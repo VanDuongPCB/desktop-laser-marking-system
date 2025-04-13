@@ -1,5 +1,5 @@
 #include "HxTabWidget.h"
-#include <iostream>
+#include "iostream"
 
 HxTabWidget::HxTabWidget( QWidget* parent ) : QTabWidget( parent )
 {

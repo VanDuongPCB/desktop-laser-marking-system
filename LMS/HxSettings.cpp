@@ -1,11 +1,11 @@
 #include "HxSettings.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
+#include "QCoreApplication"
+#include "QDir"
+#include "QFile"
+#include "QFileInfo"
+#include "QJsonDocument"
+#include "QJsonArray"
+#include "QJsonObject"
 
 #include "HxFileManager.h"
 

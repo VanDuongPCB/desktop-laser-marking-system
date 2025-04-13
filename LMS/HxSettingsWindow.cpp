@@ -9,9 +9,9 @@
 
 #include "HxMessage.h"
 
-#include <QSerialPort>
-#include <QSerialPortInfo>
-#include <QFileDialog>
+#include "QSerialPort"
+#include "QSerialPortInfo"
+#include "QFileDialog"
 
 #include "HxFileManager.h"
 

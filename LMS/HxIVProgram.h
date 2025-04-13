@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
-#include <memory>
-#include <QString>
+#include "vector"
+#include "memory"
+#include "QString"
 
 class HxIVProgram
 {

@@ -6,11 +6,11 @@
 #include "HxMessage.h"
 #include "HxException.h"
 #include "HxSystemError.h"
-#include <HxLaser.h>
-#include <HxPLC.h>
+#include "HxLaser.h"
+#include "HxPLC.h"
 
 #include "HxConvert.h"
-#include <HxDebugger.h>
+#include "HxDebugger.h"
 
 
 

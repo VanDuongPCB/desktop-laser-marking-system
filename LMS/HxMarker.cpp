@@ -1,14 +1,14 @@
 #include "HxMarker.h"
 #include "HxStopper.h"
-#include <QTimer>
-#include <QSerialPort>
-#include <QTcpSocket>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QCoreApplication>
-#include <QFile>
-#include <QDir>
+#include "QTimer"
+#include "QSerialPort"
+#include "QTcpSocket"
+#include "QJsonObject"
+#include "QJsonArray"
+#include "QJsonDocument"
+#include "QCoreApplication"
+#include "QFile"
+#include "QDir"
 
 
 #include "HxMessage.h"

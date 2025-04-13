@@ -1,6 +1,6 @@
 #pragma once
-#include <QDialog>
-#include <HxModel.h>
+#include "QDialog"
+#include "HxModel.h"
 
 namespace Ui
 {

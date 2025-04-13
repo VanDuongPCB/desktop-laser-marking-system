@@ -1,7 +1,7 @@
 #pragma once
-#include <QString>
-#include <QMap>
-#include <QObject>
+#include "QString"
+#include "QMap"
+#include "QObject"
 #include "HxException.h"
 
 class HxSystemError : public QObject

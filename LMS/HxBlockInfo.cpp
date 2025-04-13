@@ -2,10 +2,10 @@
 #include "HxModel.h"
 #include "HxLOT.h"
 #include "HxDesign.h"
-#include <QStringList>
-#include <QString>
-#include <QDateTime>
-#include <iostream>
+#include "QStringList"
+#include "QString"
+#include "QDateTime"
+#include "iostream"
 
 HxBlockInfo::HxBlockInfo()
 {

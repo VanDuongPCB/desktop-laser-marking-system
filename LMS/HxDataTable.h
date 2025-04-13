@@ -1,6 +1,6 @@
 #pragma once
-#include <QTableView>
-#include <QStandardItemModel>
+#include "QTableView"
+#include "QStandardItemModel"
 class HxDataTable : public QStandardItemModel
 {
 public:

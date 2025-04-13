@@ -1,10 +1,10 @@
 #include "HxStopper.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
+#include "QCoreApplication"
+#include "QDir"
+#include "QFile"
+#include "QJsonObject"
+#include "QJsonArray"
+#include "QJsonDocument"
 
 #include "HxFileManager.h"
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <QTabWidget>
+#include "QTabWidget"
 
 class HxTabWidget : public QTabWidget
 {

@@ -1,6 +1,6 @@
 //#include "debugger.h"
-//#include <QFile>
-//#include <QCoreApplication>
+//#include "QFile"
+//#include "QCoreApplication"
 //Debugger::Debugger()
 //{
 

@@ -1,7 +1,7 @@
 #pragma once
-#include <QObject>
-#include <QThread>
-#include <atomic>
+#include "QObject"
+#include "QThread"
+#include "atomic"
 #include "HxLOT.h"
 #include "HxDesign.h"
 #include "HxModel.h"
