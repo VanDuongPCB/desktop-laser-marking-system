@@ -1,3 +1,8 @@
 set QT_VERSION=6
 set QT_ROOT_DIR=D:/Workspaces/LMS/ThirdParty/libqt/Windows
 generate-windows.x64.release.bat
+
+
+set QT_VERSION=6
+set QT_ROOT_DIR=C:/Qt/6.8.2/msvc2022_64
+generate.bat
