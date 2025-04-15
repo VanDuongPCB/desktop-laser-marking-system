@@ -23,13 +23,13 @@ int main( int argc, char* argv[] )
     GetFileManager()->Init();
     GetTheme()->Refresh();
 
-    if ( !GetLicensing()->isRegistered() )
+    if ( !GetLicensing()->IsRegistered() )
     {
         HxRegisterDialog licenseDialog;
         licenseDialog.exec();
     }
 
-    if ( !GetLicensing()->isRegistered() )
+    if ( !GetLicensing()->IsRegistered() )
     {
         return 0;
     }

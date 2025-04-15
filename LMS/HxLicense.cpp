@@ -7,39 +7,39 @@
 
 namespace
 {
-QString s_Version = "2025.SP0";
-double s_Kernel = 0.202500;
-HxLicensing s_instance;
+    QString s_Version = "2025.SP0";
+    double s_Kernel = 0.202500;
+    HxLicensing s_instance;
 }
 
-QString HxLicensing::readKey()
+QString HxLicensing::ReadKey()
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
     QString key = settings.value( s_Version ).toString();
     return key;
 }
 
-void HxLicensing::writeKey( QString key )
+void HxLicensing::WriteKey( const QString& key )
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
     settings.setValue( s_Version, key );
 }
 
-bool HxLicensing::isRegistered()
+bool HxLicensing::IsRegistered()
 {
-    QString keyRef = keyFromId( id() );
-    QString keyStore = readKey();
+    QString keyRef = KeyFromId( ID() );
+    QString keyStore = ReadKey();
     return keyStore == keyRef;
 }
 
-QString HxLicensing::id()
+QString HxLicensing::ID()
 {
     return QSysInfo::machineUniqueId().toUpper();
 }
 
-QString HxLicensing::keyFromId( QString id )
+QString HxLicensing::KeyFromId( const QString& id )
 {
-    std::string sid = (id).toStdString();
+    std::string sid = ( id ).toStdString();
     std::vector<char> buff;
     for ( int i = 0; i < sid.length(); i++ )
     {
@@ -64,12 +64,12 @@ QString HxLicensing::keyFromId( QString id )
     return QString::fromStdString( buff.data() );
 }
 
-bool HxLicensing::registerKey( QString key )
+bool HxLicensing::RegisterKey( const QString& key )
 {
-    QString keyRef = keyFromId( id() );
+    QString keyRef = KeyFromId( ID() );
     if ( keyRef == key )
     {
-        writeKey( key );
+        WriteKey( key );
         return true;
     }
     else

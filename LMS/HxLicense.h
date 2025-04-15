@@ -4,13 +4,13 @@
 class HxLicensing
 {
 public:
-     QString readKey();
-     void writeKey( QString key );
-     bool isRegistered();
-     QString id();
-     QString keyFromId( QString id );
-     bool registerKey( QString key );
-     QString GetVersion();
+    QString ReadKey();
+    void WriteKey( const QString& key );
+    bool IsRegistered();
+    QString ID();
+    QString KeyFromId( const QString& id );
+    bool RegisterKey( const QString& key );
+    QString GetVersion();
 };
 
 HxLicensing* GetLicensing();
