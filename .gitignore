@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+#Directories
+_ide
+_build
