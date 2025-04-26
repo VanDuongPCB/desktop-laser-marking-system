@@ -1,0 +1,13 @@
+#ifndef LOGSAVER_H
+#define LOGSAVER_H
+#include "HxLOT.h"
+#include "HxModel.h"
+#include "HxDesign.h"
+
+class HxLogSaver
+{
+public:
+    static void save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design );
+};
+
+#endif // LOGSAVER_H

@@ -1,0 +1,22 @@
+#ifndef IVPROGRAM_H
+#define IVPROGRAM_H
+#include <vector>
+#include <memory>
+#include <QString>
+
+class HxIVProgram
+{
+public:
+    QString name;
+    QString filePath;
+    HxIVProgram();
+    ~HxIVProgram();
+
+
+public:
+    static std::vector<std::shared_ptr<HxIVProgram>> items;
+    static void load();
+    static QStringList names();
+};
+
+#endif // IVPROGRAM_H

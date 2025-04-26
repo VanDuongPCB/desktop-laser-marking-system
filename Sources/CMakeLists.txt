@@ -19,6 +19,7 @@ file(GLOB RESOURCE_ICONS ../Assets/Icons/*.rc)
 
 source_group("Forms" FILES ${UI_FILES})
 source_group("Resources" FILES ${RESOURCE_FILES})
+source_group("Resources" FILES ${RESOURCE_ICONS})
 
 foreach(CONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${CONFIG_TYPE} CONFIG_TYPE_UPPER)
