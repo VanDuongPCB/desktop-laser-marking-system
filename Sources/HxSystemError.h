@@ -1,5 +1,4 @@
-#ifndef SYSTEMERROR_H
-#define SYSTEMERROR_H
+#pragma once
 #include <QString>
 #include <QMap>
 #include "QObject"
@@ -19,5 +18,3 @@ signals:
 public:
     static HxSystemError* instance();
 };
-
-#endif // SYSTEMERROR_H

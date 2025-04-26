@@ -1,5 +1,4 @@
-#ifndef LASER_H
-#define LASER_H
+#pragma once
 #include <QString>
 #include <QMap>
 #include "HxPosition.h"
@@ -19,5 +18,3 @@ public:
     static bool setupPosition( QString program, HxPosition pos, int stopper, HxDesign design );
     static bool burn();
 };
-
-#endif // LASER_H

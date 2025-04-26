@@ -1,6 +1,4 @@
-#ifndef REMOVEPARAMDIALOG_H
-#define REMOVEPARAMDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 namespace Ui
@@ -23,5 +21,3 @@ private slots:
 private:
     Ui::RemoveParamDialog* ui;
 };
-
-#endif // REMOVEPARAMDIALOG_H

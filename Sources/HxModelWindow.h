@@ -1,6 +1,4 @@
-#ifndef MODELWINDOW_H
-#define MODELWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include <QLabel>
 #include <QLineEdit>
@@ -68,4 +66,3 @@ private slots:
 
 };
 
-#endif // MODELWINDOW_H

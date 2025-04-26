@@ -1,10 +1,4 @@
-
-#ifndef ACTUATOR_H
-#define ACTUATOR_H
-
-
-
-
+#pragma once
 class HxActuator
 {
 public:
@@ -17,5 +11,3 @@ public:
     static bool confirmTrigger();
     static bool setCompleteBit();
 };
-
-#endif // ACTUATOR_H

@@ -1,6 +1,4 @@
-#ifndef LOTPROPERTIESDIALOG_H
-#define LOTPROPERTIESDIALOG_H
-
+#pragma once
 #include <QDialog>
 #include <QStandardItem>
 #include "HxLOT.h"
@@ -62,4 +60,3 @@ private:
 
 };
 
-#endif // LOTPROPERTIESDIALOG_H

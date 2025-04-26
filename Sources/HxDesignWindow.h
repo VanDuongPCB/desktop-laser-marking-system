@@ -1,6 +1,4 @@
-#ifndef DESIGNWINDOW_H
-#define DESIGNWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include <QStandardItem>
 #include "HxDesign.h"
@@ -48,4 +46,3 @@ private:
     void showParams();
 };
 
-#endif // DESIGNWINDOW_H

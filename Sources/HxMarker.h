@@ -1,6 +1,4 @@
-#ifndef MARKER_H
-#define MARKER_H
-
+#pragma once
 #include "QObject"
 #include "QThread"
 #include "atomic"
@@ -52,5 +50,3 @@ public:
     static void terminate();
     static HxMarker* instance();
 };
-
-#endif 

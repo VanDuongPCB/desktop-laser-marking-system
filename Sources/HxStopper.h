@@ -1,6 +1,4 @@
-#ifndef STOPPER_H
-#define STOPPER_H
-
+#pragma once
 #include <QString>
 #include <QStringList>
 #include <QMap>
@@ -21,5 +19,3 @@ public:
     static void save();
     static std::shared_ptr<HxStopper> find( int index );
 };
-
-#endif // STOPPER_H

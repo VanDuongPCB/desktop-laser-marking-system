@@ -1,6 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include "HxException.h"
 
@@ -32,4 +30,3 @@ private:
     void closeEvent( QCloseEvent* );
 };
 
-#endif // MAINWINDOW_H

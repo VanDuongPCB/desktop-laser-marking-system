@@ -1,6 +1,4 @@
-#ifndef BARCODESAVER_H
-#define BARCODESAVER_H
-
+#pragma once
 #include <QString>
 
 class HxBarcodeSaver
@@ -9,4 +7,3 @@ public:
     static void save( QString code );
 };
 
-#endif // BARCODESAVER_H

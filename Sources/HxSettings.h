@@ -1,6 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
-
+#pragma once
 #include <QString>
 
 class HxSettings
@@ -30,5 +28,3 @@ public:
     static void save();
     static void load();
 };
-
-#endif // SETTINGS_H

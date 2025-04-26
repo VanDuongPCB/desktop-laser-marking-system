@@ -1,6 +1,4 @@
-#ifndef POSITION_H
-#define POSITION_H
-
+#pragma once
 class HxPosition
 {
 public:
@@ -13,4 +11,3 @@ public:
     ~HxPosition();
 };
 
-#endif // POSITION_H

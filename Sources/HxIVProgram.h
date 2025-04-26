@@ -1,5 +1,4 @@
-#ifndef IVPROGRAM_H
-#define IVPROGRAM_H
+#pragma once
 #include <vector>
 #include <memory>
 #include <QString>
@@ -19,4 +18,3 @@ public:
     static QStringList names();
 };
 
-#endif // IVPROGRAM_H

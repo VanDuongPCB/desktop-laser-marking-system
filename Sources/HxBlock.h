@@ -1,5 +1,4 @@
-#ifndef BLOCKINFO_H
-#define BLOCKINFO_H
+#pragma once
 #include <QString>
 
 class HxLOT;
@@ -17,5 +16,3 @@ public:
     static QString gen( QString format, std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model );
     static QMap<int, QString> gen( std::shared_ptr<HxDesign> design, std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model );
 };
-
-#endif // BLOCKINFO_H

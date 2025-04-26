@@ -1,6 +1,4 @@
-#ifndef USER_H
-#define USER_H
-
+#pragma once
 #include <QString>
 #include <vector>
 #include <memory>
@@ -20,5 +18,3 @@ public:
     static void load();
     static void save();
 };
-
-#endif // USER_H

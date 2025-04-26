@@ -1,5 +1,4 @@
-#ifndef TABLEVIEW_H
-#define TABLEVIEW_H
+#pragma once
 #include <QTableView>
 #include "HxDataTable.h"
 
@@ -19,5 +18,3 @@ public:
 protected:
     void keyPressEvent( QKeyEvent* event );
 };
-
-#endif // TABLEVIEW_H

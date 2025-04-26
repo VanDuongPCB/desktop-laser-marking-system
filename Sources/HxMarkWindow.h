@@ -1,6 +1,4 @@
-#ifndef MARKWINDOW_H
-#define MARKWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include "HxMainWindow.h"
 
@@ -53,4 +51,3 @@ private:
     void updateUI();
 };
 
-#endif // MARKWINDOW_H

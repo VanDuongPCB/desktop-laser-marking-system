@@ -1,6 +1,4 @@
-#ifndef PROTECTOR_H
-#define PROTECTOR_H
-
+#pragma once
 #include "QObject"
 #include <QString>
 #include "HxUserProfile.h"
@@ -26,4 +24,3 @@ public:
     static HxProtector* instance();
 };
 
-#endif // PROTECTOR_H

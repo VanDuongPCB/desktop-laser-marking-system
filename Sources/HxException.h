@@ -1,7 +1,4 @@
-
-#ifndef EXCEPTION_H
-#define EXCEPTION_H
-
+#pragma once
 #include <QException>
 
 class HxException : public QException
@@ -16,4 +13,3 @@ public:
     QString message = "";
 };
 
-#endif // EXCEPTION_H

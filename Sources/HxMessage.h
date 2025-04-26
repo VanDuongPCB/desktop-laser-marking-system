@@ -1,6 +1,4 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
-
+#pragma once
 #include <QString>
 #include <QMessageBox>
 
@@ -16,4 +14,3 @@ public:
     static int warning( QString content, QString title );
 };
 
-#endif // MESSAGE_H

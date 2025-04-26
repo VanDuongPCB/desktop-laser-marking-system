@@ -1,6 +1,4 @@
-#ifndef ADDPARAMSDIALOG_H
-#define ADDPARAMSDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 namespace Ui
@@ -26,4 +24,3 @@ private:
     Ui::AddParamDialog* ui;
 };
 
-#endif // ADDPARAMSDIALOG_H

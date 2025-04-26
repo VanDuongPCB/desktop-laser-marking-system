@@ -1,6 +1,4 @@
-#ifndef NEWMODELDIALOG_H
-#define NEWMODELDIALOG_H
-
+#pragma once
 #include <QDialog>
 #include "HxModel.h"
 
@@ -29,4 +27,3 @@ private:
     bool checkInputs();
 };
 
-#endif // NEWMODELDIALOG_H

@@ -1,6 +1,4 @@
-#ifndef LOGINDIALOG_H
-#define LOGINDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 namespace Ui
@@ -28,4 +26,3 @@ private:
     bool checkInputs();
 };
 
-#endif // LOGINDIALOG_H

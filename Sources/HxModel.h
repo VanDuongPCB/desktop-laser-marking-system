@@ -1,6 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
-
+#pragma once
 #include <vector>
 #include <QString>
 #include <QMap>
@@ -40,5 +38,3 @@ public:
 
     static QStringList paramNames();
 };
-
-#endif // MODEL_H

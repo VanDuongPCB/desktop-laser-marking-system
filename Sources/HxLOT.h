@@ -1,5 +1,4 @@
-#ifndef LOT_H
-#define LOT_H
+#pragma once
 #include <QString>
 #include <QMap>
 #include <vector>
@@ -40,5 +39,3 @@ public:
     static std::shared_ptr<HxLOT> find( QString name );
     static QStringList paramNames();
 };
-
-#endif // LOT_H

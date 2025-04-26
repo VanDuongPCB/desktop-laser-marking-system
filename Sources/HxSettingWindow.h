@@ -1,6 +1,4 @@
-#ifndef SETTINGSWINDOW_H
-#define SETTINGSWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 
 namespace Ui
@@ -40,5 +38,3 @@ private:
     void showStoppers();
     void showUsers();
 };
-
-#endif // SETTINGSWINDOW_H

@@ -1,7 +1,4 @@
-
-#ifndef SERIALPORT_H
-#define SERIALPORT_H
-
+#pragma once
 #include <QSerialPort>
 
 
@@ -16,5 +13,3 @@ public:
     bool writeLine( QString data, int timeout = 30000 );
     QString readLine( int timeout = 30000 );
 };
-
-#endif // SERIALPORT_H

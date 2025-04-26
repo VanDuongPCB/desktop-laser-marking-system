@@ -1,6 +1,4 @@
-#ifndef REGISTERDIALOG_H
-#define REGISTERDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 namespace Ui
@@ -26,5 +24,3 @@ private slots:
 private:
     Ui::RegisterDialog* ui;
 };
-
-#endif // REGISTERDIALOG_H

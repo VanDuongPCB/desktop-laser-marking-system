@@ -1,5 +1,4 @@
-#ifndef DESIGN_H
-#define DESIGN_H
+#pragma once
 #include <QMap>
 #include <QString>
 #include <memory>
@@ -25,4 +24,3 @@ public:
     static void save();
 };
 
-#endif // DESIGN_H

@@ -1,6 +1,4 @@
-#ifndef CONTROLWINDOW_H
-#define CONTROLWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 
 namespace Ui
@@ -31,4 +29,3 @@ private:
     Ui::ControlWindow* ui;
 };
 
-#endif // CONTROLWINDOW_H

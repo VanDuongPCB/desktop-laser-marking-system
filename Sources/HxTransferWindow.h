@@ -1,6 +1,4 @@
-#ifndef PASSWINDOW_H
-#define PASSWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include "HxMainWindow.h"
 
@@ -35,5 +33,3 @@ private:
     Ui::TransferWindow* ui;
     HxMainWindow* mainWindow = nullptr;
 };
-
-#endif // PASSWINDOW_H

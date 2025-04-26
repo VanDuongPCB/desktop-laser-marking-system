@@ -1,7 +1,4 @@
-
-#ifndef TCPSOCKET_H
-#define TCPSOCKET_H
-
+#pragma once
 #include <QTcpSocket>
 
 
@@ -18,5 +15,3 @@ public:
     bool writeLine( QString data, int timeout = 2000 );
     QString readLine( int timeout = 2000 );
 };
-
-#endif // TCPSOCKET_H

@@ -1,10 +1,5 @@
-
-#ifndef BARCODEREADER_H
-#define BARCODEREADER_H
-
+#pragma once
 #include <QString>
-
-
 
 class HxBarcodeReader
 {
@@ -15,4 +10,3 @@ public:
     static bool sendFeedback( bool status );
 };
 
-#endif // BARCODEREADER_H

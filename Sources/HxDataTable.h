@@ -1,6 +1,4 @@
-#ifndef DATATABLE_H
-#define DATATABLE_H
-
+#pragma once
 #include <QTableView>
 #include <QStandardItemModel>
 class HxDataTable : public QStandardItemModel
@@ -15,4 +13,3 @@ public:
     static HxDataTable* fromTableView( QTableView* table, QStringList headers );
 };
 
-#endif // DATATABLE_H

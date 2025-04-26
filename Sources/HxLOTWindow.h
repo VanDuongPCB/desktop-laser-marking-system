@@ -1,6 +1,4 @@
-#ifndef LOTWINDOW_H
-#define LOTWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 #include <QStandardItem>
 #include "HxLOT.h"
@@ -41,4 +39,3 @@ private:
 
 };
 
-#endif // LOTWINDOW_H

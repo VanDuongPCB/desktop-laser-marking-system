@@ -1,5 +1,4 @@
-#ifndef LICENSE_H
-#define LICENSE_H
+#pragma once
 #include <QString>
 
 class HxLicensing
@@ -13,4 +12,3 @@ public:
     static bool registerKey( QString key );
 };
 
-#endif // LICENSE_H

@@ -1,6 +1,4 @@
-#ifndef ADDUSERDIALOG_H
-#define ADDUSERDIALOG_H
-
+#pragma once
 #include <QDialog>
 
 namespace Ui
@@ -25,4 +23,3 @@ private:
     Ui::AddUserDialog* ui;
 };
 
-#endif // ADDUSERDIALOG_H
