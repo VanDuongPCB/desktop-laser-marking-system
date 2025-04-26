@@ -25,19 +25,19 @@ HxSettingsWindow::~HxSettingsWindow()
 
 void HxSettingsWindow::showEvent( QShowEvent* )
 {
-    showProtectSetting();
-    showActuatorSettings();
-    showLaserSettings();
-    showStoppers();
-    showUsers();
+    ShowProtectSetting();
+    ShowActuatorSettings();
+    ShowLaserSettings();
+    ShowStoppers();
+    ShowUsers();
 }
 
-void HxSettingsWindow::showProtectSetting()
+void HxSettingsWindow::ShowProtectSetting()
 {
     ui->txtPassword->setText( HxSettings::password );
 }
 
-void HxSettingsWindow::showActuatorSettings()
+void HxSettingsWindow::ShowActuatorSettings()
 {
     ui->txtDataDir->setText( QCoreApplication::applicationDirPath() + "/data" );
     ui->txtPLCIP->setText( HxSettings::plcIp );
@@ -59,40 +59,40 @@ void HxSettingsWindow::showActuatorSettings()
     ui->txtRegPrintRes->setText( HxSettings::markResultReg );
 }
 
-void HxSettingsWindow::showLaserSettings()
+void HxSettingsWindow::ShowLaserSettings()
 {
     on_btnEnum_clicked();
 }
 
-void HxSettingsWindow::showStoppers()
+void HxSettingsWindow::ShowStoppers()
 {
     if ( ui->tbvStoppers->headers.empty() )
     {
-        ui->tbvStoppers->setHeaders( { "X","Y" } );
+        ui->tbvStoppers->SetHeaders( { "X","Y" } );
     }
 
     auto keys = HxStopper::items.keys();
-    ui->tbvStoppers->setRowCount( keys.size() );
+    ui->tbvStoppers->SetRowCount( keys.size() );
     for ( int row = 0; row < keys.size(); row++ )
     {
-        ui->tbvStoppers->setText( row, "X", QString::number( HxStopper::items[ keys[ row ] ]->x, 'f', 2 ) );
-        ui->tbvStoppers->setText( row, "Y", QString::number( HxStopper::items[ keys[ row ] ]->y, 'f', 2 ) );
+        ui->tbvStoppers->SetText( row, "X", QString::number( HxStopper::items[ keys[ row ] ]->x, 'f', 2 ) );
+        ui->tbvStoppers->SetText( row, "Y", QString::number( HxStopper::items[ keys[ row ] ]->y, 'f', 2 ) );
     }
 }
 
-void HxSettingsWindow::showUsers()
+void HxSettingsWindow::ShowUsers()
 {
     if ( ui->tbvUsers->headers.empty() )
     {
-        ui->tbvUsers->setHeaders( { "ID" } );
+        ui->tbvUsers->SetHeaders( { "ID" } );
     }
     int rows = HxUserProfile::items.size();
-    ui->tbvUsers->setRowCount( rows );
+    ui->tbvUsers->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvUsers->setText( row, 0, HxUserProfile::items[ row ]->name );
-        ui->tbvUsers->setText( row, 1, "" );
-        ui->tbvUsers->setText( row, 2, "" );
+        ui->tbvUsers->SetText( row, 0, HxUserProfile::items[ row ]->name );
+        ui->tbvUsers->SetText( row, 1, "" );
+        ui->tbvUsers->SetText( row, 2, "" );
     }
 }
 
@@ -128,43 +128,43 @@ void HxSettingsWindow::on_actionSave_triggered()
     HxSettings::barcodeOKReg = ui->txtRegBarcodeOK->text();
     HxSettings::barcodeNGReg = ui->txtRegBarcodeNG->text();
     HxSettings::markResultReg = ui->txtRegPrintRes->text();
-    HxSettings::save();
+    HxSettings::Save();
 
-    int rows = ui->tbvStoppers->dataTable()->rowCount();
+    int rows = ui->tbvStoppers->DataTable()->rowCount();
     for ( int row = 0; row < rows; row++ )
     {
         int index = row + 1;
-        double x = ui->tbvStoppers->item( row, 0 )->text().toDouble();
-        double y = ui->tbvStoppers->item( row, 1 )->text().toDouble();
-        auto stp = HxStopper::find( index );
+        double x = ui->tbvStoppers->Item( row, 0 )->text().toDouble();
+        double y = ui->tbvStoppers->Item( row, 1 )->text().toDouble();
+        auto stp = HxStopper::Find( index );
         if ( stp != nullptr )
         {
             stp->x = x;
             stp->y = y;
         }
     }
-    HxStopper::save();
+    HxStopper::Save();
 
-    HxUserProfile::save();
+    HxUserProfile::Save();
 
     HxMessage::show( "Đã lưu cài đặt !", "Thông báo" );
 }
 
 void HxSettingsWindow::on_actionLoad_triggered()
 {
-    HxSettings::load();
-    HxStopper::load();
-    HxUserProfile::load();
-    showActuatorSettings();
-    showLaserSettings();
-    showStoppers();
+    HxSettings::Load();
+    HxStopper::Load();
+    HxUserProfile::Load();
+    ShowActuatorSettings();
+    ShowLaserSettings();
+    ShowStoppers();
 }
 
 void HxSettingsWindow::on_btnAddUser_clicked()
 {
     if ( HxAddUserDialog( this ).exec() )
     {
-        showUsers();
+        ShowUsers();
     }
 }
 
@@ -174,7 +174,7 @@ void HxSettingsWindow::on_tbnRemoveUser_clicked()
     int row = ui->tbvUsers->currentIndex().row();
     if ( row < 0 ) return;
     HxUserProfile::items.erase( HxUserProfile::items.begin() + row );
-    showUsers();
+    ShowUsers();
 }
 
 

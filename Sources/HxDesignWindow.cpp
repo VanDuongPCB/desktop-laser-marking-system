@@ -16,18 +16,18 @@ HxDesignWindow::~HxDesignWindow()
 
 void HxDesignWindow::showEvent( QShowEvent* )
 {
-    showDesigns( "" );
-    showBlocks();
-    showParams();
+    ShowDesigns( "" );
+    ShowBlocks();
+    ShowParams();
 }
 
-void HxDesignWindow::showDesigns( QString filter )
+void HxDesignWindow::ShowDesigns( QString filter )
 {
     designs.clear();
     filter = filter.trimmed().toUpper();
     if ( ui->tbvDesign->headers.empty() )
     {
-        ui->tbvDesign->setHeaders( { "Chương trình" } );
+        ui->tbvDesign->SetHeaders( { "Chương trình" } );
     }
 
     for ( auto& item : HxDesign::items )
@@ -39,14 +39,14 @@ void HxDesignWindow::showDesigns( QString filter )
     }
 
     int rows = designs.size();
-    ui->tbvDesign->setRowCount( rows );
+    ui->tbvDesign->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvDesign->setText( row, 0, designs[ row ]->name );
+        ui->tbvDesign->SetText( row, 0, designs[ row ]->name );
     }
 }
 
-void HxDesignWindow::showSize()
+void HxDesignWindow::ShowSize()
 {
     if ( design != nullptr )
     {
@@ -60,29 +60,29 @@ void HxDesignWindow::showSize()
     }
 }
 
-void HxDesignWindow::showBlocks()
+void HxDesignWindow::ShowBlocks()
 {
     if ( ui->tbvBlocks->headers.empty() )
     {
-        ui->tbvBlocks->setHeaders( { "Block","Là mã ?","Độ dài","Nội dung" } );
+        ui->tbvBlocks->SetHeaders( { "Block","Là mã ?","Độ dài","Nội dung" } );
         ui->tbvBlocks->setColumnWidth( 0, 80 );
         ui->tbvBlocks->setColumnWidth( 1, 80 );
         ui->tbvBlocks->setColumnWidth( 2, 80 );
     }
     QStandardItemModel* model = ( QStandardItemModel* )ui->tbvBlocks->model();
-    disconnect( model, &QStandardItemModel::itemChanged, this, &HxDesignWindow::blockChanged );
+    disconnect( model, &QStandardItemModel::itemChanged, this, &HxDesignWindow::BlockChanged );
     int rows = 32;
-    ui->tbvBlocks->setRowCount( rows );
+    ui->tbvBlocks->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvBlocks->setText( row, "Block", QString::number( row ).rightJustified( 3, '0' ) );
-        ui->tbvBlocks->item( row, "Block" )->setFlags( ui->tbvBlocks->item( row, 0 )->flags() & ~Qt::ItemIsEditable );
-        ui->tbvBlocks->setText( row, "Là mã ?", "" );
-        ui->tbvBlocks->item( row, "Là mã ?" )->setCheckable( true );
-        ui->tbvBlocks->item( row, "Là mã ?" )->setCheckState( Qt::Unchecked );
-        ui->tbvBlocks->item( row, "Là mã ?" )->setFlags( ui->tbvBlocks->item( row, 1 )->flags() & ~Qt::ItemIsEditable );
-        ui->tbvBlocks->setText( row, "Độ dài", "0" );
-        ui->tbvBlocks->setText( row, "Nội dung", "" );
+        ui->tbvBlocks->SetText( row, "Block", QString::number( row ).rightJustified( 3, '0' ) );
+        ui->tbvBlocks->Item( row, "Block" )->setFlags( ui->tbvBlocks->Item( row, 0 )->flags() & ~Qt::ItemIsEditable );
+        ui->tbvBlocks->SetText( row, "Là mã ?", "" );
+        ui->tbvBlocks->Item( row, "Là mã ?" )->setCheckable( true );
+        ui->tbvBlocks->Item( row, "Là mã ?" )->setCheckState( Qt::Unchecked );
+        ui->tbvBlocks->Item( row, "Là mã ?" )->setFlags( ui->tbvBlocks->Item( row, 1 )->flags() & ~Qt::ItemIsEditable );
+        ui->tbvBlocks->SetText( row, "Độ dài", "0" );
+        ui->tbvBlocks->SetText( row, "Nội dung", "" );
     }
     if ( design != nullptr )
     {
@@ -90,51 +90,51 @@ void HxDesignWindow::showBlocks()
         for ( auto num : nums )
         {
             HxBlock block = design->blocks[ num ];
-            ui->tbvBlocks->item( num, "Là mã ?" )->setCheckState( block.isCode ? Qt::Checked : Qt::Unchecked );
-            ui->tbvBlocks->setText( num, "Độ dài", QString::number( block.textLen ) );
-            ui->tbvBlocks->setText( num, "Nội dung", block.data );
+            ui->tbvBlocks->Item( num, "Là mã ?" )->setCheckState( block.isCode ? Qt::Checked : Qt::Unchecked );
+            ui->tbvBlocks->SetText( num, "Độ dài", QString::number( block.textLen ) );
+            ui->tbvBlocks->SetText( num, "Nội dung", block.data );
         }
     }
-    connect( model, &QStandardItemModel::itemChanged, this, &HxDesignWindow::blockChanged );
+    connect( model, &QStandardItemModel::itemChanged, this, &HxDesignWindow::BlockChanged );
 }
 
-void HxDesignWindow::showParams()
+void HxDesignWindow::ShowParams()
 {
     // model
     if ( ui->tbvModelParams->headers.empty() )
     {
-        ui->tbvModelParams->setHeaders( { "Thông số model" } );
+        ui->tbvModelParams->SetHeaders( { "Thông số model" } );
     }
-    QStringList modelParams = HxModel::paramNames();
+    QStringList modelParams = HxModel::ParamNames();
     int rows = modelParams.size();
-    ui->tbvModelParams->setRowCount( rows );
+    ui->tbvModelParams->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvModelParams->setText( row, 0, modelParams[ row ] );
+        ui->tbvModelParams->SetText( row, 0, modelParams[ row ] );
     }
 
 
     // lot
     if ( ui->tbvLotParams->headers.empty() )
     {
-        ui->tbvLotParams->setHeaders( { "Thông số lot" } );
+        ui->tbvLotParams->SetHeaders( { "Thông số lot" } );
     }
-    QStringList lotParams = HxLOT::paramNames();
+    QStringList lotParams = HxLOT::ParamNames();
     rows = lotParams.size();
-    ui->tbvLotParams->setRowCount( rows );
+    ui->tbvLotParams->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvLotParams->setText( row, 0, lotParams[ row ] );
+        ui->tbvLotParams->SetText( row, 0, lotParams[ row ] );
     }
 }
 
-void HxDesignWindow::blockChanged( QStandardItem* item )
+void HxDesignWindow::BlockChanged( QStandardItem* item )
 {
     if ( design == nullptr ) return;
     int row = item->row();
-    bool code = ui->tbvBlocks->item( row, "Là mã ?" )->checkState() == Qt::Checked;
-    int len = ui->tbvBlocks->item( row, "Độ dài" )->text().trimmed().toInt();
-    QString data = ui->tbvBlocks->item( row, "Nội dung" )->text();
+    bool code = ui->tbvBlocks->Item( row, "Là mã ?" )->checkState() == Qt::Checked;
+    int len = ui->tbvBlocks->Item( row, "Độ dài" )->text().trimmed().toInt();
+    QString data = ui->tbvBlocks->Item( row, "Nội dung" )->text();
     if ( !design->blocks.contains( row ) )
     {
         design->blocks.insert( row, HxBlock() );
@@ -142,20 +142,20 @@ void HxDesignWindow::blockChanged( QStandardItem* item )
     design->blocks[ row ].isCode = code;
     design->blocks[ row ].textLen = len;
     design->blocks[ row ].data = data;
-    HxDesign::save( design );
+    HxDesign::Save( design );
 }
 
 void HxDesignWindow::on_actionSave_triggered()
 {
-    HxDesign::save();
+    HxDesign::Save();
 }
 
 void HxDesignWindow::on_actionLoad_triggered()
 {
     design = nullptr;
-    HxDesign::load();
-    showDesigns( "" );
-    showBlocks();
+    HxDesign::Load();
+    ShowDesigns( "" );
+    ShowBlocks();
 }
 
 void HxDesignWindow::on_tbvDesign_pressed( const QModelIndex& index )
@@ -163,34 +163,34 @@ void HxDesignWindow::on_tbvDesign_pressed( const QModelIndex& index )
     int row = index.row();
     if ( row < 0 ) return;
     design = designs[ row ];
-    showSize();
-    showBlocks();
+    ShowSize();
+    ShowBlocks();
 }
 
 void HxDesignWindow::on_spxDesignWidth_valueChanged( double arg1 )
 {
     if ( design == nullptr ) return;
     design->width = arg1;
-    HxDesign::save( design );
+    HxDesign::Save( design );
 }
 
 void HxDesignWindow::on_spxDesignHeight_valueChanged( double arg1 )
 {
     if ( design == nullptr ) return;
     design->height = arg1;
-    HxDesign::save( design );
+    HxDesign::Save( design );
 }
 
 void HxDesignWindow::on_tbvModelParams_doubleClicked( const QModelIndex& index )
 {
     int row = ui->tbvBlocks->currentIndex().row();
     if ( row < 0 ) return;
-    QString param = "MODEL." + ui->tbvModelParams->item( index.row(), 0 )->text();
-    QString oldText = ui->tbvBlocks->item( row, "Nội dung" )->text();
+    QString param = "MODEL." + ui->tbvModelParams->Item( index.row(), 0 )->text();
+    QString oldText = ui->tbvBlocks->Item( row, "Nội dung" )->text();
     if ( oldText.length() > 0 ) oldText += ",";
     oldText += param;
-    ui->tbvBlocks->setText( row, "Nội dung", oldText );
-    HxDesign::save( design );
+    ui->tbvBlocks->SetText( row, "Nội dung", oldText );
+    HxDesign::Save( design );
 }
 
 
@@ -198,11 +198,11 @@ void HxDesignWindow::on_tbvLotParams_doubleClicked( const QModelIndex& index )
 {
     int row = ui->tbvBlocks->currentIndex().row();
     if ( row < 0 ) return;
-    QString param = "LOT." + ui->tbvLotParams->item( index.row(), 0 )->text();
-    QString oldText = ui->tbvBlocks->item( row, "Nội dung" )->text();
+    QString param = "LOT." + ui->tbvLotParams->Item( index.row(), 0 )->text();
+    QString oldText = ui->tbvBlocks->Item( row, "Nội dung" )->text();
     if ( oldText.length() > 0 ) oldText += ",";
     oldText += param;
-    ui->tbvBlocks->setText( row, "Nội dung", oldText );
-    HxDesign::save( design );
+    ui->tbvBlocks->SetText( row, "Nội dung", oldText );
+    HxDesign::Save( design );
 }
 

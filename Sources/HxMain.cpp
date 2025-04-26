@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
     QApplication a( argc, argv );
     a.setStyle( "fusion" );
 
-    bool bIsLicensed = HxLicensing::isRegistered();
+    bool bIsLicensed = HxLicensing::IsRegistered();
 
     if ( !bIsLicensed )
     {
@@ -37,18 +37,18 @@ int main( int argc, char* argv[] )
     }
 
     HxMainWindow w;
-    HxSettings::load();
-    HxStopper::load();
-    HxDesign::load();
-    HxIVProgram::load();
-    HxModel::load();
-    HxLOT::load();
-    HxUserProfile::load();
+    HxSettings::Load();
+    HxStopper::Load();
+    HxDesign::Load();
+    HxIVProgram::Load();
+    HxModel::Load();
+    HxLOT::Load();
+    HxUserProfile::Load();
 
-    HxMarker::initialize();
+    HxMarker::Initialize();
 
     w.show();
     int code = a.exec();
-    HxMarker::terminate();
+    HxMarker::Terminate();
     return code;
 }

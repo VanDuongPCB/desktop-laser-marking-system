@@ -6,7 +6,7 @@
 #include "HxSettings.h"
 #include "HxMessage.h"
 
-bool HxLaserDevice::detectPortExisting()
+bool HxLaserDevice::DetectPortExisting()
 {
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     for ( auto& it : ports )
@@ -19,12 +19,7 @@ bool HxLaserDevice::detectPortExisting()
     return false;
 }
 
-QString HxLaserDevice::detectError( QString data )
-{
-    return "";
-}
-
-QString HxLaserDevice::sendData( QString data, int timeout )
+QString HxLaserDevice::SendData( QString data, int timeout )
 {
     QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
     for ( auto& it : ports )
@@ -77,10 +72,10 @@ QString HxLaserDevice::sendData( QString data, int timeout )
     throw HxException( "Không có kết nối với máy laser trên cổng " + HxSettings::laserPort );
 }
 
-bool HxLaserDevice::setProgram( QString name )
+bool HxLaserDevice::SetProgram( QString name )
 {
     QString cmd = "GA," + name + "\r";
-    QString fb = sendData( cmd, 3000 );
+    QString fb = SendData( cmd, 3000 );
     if ( fb != "GA,0" )
     {
         QStringList items = {
@@ -92,7 +87,7 @@ bool HxLaserDevice::setProgram( QString name )
     return true;
 }
 
-bool HxLaserDevice::setupBlockData( QString program, QMap<int, QString> data )
+bool HxLaserDevice::SetupBlockData( QString program, QMap<int, QString> data )
 {
     QStringList items;
     items.push_back( "C2" );
@@ -109,7 +104,7 @@ bool HxLaserDevice::setupBlockData( QString program, QMap<int, QString> data )
 
     if ( items.length() <= 2 ) return true;
     QString cmd = items.join( "," ) + "\r";
-    QString fb = sendData( cmd, 3000 );
+    QString fb = SendData( cmd, 3000 );
     if ( fb != "C2,0" )
     {
         QStringList items = {
@@ -121,7 +116,7 @@ bool HxLaserDevice::setupBlockData( QString program, QMap<int, QString> data )
     return true;
 }
 
-bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper, HxDesign design )
+bool HxLaserDevice::SetupPosition( QString program, HxPosition pos, int stopper, HxDesign design )
 {
     if ( pos.angle % 90 != 0 )
     {
@@ -134,7 +129,7 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
 
     // 1. lấy tọa độ hiện tại dx, dy
     QString cmdCUR = "B1," + program + ",000\r";
-    QString fb = sendData( cmdCUR, 3000 );
+    QString fb = SendData( cmdCUR, 3000 );
     QStringList fbItems = fb.split( ',' );
     if ( fbItems.size() != 4 )
     {
@@ -158,7 +153,7 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdORG = items.join( "," ) + "\r";
-    fb = sendData( cmdORG, 3000 );
+    fb = SendData( cmdORG, 3000 );
     if ( fb != "AG,0" )
     {
         QStringList items = {
@@ -182,7 +177,7 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
     items.push_back( "0" );
     items.push_back( QString::number( angle ) );
     QString cmdRotate = items.join( "," ) + "\r";
-    fb = sendData( cmdRotate, 3000 );
+    fb = SendData( cmdRotate, 3000 );
     if ( fb != "VG,0" )
     {
         QStringList items = {
@@ -193,7 +188,7 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
     }
 
     // 4. lấy thông tin stopper đang dùng
-    auto stp = HxStopper::find( stopper );
+    auto stp = HxStopper::Find( stopper );
     if ( stp == nullptr )
     {
         QStringList items = {
@@ -259,7 +254,7 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdMove = items.join( "," ) + "\r";
-    fb = sendData( cmdMove, 3000 );
+    fb = SendData( cmdMove, 3000 );
     if ( fb != "AG,0" )
     {
         QStringList items = {
@@ -271,9 +266,9 @@ bool HxLaserDevice::setupPosition( QString program, HxPosition pos, int stopper,
     return true;
 }
 
-bool HxLaserDevice::burn()
+bool HxLaserDevice::Burn()
 {
-    QString fb = sendData( "NT\r" );
+    QString fb = SendData( "NT\r" );
     if ( fb == "NT,0" ) return true;
     else
     {

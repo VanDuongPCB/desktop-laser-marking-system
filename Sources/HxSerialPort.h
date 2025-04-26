@@ -10,6 +10,6 @@ public:
     explicit HxSerialPort( QString port, QObject* parent = nullptr );
     explicit HxSerialPort( QString port, int baud, QObject* parent = nullptr );
 
-    bool writeLine( QString data, int timeout = 30000 );
-    QString readLine( int timeout = 30000 );
+    bool WriteLine( QString data, int timeout = 5000 );
+    QString ReadLine( int timeout = 5000 );
 };

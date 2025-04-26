@@ -6,8 +6,8 @@
 HxLOTWindow::HxLOTWindow( QWidget* parent ) :QMainWindow( parent ), ui( new Ui::LOTWindow )
 {
     ui->setupUi( this );
-    connect( HxMarker::instance(), &HxMarker::printed, this, &HxLOTWindow::controllerPrinted );
-    showLot( "" );
+    connect( HxMarker::Instance(), &HxMarker::printed, this, &HxLOTWindow::ControllerPrinted );
+    ShowLot( "" );
 }
 
 HxLOTWindow::~HxLOTWindow()
@@ -17,16 +17,16 @@ HxLOTWindow::~HxLOTWindow()
 
 void HxLOTWindow::showEvent( QShowEvent* )
 {
-    showLot( "" );
+    ShowLot( "" );
 }
 
-void HxLOTWindow::showLot( QString filter )
+void HxLOTWindow::ShowLot( QString filter )
 {
     filter = filter.trimmed();
 
     if ( ui->tbvLots->headers.empty() )
     {
-        ui->tbvLots->setHeaders( { "Tên","Kiểu in","Model","Sản lượng","Seri đầu","Seri cuối","Tiến độ","MAC đầu","MAC cuối","Trạng thái" } );
+        ui->tbvLots->SetHeaders( { "Tên","Kiểu in","Model","Sản lượng","Seri đầu","Seri cuối","Tiến độ","MAC đầu","MAC cuối","Trạng thái" } );
         ui->tbvLots->setColumnWidth( 0, 150 );
         ui->tbvLots->setColumnWidth( 2, 150 );
         ui->tbvLots->setColumnWidth( 7, 150 );
@@ -34,25 +34,25 @@ void HxLOTWindow::showLot( QString filter )
         ui->tbvLots->setColumnWidth( 9, 150 );
     }
 
-    HxLOT::sort();
+    HxLOT::Sort();
 
     int rows = HxLOT::items.size();
-    ui->tbvLots->setRowCount( rows );
+    ui->tbvLots->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
         int start = HxLOT::items[ row ]->counterStart.toInt();
         int end = start + HxLOT::items[ row ]->quantity - 1;
-        QString status = HxLOT::items[ row ]->status();
-        ui->tbvLots->setText( row, "Tên", HxLOT::items[ row ]->name );
-        ui->tbvLots->setText( row, "Kiểu in", HxLOT::items[ row ]->isRePrint ? "In lại" : "" );
-        ui->tbvLots->setText( row, "Model", HxLOT::items[ row ]->modelName );
-        ui->tbvLots->setText( row, "Sản lượng", QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvLots->setText( row, "Seri đầu", HxLOT::items[ row ]->counterStart );
-        ui->tbvLots->setText( row, "Seri cuối", QString::number( end ).rightJustified( HxLOT::items[ row ]->counterStart.length(), '0' ) );
-        ui->tbvLots->setText( row, "Tiến độ", QString::number( HxLOT::items[ row ]->progress ) + "/" + QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvLots->setText( row, "MAC đầu", HxLOT::items[ row ]->macStart );
-        ui->tbvLots->setText( row, "MAC cuối", HxLOT::items[ row ]->macEnd );
-        ui->tbvLots->setText( row, "Trạng thái", status );
+        QString status = HxLOT::items[ row ]->Status();
+        ui->tbvLots->SetText( row, "Tên", HxLOT::items[ row ]->name );
+        ui->tbvLots->SetText( row, "Kiểu in", HxLOT::items[ row ]->isRePrint ? "In lại" : "" );
+        ui->tbvLots->SetText( row, "Model", HxLOT::items[ row ]->modelName );
+        ui->tbvLots->SetText( row, "Sản lượng", QString::number( HxLOT::items[ row ]->quantity ) );
+        ui->tbvLots->SetText( row, "Seri đầu", HxLOT::items[ row ]->counterStart );
+        ui->tbvLots->SetText( row, "Seri cuối", QString::number( end ).rightJustified( HxLOT::items[ row ]->counterStart.length(), '0' ) );
+        ui->tbvLots->SetText( row, "Tiến độ", QString::number( HxLOT::items[ row ]->progress ) + "/" + QString::number( HxLOT::items[ row ]->quantity ) );
+        ui->tbvLots->SetText( row, "MAC đầu", HxLOT::items[ row ]->macStart );
+        ui->tbvLots->SetText( row, "MAC cuối", HxLOT::items[ row ]->macEnd );
+        ui->tbvLots->SetText( row, "Trạng thái", status );
 
         QColor background = QColor( 255, 255, 255 );
         if ( status == "Đang sản xuất" )
@@ -64,32 +64,32 @@ void HxLOTWindow::showLot( QString filter )
             background = QColor( 128, 255, 128 );
         }
 
-        for ( int col = 0; col < ui->tbvLots->dataTable()->columnCount(); col++ )
+        for ( int col = 0; col < ui->tbvLots->DataTable()->columnCount(); col++ )
         {
-            ui->tbvLots->item( row, col )->setBackground( background );
+            ui->tbvLots->Item( row, col )->setBackground( background );
         }
     }
 }
 
 
-void HxLOTWindow::controllerPrinted( std::shared_ptr<HxLOT> lot )
+void HxLOTWindow::ControllerPrinted( std::shared_ptr<HxLOT> lot )
 {
-    showLot( "" );
+    ShowLot( "" );
 }
 
-void HxLOTWindow::dataChanged()
+void HxLOTWindow::DataChanged()
 {
-    showLot( "" );
+    ShowLot( "" );
 }
 
 
 void HxLOTWindow::on_actionNew_triggered()
 {
     HxLOTPropertyDialog dialog( this );
-    dialog.setData( nullptr );
+    dialog.SetData( nullptr );
     if ( dialog.exec() )
     {
-        showLot( "" );
+        ShowLot( "" );
     }
 }
 
@@ -108,36 +108,36 @@ void HxLOTWindow::on_actionRemove_triggered()
     {
         for ( auto index : indexs )
         {
-            if ( HxLOT::items[ index ]->status() == "Chưa sản xuất" )
+            if ( HxLOT::items[ index ]->Status() == "Chưa sản xuất" )
             {
-                HxLOT::remove( index );
+                HxLOT::Remove( index );
             }
         }
     }
-    HxLOT::saveAll();
-    showLot( "" );
+    HxLOT::SaveAll();
+    ShowLot( "" );
 }
 
 void HxLOTWindow::on_actionSave_triggered()
 {
-    HxLOT::saveAll();
+    HxLOT::SaveAll();
 }
 
 void HxLOTWindow::on_actionLoad_triggered()
 {
-    showLot( "" );
+    ShowLot( "" );
 }
 
 void HxLOTWindow::on_tbvLots_doubleClicked( const QModelIndex& index )
 {
     int row = index.row();
     if ( row < 0 ) return;
-    QString lotName = ui->tbvLots->item( row, 0 )->text();
-    auto lot = HxLOT::find( lotName );
+    QString lotName = ui->tbvLots->Item( row, 0 )->text();
+    auto lot = HxLOT::Find( lotName );
     HxLOTPropertyDialog dialog( this );
-    dialog.setData( lot );
+    dialog.SetData( lot );
     if ( dialog.exec() )
     {
-        showLot( "" );
+        ShowLot( "" );
     }
 }

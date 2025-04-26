@@ -3,7 +3,7 @@
 
 
 
-class HxTcpSocket : public QTcpSocket
+class HxTcpSocket : private QTcpSocket
 {
 private:
     QString ip;
@@ -11,7 +11,7 @@ private:
 public:
     explicit HxTcpSocket( QObject* parent = nullptr );
     explicit HxTcpSocket( QString ip, int port, QObject* parent = nullptr );
-    bool connect( int timeout = 5000 );
-    bool writeLine( QString data, int timeout = 2000 );
-    QString readLine( int timeout = 2000 );
+    bool Connect( int timeout = 5000 );
+    bool WriteLine( QString data, int timeout = 2000 );
+    QString ReadLine( int timeout = 2000 );
 };

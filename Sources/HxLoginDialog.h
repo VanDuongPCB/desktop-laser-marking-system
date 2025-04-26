@@ -23,6 +23,6 @@ private slots:
 
 private:
     Ui::LoginDialog* ui;
-    bool checkInputs();
+    bool CheckInputs();
 };
 

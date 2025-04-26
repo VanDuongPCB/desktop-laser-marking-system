@@ -26,11 +26,11 @@ void HxControlWindow::on_btnBarcodeRead_clicked()
     ui->txtBarcodeData->setText( "" );
     try
     {
-        bool bit = HxBarcodeReader::hasData();
+        bool bit = HxBarcodeReader::IsHasData();
         if ( bit )
         {
-            HxBarcodeReader::clear();
-            QString barcode = HxBarcodeReader::read();
+            HxBarcodeReader::Clear();
+            QString barcode = HxBarcodeReader::Read();
             ui->txtBarcodeData->setText( barcode );
         }
     }
@@ -44,7 +44,7 @@ void HxControlWindow::on_spxCvWidth_valueChanged( double arg1 )
 {
     try
     {
-        HxActuator::setCvWidth( arg1 );
+        HxActuator::SetCvWidth( arg1 );
     }
     catch ( HxException ex )
     {
@@ -56,7 +56,7 @@ void HxControlWindow::on_cbxStopper_currentIndexChanged( int index )
 {
     try
     {
-        HxActuator::setStopper( index );
+        HxActuator::SetStopper( index );
     }
     catch ( HxException ex )
     {
@@ -68,14 +68,14 @@ void HxControlWindow::on_btnBlockClear_clicked()
 {
     if ( ui->tbvMarkBlocks->headers.empty() )
     {
-        ui->tbvMarkBlocks->setHeaders( { "Block","Giá trị" } );
+        ui->tbvMarkBlocks->SetHeaders( { "Block","Giá trị" } );
         int rows = 16;
-        ui->tbvMarkBlocks->setRowCount( rows );
+        ui->tbvMarkBlocks->SetRowCount( rows );
         for ( int row = 0; row < rows; row++ )
         {
-            ui->tbvMarkBlocks->setText( row, 0, QString::number( row ).rightJustified( 3, '0' ) );
-            ui->tbvMarkBlocks->item( row, 0 )->setFlags( ui->tbvMarkBlocks->item( row, 0 )->flags() & ~Qt::ItemIsEditable );
-            ui->tbvMarkBlocks->setText( row, 1, "" );
+            ui->tbvMarkBlocks->SetText( row, 0, QString::number( row ).rightJustified( 3, '0' ) );
+            ui->tbvMarkBlocks->Item( row, 0 )->setFlags( ui->tbvMarkBlocks->Item( row, 0 )->flags() & ~Qt::ItemIsEditable );
+            ui->tbvMarkBlocks->SetText( row, 1, "" );
         }
     }
 }

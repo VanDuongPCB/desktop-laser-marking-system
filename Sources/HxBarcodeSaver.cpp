@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QDateTime>
 
-void HxBarcodeSaver::save( QString code )
+void HxBarcodeSaver::Save( QString code )
 {
     QString dir = QCoreApplication::applicationDirPath() + "/data/BARCODE-LOGS";
     QDir().mkdir( dir );

@@ -12,15 +12,15 @@ private:
 public:
     explicit HxProtector( QObject* parent = 0 );
     ~HxProtector();
-    bool login( QString name, QString pass );
-    void logout();
-    HxUserProfile* currentUser();
+    bool Login( QString name, QString pass );
+    void Logout();
+    HxUserProfile* CurrentUser();
 
 signals:
-    void loginChanged();
+    void LoginChanged();
 public slots:
 
 public:
-    static HxProtector* instance();
+    static HxProtector* Instance();
 };
 

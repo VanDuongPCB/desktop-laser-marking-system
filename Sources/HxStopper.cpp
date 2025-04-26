@@ -19,7 +19,7 @@ HxStopper::~HxStopper()
 
 QMap<int, std::shared_ptr<HxStopper>> HxStopper::items;
 
-void HxStopper::load()
+void HxStopper::Load()
 {
     if ( !items.contains( 1 ) ) items.insert( 1, std::make_shared<HxStopper>( HxStopper() ) );
     if ( !items.contains( 2 ) ) items.insert( 2, std::make_shared<HxStopper>( HxStopper() ) );
@@ -46,7 +46,7 @@ void HxStopper::load()
     }
 }
 
-void HxStopper::save()
+void HxStopper::Save()
 {
     QJsonArray arr;
     for ( int i = 1; i <= 3; i++ )
@@ -74,7 +74,7 @@ void HxStopper::save()
     }
 }
 
-std::shared_ptr<HxStopper> HxStopper::find( int index )
+std::shared_ptr<HxStopper> HxStopper::Find( int index )
 {
     if ( items.contains( index ) ) return items[ index ];
     return {};

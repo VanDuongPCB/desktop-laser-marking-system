@@ -16,12 +16,12 @@ class HxLOTPropertyDialog : public QDialog
 public:
     explicit HxLOTPropertyDialog( QWidget* parent = 0 );
     ~HxLOTPropertyDialog();
-    void setData( std::shared_ptr<HxLOT> data );
-    void clear();
+    void SetData( std::shared_ptr<HxLOT> data );
+    void Clear();
 signals:
-    void dataChanged();
+    void DataChanged();
 private slots:
-    void paramChanged( QStandardItem* );
+    void ParamChanged( QStandardItem* );
 
     void on_btnCreateOrChange_clicked();
 
@@ -43,20 +43,20 @@ private:
     Ui::LOTPropertyDialog* ui;
     std::shared_ptr<HxLOT> lot;
 
-    void pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot );
+    void PasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot );
 
-    void showInfo();
-    void showParams();
-    void showBlocks();
+    void ShowInfo();
+    void ShowParams();
+    void ShowBlocks();
 
-    bool checkLotName();
-    bool checkSeriRange();
-    bool checkMacs();
-    bool checkModelInfo();
-    bool checkBlocks();
+    bool CheckLotName();
+    bool CheckSeriRange();
+    bool CheckMacs();
+    bool CheckModelInfo();
+    bool CheckBlocks();
 
 
-    void checkInputs();
+    void CheckInputs();
 
 };
 

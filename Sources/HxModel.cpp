@@ -24,7 +24,7 @@ HxModel::~HxModel()
 
 }
 
-QString HxModel::value( QString paramName )
+QString HxModel::Value( QString paramName )
 {
     if ( paramName == "CODE" ) return code;
     else if ( paramName == "NAME" ) return name;
@@ -43,9 +43,9 @@ QString HxModel::value( QString paramName )
 std::vector<std::shared_ptr<HxModel>> HxModel::items;
 
 
-std::shared_ptr<HxModel> HxModel::create( QString name, QString code )
+std::shared_ptr<HxModel> HxModel::Create( QString name, QString code )
 {
-    auto ex = find( name );
+    auto ex = Find( name );
     if ( ex != nullptr ) return ex;
     ex = std::make_shared<HxModel>( HxModel() );
     ex->name = name;
@@ -54,7 +54,7 @@ std::shared_ptr<HxModel> HxModel::create( QString name, QString code )
     return ex;
 }
 
-void HxModel::addModelsFromFile( QString file )
+void HxModel::AddModelsFromFile( QString file )
 {
     QFile reader( file );
     QStringList lines;
@@ -154,7 +154,7 @@ void HxModel::addModelsFromFile( QString file )
             continue;
         }
 
-        auto targetModel = HxModel::find( tempModel.name );
+        auto targetModel = HxModel::Find( tempModel.name );
         if ( targetModel == nullptr )
         {
             targetModel = std::make_shared<HxModel>( tempModel );
@@ -163,7 +163,7 @@ void HxModel::addModelsFromFile( QString file )
     }
 }
 
-void HxModel::save( std::shared_ptr<HxModel> model )
+void HxModel::Save( std::shared_ptr<HxModel> model )
 {
     if ( model == nullptr ) return;
     QJsonObject obj;
@@ -213,15 +213,15 @@ void HxModel::save( std::shared_ptr<HxModel> model )
     }
 }
 
-void HxModel::save()
+void HxModel::Save()
 {
     for ( auto& item : items )
     {
-        save( item );
+        Save( item );
     }
 }
 
-void HxModel::load()
+void HxModel::Load()
 {
     QString dir = QCoreApplication::applicationDirPath() + "/data";
 
@@ -279,7 +279,7 @@ void HxModel::load()
     }
 }
 
-QStringList HxModel::names()
+QStringList HxModel::Names()
 {
     QStringList _names;
     for ( auto& item : items )
@@ -289,7 +289,7 @@ QStringList HxModel::names()
     return _names;
 }
 
-std::shared_ptr<HxModel> HxModel::find( QString name )
+std::shared_ptr<HxModel> HxModel::Find( QString name )
 {
     for ( auto& item : items )
     {
@@ -301,7 +301,7 @@ std::shared_ptr<HxModel> HxModel::find( QString name )
     return {};
 }
 
-QStringList HxModel::paramNames()
+QStringList HxModel::ParamNames()
 {
     QStringList names = { "NAME","CODE","NO","FIX1","FIX2","FIX3","FIX4","FIX5" };
     for ( auto& it : items )

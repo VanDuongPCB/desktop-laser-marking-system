@@ -4,6 +4,6 @@
 class HxBarcodeSaver
 {
 public:
-    static void save( QString code );
+    static void Save( QString code );
 };
 

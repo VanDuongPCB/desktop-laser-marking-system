@@ -14,7 +14,7 @@ public:
 
 public:
     static std::vector<std::shared_ptr<HxIVProgram>> items;
-    static void load();
-    static QStringList names();
+    static void Load();
+    static QStringList Names();
 };
 

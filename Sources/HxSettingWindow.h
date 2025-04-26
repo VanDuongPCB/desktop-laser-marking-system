@@ -32,9 +32,9 @@ private slots:
 private:
     Ui::SettingWindow* ui;
     void showEvent( QShowEvent* );
-    void showProtectSetting();
-    void showActuatorSettings();
-    void showLaserSettings();
-    void showStoppers();
-    void showUsers();
+    void ShowProtectSetting();
+    void ShowActuatorSettings();
+    void ShowLaserSettings();
+    void ShowStoppers();
+    void ShowUsers();
 };

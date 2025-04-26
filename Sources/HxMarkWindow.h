@@ -20,11 +20,11 @@ public:
     ~HxMarkWindow();
 
 private slots:
-    void handleException( HxException ex );
-    void markStarted();
-    void markStopped();
+    void HandleException( HxException ex );
+    void MarkStarted();
+    void MarkStopped();
 
-    void controllerPrinted( std::shared_ptr<HxLOT> lot );
+    void ControllerPrinted( std::shared_ptr<HxLOT> lot );
 
     void on_actionSelect_triggered();
 
@@ -43,11 +43,11 @@ private:
     HxMainWindow* mainWindow = nullptr;
     std::vector<HxException> exceptions;
     void showEvent( QShowEvent* );
-    void showLots();
-    void showLotInfo( std::shared_ptr<HxLOT> lot );
-    void showLotStatus( std::shared_ptr<HxLOT> lot );
-    void showLotBlocks();
-    void showExceptions();
-    void updateUI();
+    void ShowLots();
+    void ShowLotInfo( std::shared_ptr<HxLOT> lot );
+    void ShowLotStatus( std::shared_ptr<HxLOT> lot );
+    void ShowLotBlocks();
+    void ShowExceptions();
+    void UpdateUI();
 };
 

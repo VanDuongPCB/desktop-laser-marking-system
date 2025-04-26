@@ -2,12 +2,12 @@
 class HxActuator
 {
 public:
-    static bool setEnable( bool en );
-    static bool setMarkResult( bool status );
-    static bool setCvWidth( double width );
-    static bool setTransferMode( bool on );
-    static bool setStopper( int stopper );
-    static bool hasTrigger();
-    static bool confirmTrigger();
-    static bool setCompleteBit();
+    static bool SetEnable( bool en );
+    static bool SetMarkResult( bool status );
+    static bool SetCvWidth( double width );
+    static bool SetTransferMode( bool on );
+    static bool SetStopper( int stopper );
+    static bool IsHasTrigger();
+    static bool ConfirmTrigger();
+    static bool SetCompleteBit();
 };

@@ -26,21 +26,21 @@ private:
 
     void showEvent( QShowEvent* );
 
-    void showModels();
-    void showModelInfo();
-    void showMarkPositions();
-    void showMarkBlocks();
-    void showComments();
+    void ShowModels();
+    void ShowModelInfo();
+    void ShowMarkPositions();
+    void ShowMarkBlocks();
+    void ShowComments();
 
 
 private slots:
-    void modelFilterTextChanged( QString filter );
+    void ModelFilterTextChanged( QString filter );
 
-    void modelSelectionChanged( const QModelIndex& index );
+    void ModelSelectionChanged( const QModelIndex& index );
 
-    void markPositionChanged( QStandardItem* item );
+    void MarkPositionChanged( QStandardItem* item );
 
-    void commentChanged( QStandardItem* item );
+    void CommentChanged( QStandardItem* item );
 
     void on_actionNew_triggered();
 

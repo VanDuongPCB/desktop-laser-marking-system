@@ -19,7 +19,7 @@ HxDesign::~HxDesign()
 
 }
 
-int HxDesign::indexOfBlockCode()
+int HxDesign::IndexOfBlockCode()
 {
     int index = 1;
     QList<int> keys = blocks.keys();
@@ -40,7 +40,7 @@ int HxDesign::indexOfBlockCode()
 std::vector<std::shared_ptr<HxDesign>> HxDesign::items;
 
 
-std::shared_ptr<HxDesign> HxDesign::find( QString name )
+std::shared_ptr<HxDesign> HxDesign::Find( QString name )
 {
     for ( auto& item : items )
     {
@@ -50,7 +50,7 @@ std::shared_ptr<HxDesign> HxDesign::find( QString name )
     return {};
 }
 
-void HxDesign::load()
+void HxDesign::Load()
 {
     items.clear();
 
@@ -91,7 +91,7 @@ void HxDesign::load()
     }
 }
 
-void HxDesign::save( std::shared_ptr<HxDesign> design )
+void HxDesign::Save( std::shared_ptr<HxDesign> design )
 {
     QString designDir = QCoreApplication::applicationDirPath() + "/data/DESIGNS";
     QDir().mkdir( designDir );
@@ -129,13 +129,13 @@ void HxDesign::save( std::shared_ptr<HxDesign> design )
     }
 }
 
-void HxDesign::save()
+void HxDesign::Save()
 {
     QString designDir = QCoreApplication::applicationDirPath() + "/data/DESIGNS";
     QDir().mkdir( designDir );
 
     for ( auto& item : items )
     {
-        save( item );
+        Save( item );
     }
 }

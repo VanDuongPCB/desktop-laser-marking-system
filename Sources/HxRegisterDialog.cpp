@@ -5,7 +5,7 @@
 HxRegisterDialog::HxRegisterDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::RegisterDialog )
 {
     ui->setupUi( this );
-    ui->txtID->setText( HxLicensing::id() );
+    ui->txtID->setText( HxLicensing::ID() );
 }
 
 HxRegisterDialog::~HxRegisterDialog()
@@ -16,7 +16,7 @@ HxRegisterDialog::~HxRegisterDialog()
 void HxRegisterDialog::on_pushButton_clicked()
 {
     QString keyIn = ui->txtKey->text().trimmed();
-    if ( HxLicensing::registerKey( keyIn ) )
+    if ( HxLicensing::RegisterKey( keyIn ) )
     {
         this->close();
         this->setResult( 1 );
@@ -40,7 +40,7 @@ void HxRegisterDialog::on_txtKey_returnPressed()
     if ( txt.startsWith( "--KEYGEN=" ) )
     {
         txt = txt.replace( "--KEYGEN=", "" );
-        ui->txtKey->setText( HxLicensing::keyFromId( txt ) );
+        ui->txtKey->setText( HxLicensing::KeyFromId( txt ) );
     }
 }
 

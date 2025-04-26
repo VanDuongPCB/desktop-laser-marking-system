@@ -24,21 +24,21 @@ public:
     explicit HxMarker( QObject* parent = 0 );
     ~HxMarker();
 
-    void clear();
-    bool select( std::shared_ptr<HxLOT> lot );
-    bool mark( bool test = false );
+    void Clear();
+    bool Select( std::shared_ptr<HxLOT> lot );
+    bool Mark( bool test = false );
 
 
-    bool isBusy();
+    bool IsBusy();
 
-    void start();
-    void stop();
+    void Start();
+    void Stop();
 signals:
     void started();
     void printed( std::shared_ptr<HxLOT> lot );
     void stopped();
 public slots:
-    void task();
+    void Task();
 
 
     /* ----------- */
@@ -46,7 +46,7 @@ private:
     static QThread worker;
     static HxMarker* _instance;
 public:
-    static void initialize();
-    static void terminate();
-    static HxMarker* instance();
+    static void Initialize();
+    static void Terminate();
+    static HxMarker* Instance();
 };

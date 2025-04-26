@@ -13,7 +13,7 @@ HxNewModelDialog::~HxNewModelDialog()
     delete ui;
 }
 
-bool HxNewModelDialog::checkInputs()
+bool HxNewModelDialog::CheckInputs()
 {
     QString name = ui->txtModelName->text().trimmed().toUpper();
     QString code = ui->txtModelCode->text().trimmed().toUpper();
@@ -35,10 +35,10 @@ void HxNewModelDialog::on_btnCreate_clicked()
     QString code = ui->txtModelCode->text().trimmed().toUpper();
     QString no = ui->txtModelNo->text().trimmed().toUpper();
 
-    data = HxModel::create( name, code );
+    data = HxModel::Create( name, code );
     data->kNo = no;
     data->cvWidth = ui->spxCvWidth->value();
-    HxModel::save( data );
+    HxModel::Save( data );
 
     this->close();
     this->setResult( 1 );
@@ -46,12 +46,12 @@ void HxNewModelDialog::on_btnCreate_clicked()
 
 void HxNewModelDialog::on_txtModelCode_textChanged( const QString& arg1 )
 {
-    ui->btnCreate->setEnabled( checkInputs() );
+    ui->btnCreate->setEnabled( CheckInputs() );
 }
 
 
 void HxNewModelDialog::on_txtModelName_textChanged( const QString& arg1 )
 {
-    ui->btnCreate->setEnabled( checkInputs() );
+    ui->btnCreate->setEnabled( CheckInputs() );
 }
 

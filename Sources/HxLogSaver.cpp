@@ -6,7 +6,7 @@
 #include <QDir>
 #include <QCoreApplication>
 
-void HxLogSaver::save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design )
+void HxLogSaver::Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design )
 {
     if ( lot == nullptr )
     {

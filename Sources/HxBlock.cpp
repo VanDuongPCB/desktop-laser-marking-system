@@ -35,12 +35,12 @@ QString HxBlock::gen( QString format, std::shared_ptr<HxLOT> lot, std::shared_pt
                 QString paramName = itemParams[ 1 ].toUpper().trimmed();
                 if ( objectName == "model" )
                 {
-                    QString value = model->value( paramName );
+                    QString value = model->Value( paramName );
                     itemDatas.push_back( value );
                 }
                 else if ( objectName == "lot" )
                 {
-                    QString value = lot->value( paramName );
+                    QString value = lot->Value( paramName );
                     itemDatas.push_back( value );
                 }
             }

@@ -4,11 +4,11 @@
 class HxLicensing
 {
 public:
-    static QString readKey();
-    static void writeKey( QString key );
-    static bool isRegistered();
-    static QString id();
-    static QString keyFromId( QString id );
-    static bool registerKey( QString key );
+    static QString ReadKey();
+    static void WriteKey( QString key );
+    static bool IsRegistered();
+    static QString ID();
+    static QString KeyFromId( QString id );
+    static bool RegisterKey( QString key );
 };
 

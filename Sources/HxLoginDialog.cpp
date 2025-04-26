@@ -12,7 +12,7 @@ HxLoginDialog::~HxLoginDialog()
     delete ui;
 }
 
-bool HxLoginDialog::checkInputs()
+bool HxLoginDialog::CheckInputs()
 {
     QString user = ui->txtUserName->text().trimmed().toUpper();
     QString pass = ui->txtPassword->text().trimmed();
@@ -21,19 +21,19 @@ bool HxLoginDialog::checkInputs()
 
 void HxLoginDialog::on_txtUserName_textChanged( const QString& arg1 )
 {
-    ui->btnLogin->setEnabled( checkInputs() );
+    ui->btnLogin->setEnabled( CheckInputs() );
 }
 
 void HxLoginDialog::on_txtPassword_textChanged( const QString& arg1 )
 {
-    ui->btnLogin->setEnabled( checkInputs() );
+    ui->btnLogin->setEnabled( CheckInputs() );
 }
 
 void HxLoginDialog::on_btnLogin_clicked()
 {
     QString user = ui->txtUserName->text().trimmed().toUpper();
     QString pass = ui->txtPassword->text().trimmed();
-    if ( HxProtector::instance()->login( user, pass ) )
+    if ( HxProtector::Instance()->Login( user, pass ) )
     {
         this->close();
         this->setResult( 1 );

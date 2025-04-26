@@ -8,12 +8,12 @@ HxSystemError::HxSystemError()
 }
 
 
-void HxSystemError::errorReport( HxException ex )
+void HxSystemError::ErrorReport( HxException ex )
 {
-    emit reported( ex );
+    emit Reported( ex );
 }
 
-HxSystemError* HxSystemError::instance()
+HxSystemError* HxSystemError::Instance()
 {
     static HxSystemError _ins;
     return &_ins;

@@ -18,9 +18,9 @@ public:
     ~HxLOTWindow();
 
 private slots:
-    void controllerPrinted( std::shared_ptr<HxLOT> lot );
+    void ControllerPrinted( std::shared_ptr<HxLOT> lot );
 
-    void dataChanged();
+    void DataChanged();
 
     void on_actionNew_triggered();
 
@@ -35,7 +35,7 @@ private slots:
 private:
     Ui::LOTWindow* ui;
     void showEvent( QShowEvent* );
-    void showLot( QString filter );
+    void ShowLot( QString filter );
 
 };
 

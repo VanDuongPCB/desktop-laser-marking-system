@@ -13,13 +13,13 @@ HxProtector::~HxProtector()
 
 }
 
-bool HxProtector::login( QString name, QString pass )
+bool HxProtector::Login( QString name, QString pass )
 {
     name = name.trimmed().toLower();
     if ( name == "admin" && pass == HxSettings::password )
     {
         _currentUser = &admin;
-        emit loginChanged();
+        emit LoginChanged();
         return true;
     }
 
@@ -31,36 +31,36 @@ bool HxProtector::login( QString name, QString pass )
             {
                 _currentUser = user.get();
                 _currentUser->pass = pass;
-                HxUserProfile::save();
-                emit loginChanged();
+                HxUserProfile::Save();
+                emit LoginChanged();
             }
             else if ( user->pass == pass )
             {
                 _currentUser = user.get();
-                emit loginChanged();
+                emit LoginChanged();
                 return true;
             }
         }
     }
     _currentUser = nullptr;
-    emit loginChanged();
+    emit LoginChanged();
     return false;
 }
 
-void HxProtector::logout()
+void HxProtector::Logout()
 {
     _currentUser = nullptr;
-    emit loginChanged();
+    emit LoginChanged();
 }
 
-HxUserProfile* HxProtector::currentUser()
+HxUserProfile* HxProtector::CurrentUser()
 {
     return _currentUser;
 }
 
 
 /* -------------------------- */
-HxProtector* HxProtector::instance()
+HxProtector* HxProtector::Instance()
 {
     static HxProtector p;
     return &p;

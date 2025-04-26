@@ -15,12 +15,12 @@ public:
     QMap<int, HxBlock> blocks;
     HxDesign();
     ~HxDesign();
-    int indexOfBlockCode();
+    int IndexOfBlockCode();
 public:
     static std::vector<std::shared_ptr<HxDesign>> items;
-    static std::shared_ptr<HxDesign> find( QString name );
-    static void load();
-    static void save( std::shared_ptr<HxDesign> design );
-    static void save();
+    static std::shared_ptr<HxDesign> Find( QString name );
+    static void Load();
+    static void Save( std::shared_ptr<HxDesign> design );
+    static void Save();
 };
 

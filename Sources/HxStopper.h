@@ -15,7 +15,7 @@ public:
 
 public:
     static QMap<int, std::shared_ptr<HxStopper>> items;
-    static void load();
-    static void save();
-    static std::shared_ptr<HxStopper> find( int index );
+    static void Load();
+    static void Save();
+    static std::shared_ptr<HxStopper> Find( int index );
 };

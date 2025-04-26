@@ -25,6 +25,6 @@ public:
     static QString markResultReg;// = "MR30101";
 
 
-    static void save();
-    static void load();
+    static void Save();
+    static void Load();
 };

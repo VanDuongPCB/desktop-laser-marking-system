@@ -17,7 +17,7 @@ public:
     ~HxDesignWindow();
 
 private slots:
-    void blockChanged( QStandardItem* item );
+    void BlockChanged( QStandardItem* item );
 
     void on_actionSave_triggered();
 
@@ -40,9 +40,9 @@ private:
 
     void showEvent( QShowEvent* );
 
-    void showDesigns( QString filter );
-    void showSize();
-    void showBlocks();
-    void showParams();
+    void ShowDesigns( QString filter );
+    void ShowSize();
+    void ShowBlocks();
+    void ShowParams();
 };
 

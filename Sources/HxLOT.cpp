@@ -24,7 +24,7 @@ HxLOT::~HxLOT()
 
 }
 
-QString HxLOT::counter()
+QString HxLOT::Counter()
 {
     int len = counterStart.length();
     int start = counterStart.toInt( 0 );
@@ -32,14 +32,14 @@ QString HxLOT::counter()
     return QString::number( cnt ).rightJustified( len, '0' );
 }
 
-QString HxLOT::mac()
+QString HxLOT::MAC()
 {
     uint64_t start = HexStringToUInt64( macStart );
     uint64_t cnt = start + progress;
     return UInt64ToHexString( cnt, 12 );
 }
 
-QString HxLOT::status()
+QString HxLOT::Status()
 {
     if ( progress <= 0 )
     {
@@ -55,22 +55,22 @@ QString HxLOT::status()
     }
 }
 
-bool HxLOT::nextItem()
+bool HxLOT::NextItem()
 {
     progress++;
     return progress < quantity;
 }
 
-bool HxLOT::isCompleted()
+bool HxLOT::IsCompleted()
 {
     return progress >= quantity;
 }
 
-QString HxLOT::value( QString paramName )
+QString HxLOT::Value( QString paramName )
 {
     if ( paramName == "NAME" ) return name.split( "-RE" ).first();
-    else if ( paramName == "COUNTER" ) return counter();
-    else if ( paramName == "MAC" ) return mac();
+    else if ( paramName == "COUNTER" ) return Counter();
+    else if ( paramName == "MAC" ) return MAC();
     else if ( comments.contains( paramName ) )
     {
         return comments.value( paramName );
@@ -85,14 +85,14 @@ QString HxLOT::value( QString paramName )
 
 std::vector<std::shared_ptr<HxLOT>> HxLOT::items;
 
-void HxLOT::sort()
+void HxLOT::Sort()
 {
     for ( auto& it : items )
     {
         it->sIndex = 0;
-        if ( it->status() == "Đang sản xuất" ) it->sIndex += 1000000;
-        else if ( it->status() == "Chưa sản xuất" ) it->sIndex += 2000000;
-        else if ( it->status() == "Đã hoàn thành" ) it->sIndex += 3000000;
+        if ( it->Status() == "Đang sản xuất" ) it->sIndex += 1000000;
+        else if ( it->Status() == "Chưa sản xuất" ) it->sIndex += 2000000;
+        else if ( it->Status() == "Đã hoàn thành" ) it->sIndex += 3000000;
     }
 
     std::sort( items.begin(), items.end(), []( std::shared_ptr<HxLOT>& it1, std::shared_ptr<HxLOT>& it2 )
@@ -101,7 +101,7 @@ void HxLOT::sort()
                } );
 }
 
-void HxLOT::load()
+void HxLOT::Load()
 {
     items.clear();
     QDir().mkdir( QCoreApplication::applicationDirPath() + "/data" );
@@ -152,10 +152,10 @@ void HxLOT::load()
             }
         }
     }
-    sort();
+    Sort();
 }
 
-void HxLOT::saveLot( std::shared_ptr<HxLOT> data )
+void HxLOT::SaveLot( std::shared_ptr<HxLOT> data )
 {
     QJsonObject obj;
     obj.insert( "time-create", data->dateCreate );
@@ -191,7 +191,7 @@ void HxLOT::saveLot( std::shared_ptr<HxLOT> data )
     }
 }
 
-void HxLOT::remove( int index )
+void HxLOT::Remove( int index )
 {
     if ( index < 0 || index >= items.size() ) return;
     // delete
@@ -205,22 +205,22 @@ void HxLOT::remove( int index )
     items.erase( items.begin() + index );
 }
 
-void HxLOT::saveAll()
+void HxLOT::SaveAll()
 {
     for ( auto& item : items )
     {
-        saveLot( item );
+        SaveLot( item );
     }
 }
 
-std::shared_ptr<HxLOT> HxLOT::create()
+std::shared_ptr<HxLOT> HxLOT::Create()
 {
     auto lot = std::make_shared<HxLOT>( HxLOT() );
     items.push_back( lot );
     return lot;
 }
 
-std::shared_ptr<HxLOT> HxLOT::find( QString name )
+std::shared_ptr<HxLOT> HxLOT::Find( QString name )
 {
     for ( auto& item : items )
     {
@@ -229,7 +229,7 @@ std::shared_ptr<HxLOT> HxLOT::find( QString name )
     return {};
 }
 
-QStringList HxLOT::paramNames()
+QStringList HxLOT::ParamNames()
 {
     QStringList names = { "NAME","COUNTER","FIX1","FIX2","FIX3","FIX4","FIX5" };
     for ( auto& it : items )

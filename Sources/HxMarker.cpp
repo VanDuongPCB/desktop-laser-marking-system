@@ -34,7 +34,7 @@ HxMarker::~HxMarker()
 
 }
 
-void HxMarker::clear()
+void HxMarker::Clear()
 {
     lot.reset();
     model.reset();
@@ -42,52 +42,52 @@ void HxMarker::clear()
     stopper.reset();
 }
 
-bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
+bool HxMarker::Select( std::shared_ptr<HxLOT> lotinf )
 {
     if ( lotinf == nullptr )
     {
         HxMessage::error( "Dữ liệu lot không hợp lệ !" );
-        clear();
+        Clear();
         return false;
     }
 
-    if ( lotinf->isCompleted() )
+    if ( lotinf->IsCompleted() )
     {
         HxMessage::error( "Lot này đã hoàn thành !" );
-        clear();
+        Clear();
         return false;
     }
 
-    auto _model = HxModel::find( lotinf->modelName );
+    auto _model = HxModel::Find( lotinf->modelName );
     if ( _model == nullptr )
     {
         HxMessage::error( "Không tìm thấy thông tin model : " + lotinf->modelName );
-        clear();
+        Clear();
         return false;
     }
 
-    auto _design = HxDesign::find( _model->design );
+    auto _design = HxDesign::Find( _model->design );
     if ( _design == nullptr )
     {
         HxMessage::error( "Không tìm thấy thông tin thiết kế : " + _model->design );
-        clear();
+        Clear();
         return false;
     }
 
-    auto _stopper = HxStopper::find( _model->stopper );
+    auto _stopper = HxStopper::Find( _model->stopper );
     if ( _stopper == nullptr )
     {
         HxMessage::error( "Không tìm thấy thông tin stopper : " + QString::number( _model->stopper ) );
-        clear();
+        Clear();
         return false;
     }
 
     // try setup
     try
     {
-        HxLaserDevice::setProgram( _design->name );
-        HxActuator::setCvWidth( _model->cvWidth );
-        HxActuator::setStopper( _model->stopper );
+        HxLaserDevice::SetProgram( _design->name );
+        HxActuator::SetCvWidth( _model->cvWidth );
+        HxActuator::SetStopper( _model->stopper );
 
         lot = lotinf;
         model = _model;
@@ -97,14 +97,14 @@ bool HxMarker::select( std::shared_ptr<HxLOT> lotinf )
     }
     catch ( HxException ex )
     {
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
         //        Message::error(ex.message);
-        clear();
+        Clear();
         return false;
     }
 }
 
-bool HxMarker::mark( bool test )
+bool HxMarker::Mark( bool test )
 {
     auto tempLot = std::make_shared<HxLOT>( HxLOT() );
     tempLot.get()[ 0 ] = lot.get()[ 0 ];
@@ -118,9 +118,9 @@ bool HxMarker::mark( bool test )
             QMap<int, QString> blockDatas = HxBlock::gen( design, tempLot, model );
 
 
-            HxLaserDevice::setupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
-            HxLaserDevice::setupBlockData( design->name, blockDatas );
-            HxLaserDevice::burn();
+            HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
+            HxLaserDevice::SetupBlockData( design->name, blockDatas );
+            HxLaserDevice::Burn();
             tempLot->progress++;
         }
     }
@@ -128,29 +128,29 @@ bool HxMarker::mark( bool test )
     {
         for ( int i = 0; i < patternCnt; i++ )
         {
-            if ( tempLot->isCompleted() ) continue;
+            if ( tempLot->IsCompleted() ) continue;
             HxPosition pos = model->positions[ i ];
             QMap<int, QString> blockDatas = HxBlock::gen( design, tempLot, model );
 
-            HxLaserDevice::setupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
-            HxLaserDevice::setupBlockData( design->name, blockDatas );
-            HxLaserDevice::burn();
-            HxLogSaver::save( tempLot, model, design );
+            HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
+            HxLaserDevice::SetupBlockData( design->name, blockDatas );
+            HxLaserDevice::Burn();
+            HxLogSaver::Save( tempLot, model, design );
             tempLot->progress++;
         }
         lot.get()[ 0 ] = tempLot.get()[ 0 ];
-        HxLOT::saveLot( lot );
+        HxLOT::SaveLot( lot );
     }
     return true;
 }
 
 
-bool HxMarker::isBusy()
+bool HxMarker::IsBusy()
 {
     return runFlag;
 }
 
-void HxMarker::start()
+void HxMarker::Start()
 {
     if ( runFlag )
     {
@@ -160,12 +160,12 @@ void HxMarker::start()
     QMetaObject::invokeMethod( this, "task" );
 }
 
-void HxMarker::stop()
+void HxMarker::Stop()
 {
     runFlag = false;
 }
 
-void HxMarker::task()
+void HxMarker::Task()
 {
     emit started();
     runFlag = true;
@@ -178,44 +178,44 @@ void HxMarker::task()
 
         try
         {
-            if ( HxBarcodeReader::hasData() )
+            if ( HxBarcodeReader::IsHasData() )
             {
-                HxBarcodeReader::clear();
-                QString code = HxBarcodeReader::read().trimmed();
+                HxBarcodeReader::Clear();
+                QString code = HxBarcodeReader::Read().trimmed();
                 if ( code.length() > 0 && code.startsWith( "ERROR" ) == false )
                 {
-                    HxBarcodeSaver::save( code );
-                    HxBarcodeReader::sendFeedback( true );
+                    HxBarcodeSaver::Save( code );
+                    HxBarcodeReader::SendFeedback( true );
                 }
                 else
                 {
-                    HxBarcodeReader::sendFeedback( false );
+                    HxBarcodeReader::SendFeedback( false );
                 }
             }
         }
         catch ( HxException ex )
         {
             ex.where = "Đọc barcode";
-            HxSystemError::instance()->errorReport( ex );
+            HxSystemError::Instance()->ErrorReport( ex );
 
             HxException ex2;
             ex2.where = "Khắc";
             ex2.message = "Quá trình khắc đã dừng lại do phát hiện lỗi!";
-            HxSystemError::instance()->errorReport( ex2 );
+            HxSystemError::Instance()->ErrorReport( ex2 );
             runFlag = false;
             break;
         }
 
         try
         {
-            if ( HxActuator::hasTrigger() )
+            if ( HxActuator::IsHasTrigger() )
             {
-                HxActuator::confirmTrigger();
-                bool status = mark( false );
-                HxActuator::setMarkResult( status );
-                if ( lot->isCompleted() )
+                HxActuator::ConfirmTrigger();
+                bool status = Mark( false );
+                HxActuator::SetMarkResult( status );
+                if ( lot->IsCompleted() )
                 {
-                    HxActuator::setCompleteBit();
+                    HxActuator::SetCompleteBit();
                 }
                 emit printed( lot );
             }
@@ -223,12 +223,12 @@ void HxMarker::task()
         catch ( HxException ex )
         {
             ex.where = "Khắc";
-            HxSystemError::instance()->errorReport( ex );
+            HxSystemError::Instance()->ErrorReport( ex );
 
             HxException ex2;
             ex2.where = "Khắc";
             ex2.message = "Quá trình khắc đã dừng lại do phát hiện lỗi!";
-            HxSystemError::instance()->errorReport( ex2 );
+            HxSystemError::Instance()->ErrorReport( ex2 );
 
             runFlag = false;
             break;
@@ -242,16 +242,16 @@ void HxMarker::task()
 QThread HxMarker::worker;
 HxMarker* HxMarker::_instance = nullptr;
 
-void HxMarker::initialize()
+void HxMarker::Initialize()
 {
     worker.start();
 }
-void HxMarker::terminate()
+void HxMarker::Terminate()
 {
     worker.quit();
 }
 
-HxMarker* HxMarker::instance()
+HxMarker* HxMarker::Instance()
 {
     if ( _instance == nullptr )
     {

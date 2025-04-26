@@ -6,5 +6,5 @@
 class HxLogSaver
 {
 public:
-    static void save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design );
+    static void Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design );
 };

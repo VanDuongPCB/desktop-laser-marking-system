@@ -25,16 +25,16 @@ public:
 public:
     HxModel();
     ~HxModel();
-    QString value( QString paramName );
+    QString Value( QString paramName );
 public:
     static std::vector<std::shared_ptr<HxModel>> items;
-    static std::shared_ptr<HxModel> create( QString name, QString code );
-    static void addModelsFromFile( QString file );
-    static void save( std::shared_ptr<HxModel> model );
-    static void save();
-    static void load();
-    static QStringList names();
-    static std::shared_ptr<HxModel> find( QString name );
+    static std::shared_ptr<HxModel> Create( QString name, QString code );
+    static void AddModelsFromFile( QString file );
+    static void Save( std::shared_ptr<HxModel> model );
+    static void Save();
+    static void Load();
+    static QStringList Names();
+    static std::shared_ptr<HxModel> Find( QString name );
 
-    static QStringList paramNames();
+    static QStringList ParamNames();
 };

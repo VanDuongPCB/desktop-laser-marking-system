@@ -16,7 +16,7 @@ HxLOTPropertyDialog::~HxLOTPropertyDialog()
     delete ui;
 }
 
-void HxLOTPropertyDialog::pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot )
+void HxLOTPropertyDialog::PasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot )
 {
     if ( dstLot == nullptr ) return;
     if ( newLot )
@@ -40,11 +40,11 @@ void HxLOTPropertyDialog::pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot
 
 
     // param
-    int rows = ui->tbvParams->dataTable()->rowCount();
+    int rows = ui->tbvParams->DataTable()->rowCount();
     for ( int row = 0; row < rows; row++ )
     {
-        QString key = ui->tbvParams->item( row, 0 )->text();
-        QString value = ui->tbvParams->item( row, 1 )->text();
+        QString key = ui->tbvParams->Item( row, 0 )->text();
+        QString value = ui->tbvParams->Item( row, 1 )->text();
         if ( dstLot->comments.contains( key ) )
         {
             dstLot->comments[ key ] = value;
@@ -56,7 +56,7 @@ void HxLOTPropertyDialog::pasteToLot( std::shared_ptr<HxLOT> dstLot, bool newLot
     }
 }
 
-void HxLOTPropertyDialog::showInfo()
+void HxLOTPropertyDialog::ShowInfo()
 {
     if ( lot != nullptr )
     {
@@ -67,12 +67,12 @@ void HxLOTPropertyDialog::showInfo()
         ui->txtName->setText( lot->name );
         ui->cbxModel->setCurrentText( lot->modelName );
         ui->txtMACStart->setText( lot->macStart );
-        ui->txtCounter->setText( lot->counter() );
+        ui->txtCounter->setText( lot->Counter() );
         ui->txtMACEnd->setText( lot->macEnd );
         ui->spxQuantity->setValue( lot->quantity );
         ui->txtCounterStart->setText( lot->counterStart );
 
-        if ( lot->status() == "Chưa sản xuất" )
+        if ( lot->Status() == "Chưa sản xuất" )
         {
             ui->cbxModel->setEnabled( true );
             ui->txtMACStart->setEnabled( true );
@@ -81,7 +81,7 @@ void HxLOTPropertyDialog::showInfo()
             ui->spxQuantity->setEnabled( true );
             ui->txtCounterStart->setEnabled( true );
         }
-        else if ( lot->status() == "Đang sản xuất" )
+        else if ( lot->Status() == "Đang sản xuất" )
         {
             ui->cbxModel->setEnabled( false );
             ui->txtMACStart->setEnabled( false );
@@ -105,18 +105,18 @@ void HxLOTPropertyDialog::showInfo()
     else
     {
         this->setWindowTitle( "Tạo lot" );
-        clear();
+        Clear();
 
         ui->btnCreateOrChange->setText( "Tạo mới" );
     }
 }
 
-void HxLOTPropertyDialog::showParams()
+void HxLOTPropertyDialog::ShowParams()
 {
-    disconnect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::paramChanged );
+    disconnect( ui->tbvParams->DataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::ParamChanged );
     if ( ui->tbvParams->headers.empty() )
     {
-        ui->tbvParams->setHeaders( { "Thông tin","Giá trị" } );
+        ui->tbvParams->SetHeaders( { "Thông tin","Giá trị" } );
     }
 
     QStringList paramNames = {};
@@ -148,64 +148,64 @@ void HxLOTPropertyDialog::showParams()
     }
 
     int rows = paramNames.size();
-    ui->tbvParams->setRowCount( rows );
+    ui->tbvParams->SetRowCount( rows );
 
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvParams->setText( row, 0, paramNames[ row ] );
-        ui->tbvParams->setText( row, 1, "" );
+        ui->tbvParams->SetText( row, 0, paramNames[ row ] );
+        ui->tbvParams->SetText( row, 1, "" );
         if ( lot != nullptr && lot->comments.contains( paramNames[ row ] ) )
         {
-            ui->tbvParams->setText( row, 1, lot->comments.value( paramNames[ row ] ) );
+            ui->tbvParams->SetText( row, 1, lot->comments.value( paramNames[ row ] ) );
         }
     }
-    connect( ui->tbvParams->dataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::paramChanged );
+    connect( ui->tbvParams->DataTable(), &QStandardItemModel::itemChanged, this, &HxLOTPropertyDialog::ParamChanged );
 }
 
-void HxLOTPropertyDialog::showBlocks()
+void HxLOTPropertyDialog::ShowBlocks()
 {
     if ( ui->tbvBlocks->headers.empty() )
     {
-        ui->tbvBlocks->setHeaders( { "Block","Nội dung","Độ dài","Định dạng" } );
+        ui->tbvBlocks->SetHeaders( { "Block","Nội dung","Độ dài","Định dạng" } );
         ui->tbvBlocks->setColumnWidth( 1, 300 );
     }
-    ui->tbvBlocks->setRowCount( 0 );
+    ui->tbvBlocks->SetRowCount( 0 );
     auto tmp = std::make_shared<HxLOT>( HxLOT() );
-    pasteToLot( tmp, lot == nullptr );
+    PasteToLot( tmp, lot == nullptr );
 
-    auto model = HxModel::find( tmp->modelName );
+    auto model = HxModel::Find( tmp->modelName );
     if ( model == nullptr ) return;
-    auto design = HxDesign::find( model->design );
+    auto design = HxDesign::Find( model->design );
     if ( design == nullptr ) return;
     QList<int> nums = design->blocks.keys();
     std::sort( nums.begin(), nums.end() );
 
-    ui->tbvBlocks->setRowCount( nums.size() );
+    ui->tbvBlocks->SetRowCount( nums.size() );
     for ( int i = 0; i < nums.size(); i++ )
     {
         int blockIdx = nums[ i ];
-        ui->tbvBlocks->setText( i, "Block", QString::number( nums[ i ] ).rightJustified( 3, '0' ) );
+        ui->tbvBlocks->SetText( i, "Block", QString::number( nums[ i ] ).rightJustified( 3, '0' ) );
 
         QString data = HxBlock::gen( design->blocks[ blockIdx ].data, tmp, model );
-        ui->tbvBlocks->setText( i, "Nội dung", data );
+        ui->tbvBlocks->SetText( i, "Nội dung", data );
 
-        ui->tbvBlocks->setText( i, "Định dạng", design->blocks[ blockIdx ].data );
+        ui->tbvBlocks->SetText( i, "Định dạng", design->blocks[ blockIdx ].data );
 
         int len = data.length();
         int setupLen = design->blocks[ blockIdx ].textLen;
         bool match = len == setupLen;
-        ui->tbvBlocks->setText( i, "Độ dài", QString::number( len ) + "/" + QString::number( setupLen ) );
+        ui->tbvBlocks->SetText( i, "Độ dài", QString::number( len ) + "/" + QString::number( setupLen ) );
 
         QColor color = QColor( 0, 128, 0 );
         if ( !match ) color = QColor( 128, 0, 0 );
-        for ( int col = 0; col < ui->tbvBlocks->dataTable()->columnCount(); col++ )
+        for ( int col = 0; col < ui->tbvBlocks->DataTable()->columnCount(); col++ )
         {
-            ui->tbvBlocks->item( i, col )->setForeground( color );
+            ui->tbvBlocks->Item( i, col )->setForeground( color );
         }
     }
 }
 
-bool HxLOTPropertyDialog::checkLotName()
+bool HxLOTPropertyDialog::CheckLotName()
 {
     if ( ui->chxRePrint->isChecked() ) return true;
     QString lotName = ui->txtName->text().trimmed().toUpper();
@@ -221,21 +221,21 @@ bool HxLOTPropertyDialog::checkLotName()
     return true;
 }
 
-bool HxLOTPropertyDialog::checkSeriRange()
+bool HxLOTPropertyDialog::CheckSeriRange()
 {
     if ( ui->chxRePrint->isChecked() ) return true;
     QString modelName = ui->cbxModel->currentText().trimmed().toUpper();
-    auto model = HxModel::find( modelName );
+    auto model = HxModel::Find( modelName );
     if ( model == nullptr ) return false;
 
-    auto design = HxDesign::find( model->design );
+    auto design = HxDesign::Find( model->design );
     if ( design == nullptr ) return false;
-    int indexBlockCode = design->indexOfBlockCode();
+    int indexBlockCode = design->IndexOfBlockCode();
     if ( indexBlockCode < 1 ) return false;
     HxBlock block = design->blocks[ indexBlockCode ];
 
     auto fromLot = std::make_shared<HxLOT>( HxLOT() );
-    pasteToLot( fromLot, true );
+    PasteToLot( fromLot, true );
     fromLot->progress = 0;
     QString startSerial = HxBlock::gen( block.data, fromLot, model );
     fromLot->progress = fromLot->quantity - 1;
@@ -278,7 +278,7 @@ bool HxLOTPropertyDialog::checkSeriRange()
     return true;
 }
 
-bool HxLOTPropertyDialog::checkMacs()
+bool HxLOTPropertyDialog::CheckMacs()
 {
     QString lotName = ui->txtName->text().trimmed().toUpper();
     QString macStart = ui->txtMACStart->text().trimmed();
@@ -328,23 +328,23 @@ bool HxLOTPropertyDialog::checkMacs()
     return true;
 }
 
-bool HxLOTPropertyDialog::checkModelInfo()
+bool HxLOTPropertyDialog::CheckModelInfo()
 {
     QString modelName = ui->cbxModel->currentText();
-    auto model = HxModel::find( modelName );
+    auto model = HxModel::Find( modelName );
     if ( model == nullptr ) return false;
-    auto design = HxDesign::find( model->design );
+    auto design = HxDesign::Find( model->design );
     if ( design == nullptr ) return false;
     return true;
 }
 
-bool HxLOTPropertyDialog::checkBlocks()
+bool HxLOTPropertyDialog::CheckBlocks()
 {
     bool match = true;
-    int rows = ui->tbvBlocks->dataTable()->rowCount();
+    int rows = ui->tbvBlocks->DataTable()->rowCount();
     for ( int row = 0; row < rows; row++ )
     {
-        QColor color = ui->tbvBlocks->item( row, 0 )->foreground().color();
+        QColor color = ui->tbvBlocks->Item( row, 0 )->foreground().color();
         int r = color.red();
         int g = color.green();
         if ( r > g )
@@ -356,36 +356,36 @@ bool HxLOTPropertyDialog::checkBlocks()
     return match;
 }
 
-void HxLOTPropertyDialog::checkInputs()
+void HxLOTPropertyDialog::CheckInputs()
 {
     bool available = true;
     QStringList errors;
 
-    if ( !checkLotName() )
+    if ( !CheckLotName() )
     {
         errors.push_back( "Tên lot trống hoặc bị trùng" );
         available = false;
     }
 
-    if ( !checkSeriRange() )
+    if ( !CheckSeriRange() )
     {
         errors.push_back( "Dải seri bị trùng" );
         available = false;
     }
 
-    if ( !checkMacs() )
+    if ( !CheckMacs() )
     {
         errors.push_back( "Dải mac không hợp lệ hoặc bị trùng" );
         available = false;
     }
 
-    if ( !checkModelInfo() )
+    if ( !CheckModelInfo() )
     {
         errors.push_back( "Thông tin model chưa đúng" );
         available = false;
     }
 
-    if ( !checkBlocks() )
+    if ( !CheckBlocks() )
     {
         errors.push_back( "Phát hiện dữ liệu block sai quy cách" );
         available = false;
@@ -396,22 +396,22 @@ void HxLOTPropertyDialog::checkInputs()
 }
 
 
-void HxLOTPropertyDialog::setData( std::shared_ptr<HxLOT> data )
+void HxLOTPropertyDialog::SetData( std::shared_ptr<HxLOT> data )
 {
     // model list
-    QStringList names = HxModel::names();
+    QStringList names = HxModel::Names();
     ui->cbxModel->clear();
     ui->cbxModel->addItem( "" );
     ui->cbxModel->addItems( names );
 
     lot = data;
-    showInfo();
-    showParams();
-    showBlocks();
-    checkInputs();
+    ShowInfo();
+    ShowParams();
+    ShowBlocks();
+    CheckInputs();
 }
 
-void HxLOTPropertyDialog::clear()
+void HxLOTPropertyDialog::Clear()
 {
     lot = nullptr;
     ui->txtName->setText( "" );
@@ -425,31 +425,31 @@ void HxLOTPropertyDialog::clear()
 
 void HxLOTPropertyDialog::on_txtMACStart_textChanged( const QString& )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_txtMACEnd_textEdited( const QString& )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_spxQuantity_valueChanged( int )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_txtCounterStart_textChanged( const QString& )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_cbxModel_currentTextChanged( const QString& arg1 )
 {
-    auto model = HxModel::find( arg1 );
+    auto model = HxModel::Find( arg1 );
     if ( model == nullptr )
     {
         ui->txtDesign->setText( "-" );
@@ -460,20 +460,20 @@ void HxLOTPropertyDialog::on_cbxModel_currentTextChanged( const QString& arg1 )
         ui->txtDesign->setText( model->design );
         ui->txtProgram->setText( model->ivProgram );
     }
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_txtName_textChanged( const QString& )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
-void HxLOTPropertyDialog::paramChanged( QStandardItem* )
+void HxLOTPropertyDialog::ParamChanged( QStandardItem* )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 
 void HxLOTPropertyDialog::on_btnCreateOrChange_clicked()
@@ -481,18 +481,18 @@ void HxLOTPropertyDialog::on_btnCreateOrChange_clicked()
     bool create = lot == nullptr;
     if ( create )
     {
-        lot = HxLOT::create();
+        lot = HxLOT::Create();
     }
-    pasteToLot( lot, create );
-    HxLOT::saveLot( lot );
-    emit dataChanged();
+    PasteToLot( lot, create );
+    HxLOT::SaveLot( lot );
+    emit DataChanged();
     this->close();
     this->setResult( 1 );
 }
 
 void HxLOTPropertyDialog::on_chxRePrint_toggled( bool )
 {
-    showBlocks();
-    checkInputs();
+    ShowBlocks();
+    CheckInputs();
 }
 

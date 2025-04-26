@@ -23,7 +23,7 @@ void HxTableView::keyPressEvent( QKeyEvent* event )
     }
 }
 
-HxDataTable* HxTableView::dataTable()
+HxDataTable* HxTableView::DataTable()
 {
     HxDataTable* m = ( HxDataTable* )this->model();
     if ( m == nullptr )
@@ -34,25 +34,25 @@ HxDataTable* HxTableView::dataTable()
     return m;
 }
 
-void HxTableView::setHeaders( QStringList headers )
+void HxTableView::SetHeaders( QStringList headers )
 {
     this->headers = headers;
-    HxDataTable* m = dataTable();
+    HxDataTable* m = DataTable();
     m->setColumnCount( headers.size() );
     m->setHorizontalHeaderLabels( headers );
 }
 
-void HxTableView::setRowCount( int count )
+void HxTableView::SetRowCount( int count )
 {
-    dataTable()->setRowCount( count );
+    DataTable()->setRowCount( count );
 }
 
-QStandardItem* HxTableView::item( int row, int col )
+QStandardItem* HxTableView::Item( int row, int col )
 {
     return ( ( QStandardItemModel* )model() )->item( row, col );
 }
 
-QStandardItem* HxTableView::item( int row, QString header )
+QStandardItem* HxTableView::Item( int row, QString header )
 {
     for ( int i = 0; i < headers.size(); i++ )
     {
@@ -64,9 +64,9 @@ QStandardItem* HxTableView::item( int row, QString header )
     return nullptr;
 }
 
-void HxTableView::setText( int row, int col, QString data )
+void HxTableView::SetText( int row, int col, QString data )
 {
-    HxDataTable* m = dataTable();
+    HxDataTable* m = DataTable();
     if ( row < 0 || row >= m->rowCount() ) return;
     if ( col < 0 || col >= m->columnCount() ) return;
     QStandardItem* item = ( QStandardItem* )m->item( row, col );
@@ -78,15 +78,15 @@ void HxTableView::setText( int row, int col, QString data )
     item->setText( data );
 }
 
-void HxTableView::setText( int row, QString header, QString data )
+void HxTableView::SetText( int row, QString header, QString data )
 {
-    HxDataTable* m = dataTable();
+    HxDataTable* m = DataTable();
     if ( row < 0 || row >= m->rowCount() ) return;
     for ( int col = 0; col < headers.size(); col++ )
     {
         if ( headers[ col ] == header )
         {
-            setText( row, col, data );
+            SetText( row, col, data );
             break;
         }
     }

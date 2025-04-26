@@ -15,6 +15,6 @@ public:
 
 public:
     static std::vector<std::shared_ptr<HxUserProfile>> items;
-    static void load();
-    static void save();
+    static void Load();
+    static void Save();
 };

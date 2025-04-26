@@ -18,7 +18,7 @@ HxUserProfile::~HxUserProfile()
 
 /* -------------------------------------------------------- */
 std::vector<std::shared_ptr<HxUserProfile>> HxUserProfile::items;
-void HxUserProfile::load()
+void HxUserProfile::Load()
 {
     items.clear();
     QString dir = QCoreApplication::applicationDirPath() + "/settings";
@@ -39,7 +39,7 @@ void HxUserProfile::load()
         }
     }
 }
-void HxUserProfile::save()
+void HxUserProfile::Save()
 {
     QString dir = QCoreApplication::applicationDirPath() + "/settings";
     QDir().mkdir( dir );

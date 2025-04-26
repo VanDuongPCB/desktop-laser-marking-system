@@ -38,7 +38,7 @@ QString HxSettings::markResultReg = "MR30101";
 
 
 
-void HxSettings::save()
+void HxSettings::Save()
 {
     QJsonObject obj;
     obj.insert( "password", password );
@@ -75,7 +75,7 @@ void HxSettings::save()
     }
 }
 
-void HxSettings::load()
+void HxSettings::Load()
 {
     QString dir = QCoreApplication::applicationDirPath() + "/settings";
     QDir().mkdir( dir );

@@ -14,7 +14,7 @@ public:
     bool isApplyAll = false;
     explicit HxRemoveParamDialog( QWidget* parent = nullptr );
     ~HxRemoveParamDialog();
-    void setParams( QStringList names );
+    void SetParams( QStringList names );
 private slots:
     void on_btnRemove_clicked();
 

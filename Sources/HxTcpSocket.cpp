@@ -13,7 +13,7 @@ HxTcpSocket::HxTcpSocket( QString ip, int port, QObject* parent )
     this->port = port;
 }
 
-bool HxTcpSocket::connect( int timeout )
+bool HxTcpSocket::Connect( int timeout )
 {
     connectToHost( ip, port );
     if ( !waitForConnected( timeout ) )
@@ -28,7 +28,7 @@ bool HxTcpSocket::connect( int timeout )
     return true;
 }
 
-bool HxTcpSocket::writeLine( QString data, int timeout )
+bool HxTcpSocket::WriteLine( QString data, int timeout )
 {
     std::string s = data.toStdString();
     this->write( s.data(), s.length() );
@@ -44,7 +44,7 @@ bool HxTcpSocket::writeLine( QString data, int timeout )
     return true;
 }
 
-QString HxTcpSocket::readLine( int timeout )
+QString HxTcpSocket::ReadLine( int timeout )
 {
     if ( !waitForReadyRead( timeout ) )
     {

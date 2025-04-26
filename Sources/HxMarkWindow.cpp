@@ -18,17 +18,17 @@ HxMarkWindow::HxMarkWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
 {
     mainWindow = ( HxMainWindow* )parent;
     ui->setupUi( this );
-    connect( HxMarker::instance(), &HxMarker::printed, this, &HxMarkWindow::controllerPrinted );
-    connect( HxMarker::instance(), &HxMarker::started, this, &HxMarkWindow::markStarted );
-    connect( HxMarker::instance(), &HxMarker::stopped, this, &HxMarkWindow::markStopped );
-    connect( HxSystemError::instance(), &HxSystemError::reported, this, &HxMarkWindow::handleException );
+    connect( HxMarker::Instance(), &HxMarker::printed, this, &HxMarkWindow::ControllerPrinted );
+    connect( HxMarker::Instance(), &HxMarker::started, this, &HxMarkWindow::MarkStarted );
+    connect( HxMarker::Instance(), &HxMarker::stopped, this, &HxMarkWindow::MarkStopped );
+    connect( HxSystemError::Instance(), &HxSystemError::Reported, this, &HxMarkWindow::HandleException );
 
-    showLots();
-    showLotInfo( nullptr );
-    showLotStatus( nullptr );
-    showLotBlocks();
-    showExceptions();
-    updateUI();
+    ShowLots();
+    ShowLotInfo( nullptr );
+    ShowLotStatus( nullptr );
+    ShowLotBlocks();
+    ShowExceptions();
+    UpdateUI();
 }
 
 HxMarkWindow::~HxMarkWindow()
@@ -38,34 +38,34 @@ HxMarkWindow::~HxMarkWindow()
 
 void HxMarkWindow::showEvent( QShowEvent* )
 {
-    showLots();
-    showLotInfo( HxMarker::instance()->lot );
-    showLotStatus( HxMarker::instance()->lot );
-    updateUI();
+    ShowLots();
+    ShowLotInfo( HxMarker::Instance()->lot );
+    ShowLotStatus( HxMarker::Instance()->lot );
+    UpdateUI();
 }
 
-void HxMarkWindow::showLots()
+void HxMarkWindow::ShowLots()
 {
     if ( ui->tbvSelector->headers.empty() )
     {
-        ui->tbvSelector->setHeaders( { "Tên","Model","MAC đầu","MAC cuối","Sản lượng","Tiến độ","Trạng thái" } );
+        ui->tbvSelector->SetHeaders( { "Tên","Model","MAC đầu","MAC cuối","Sản lượng","Tiến độ","Trạng thái" } );
     }
 
-    HxLOT::sort();
+    HxLOT::Sort();
 
     int rows = ( int )HxLOT::items.size();
-    ui->tbvSelector->setRowCount( rows );
+    ui->tbvSelector->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        QString status = HxLOT::items[ row ]->status();
+        QString status = HxLOT::items[ row ]->Status();
 
-        ui->tbvSelector->setText( row, "Tên", HxLOT::items[ row ]->name );
-        ui->tbvSelector->setText( row, "Model", HxLOT::items[ row ]->modelName );
-        ui->tbvSelector->setText( row, "MAC đầu", HxLOT::items[ row ]->macStart );
-        ui->tbvSelector->setText( row, "MAC cuối", HxLOT::items[ row ]->macEnd );
-        ui->tbvSelector->setText( row, "Sản lượng", QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvSelector->setText( row, "Tiến độ", QString::number( HxLOT::items[ row ]->progress ) + "/" + QString::number( HxLOT::items[ row ]->quantity ) );
-        ui->tbvSelector->setText( row, "Trạng thái", status );
+        ui->tbvSelector->SetText( row, "Tên", HxLOT::items[ row ]->name );
+        ui->tbvSelector->SetText( row, "Model", HxLOT::items[ row ]->modelName );
+        ui->tbvSelector->SetText( row, "MAC đầu", HxLOT::items[ row ]->macStart );
+        ui->tbvSelector->SetText( row, "MAC cuối", HxLOT::items[ row ]->macEnd );
+        ui->tbvSelector->SetText( row, "Sản lượng", QString::number( HxLOT::items[ row ]->quantity ) );
+        ui->tbvSelector->SetText( row, "Tiến độ", QString::number( HxLOT::items[ row ]->progress ) + "/" + QString::number( HxLOT::items[ row ]->quantity ) );
+        ui->tbvSelector->SetText( row, "Trạng thái", status );
 
         QColor background = QColor( 255, 255, 255 );
         if ( status == "Đang sản xuất" )
@@ -77,14 +77,14 @@ void HxMarkWindow::showLots()
             background = QColor( 128, 255, 128 );
         }
 
-        for ( int col = 0; col < ui->tbvSelector->dataTable()->columnCount(); col++ )
+        for ( int col = 0; col < ui->tbvSelector->DataTable()->columnCount(); col++ )
         {
-            ui->tbvSelector->item( row, col )->setBackground( background );
+            ui->tbvSelector->Item( row, col )->setBackground( background );
         }
     }
 }
 
-void HxMarkWindow::showLotInfo( std::shared_ptr<HxLOT> lot )
+void HxMarkWindow::ShowLotInfo( std::shared_ptr<HxLOT> lot )
 {
     if ( lot == nullptr )
     {
@@ -104,9 +104,9 @@ void HxMarkWindow::showLotInfo( std::shared_ptr<HxLOT> lot )
         ui->lblSerialStart->setText( lot->macStart );
         ui->lblSerialEnd->setText( lot->macEnd );
         ui->lblQuantity->setText( QString::number( lot->quantity ) );
-        ui->lblStatus->setText( lot->status() );
+        ui->lblStatus->setText( lot->Status() );
         ui->lblModelName->setText( lot->modelName );
-        auto model = HxModel::find( lot->modelName );
+        auto model = HxModel::Find( lot->modelName );
         if ( model != nullptr )
         {
             ui->lblModelCode->setText( model->code );
@@ -122,7 +122,7 @@ void HxMarkWindow::showLotInfo( std::shared_ptr<HxLOT> lot )
     }
 }
 
-void HxMarkWindow::showLotStatus( std::shared_ptr<HxLOT> lot )
+void HxMarkWindow::ShowLotStatus( std::shared_ptr<HxLOT> lot )
 {
     if ( lot == nullptr )
     {
@@ -133,16 +133,16 @@ void HxMarkWindow::showLotStatus( std::shared_ptr<HxLOT> lot )
     }
     else
     {
-        ui->lblStatus->setText( lot->status() );
+        ui->lblStatus->setText( lot->Status() );
         ui->lblCount->setText( QString::number( lot->progress ) );
         ui->pgbProgress->setMaximum( lot->quantity );
         ui->pgbProgress->setValue( lot->progress );
 
-        if ( lot->status() == "Chưa sản xuất" )
+        if ( lot->Status() == "Chưa sản xuất" )
         {
             ui->lblStatus->setStyleSheet( "background:#888" );
         }
-        else if ( lot->status() == "Đang sản xuất" )
+        else if ( lot->Status() == "Đang sản xuất" )
         {
             ui->lblStatus->setStyleSheet( "background:#ff8" );
         }
@@ -153,21 +153,21 @@ void HxMarkWindow::showLotStatus( std::shared_ptr<HxLOT> lot )
     }
 }
 
-void HxMarkWindow::showLotBlocks()
+void HxMarkWindow::ShowLotBlocks()
 {
     if ( ui->tbvBlocks->headers.empty() )
     {
-        ui->tbvBlocks->setHeaders( { "Block","Dữ liệu" } );
+        ui->tbvBlocks->SetHeaders( { "Block","Dữ liệu" } );
     }
-    ui->tbvBlocks->setRowCount( 0 );
-    auto lot = HxMarker::instance()->lot;
+    ui->tbvBlocks->SetRowCount( 0 );
+    auto lot = HxMarker::Instance()->lot;
     if ( lot == nullptr ) return;
-    auto model = HxMarker::instance()->model;
-    auto design = HxMarker::instance()->design;
+    auto model = HxMarker::Instance()->model;
+    auto design = HxMarker::Instance()->design;
     int codeIndex = -1;
     if ( design != nullptr )
     {
-        codeIndex = design->indexOfBlockCode();
+        codeIndex = design->IndexOfBlockCode();
     }
     auto tempLot = std::make_shared<HxLOT>( HxLOT() );
     tempLot.get()[ 0 ] = lot.get()[ 0 ];
@@ -180,11 +180,11 @@ void HxMarkWindow::showLotBlocks()
     QMap<int, QString> blockdatas = HxBlock::gen( design, tempLot, model );
     QList<int> blockNums = blockdatas.keys();
     std::sort( blockNums.begin(), blockNums.end() );
-    ui->tbvBlocks->setRowCount( blockNums.size() );
+    ui->tbvBlocks->SetRowCount( blockNums.size() );
     for ( int i = 0; i < blockNums.size(); i++ )
     {
-        ui->tbvBlocks->setText( i, "Block", QString::number( blockNums[ i ] ).rightJustified( 3, '0' ) );
-        ui->tbvBlocks->setText( i, "Dữ liệu", blockdatas[ blockNums[ i ] ] );
+        ui->tbvBlocks->SetText( i, "Block", QString::number( blockNums[ i ] ).rightJustified( 3, '0' ) );
+        ui->tbvBlocks->SetText( i, "Dữ liệu", blockdatas[ blockNums[ i ] ] );
         if ( blockNums[ i ] == codeIndex )
         {
             ui->lblBarcode->setText( blockdatas[ blockNums[ i ] ] );
@@ -198,29 +198,29 @@ void HxMarkWindow::showLotBlocks()
     }
 }
 
-void HxMarkWindow::showExceptions()
+void HxMarkWindow::ShowExceptions()
 {
     if ( ui->tbvErrors->headers.empty() )
     {
-        ui->tbvErrors->setHeaders( { "Thời gian","Từ","Lỗi" } );
+        ui->tbvErrors->SetHeaders( { "Thời gian","Từ","Lỗi" } );
     }
     int rows = ( int )exceptions.size();
-    ui->tbvErrors->setRowCount( rows );
+    ui->tbvErrors->SetRowCount( rows );
     for ( int row = 0; row < rows; row++ )
     {
-        ui->tbvErrors->setText( row, 0, exceptions[ row ].time );
-        ui->tbvErrors->setText( row, 1, exceptions[ row ].where );
-        ui->tbvErrors->setText( row, 2, exceptions[ row ].message.replace( "\n", ", " ) );
+        ui->tbvErrors->SetText( row, 0, exceptions[ row ].time );
+        ui->tbvErrors->SetText( row, 1, exceptions[ row ].where );
+        ui->tbvErrors->SetText( row, 2, exceptions[ row ].message.replace( "\n", ", " ) );
     }
     ui->tbvErrors->scrollToBottom();
 }
 
-void HxMarkWindow::updateUI()
+void HxMarkWindow::UpdateUI()
 {
-    auto lot = HxMarker::instance()->lot;
+    auto lot = HxMarker::Instance()->lot;
     bool hasData = lot != nullptr;
-    bool canMark = hasData && lot->isCompleted() == false;
-    bool busy = HxMarker::instance()->isBusy();
+    bool canMark = hasData && lot->IsCompleted() == false;
+    bool busy = HxMarker::Instance()->IsBusy();
 
     ui->actionSelect->setEnabled( !busy );
     ui->actionLoad->setEnabled( !busy );
@@ -229,41 +229,41 @@ void HxMarkWindow::updateUI()
     ui->actionStop->setEnabled( busy );
 }
 
-void HxMarkWindow::handleException( HxException ex )
+void HxMarkWindow::HandleException( HxException ex )
 {
     exceptions.push_back( ex );
-    showExceptions();
+    ShowExceptions();
 }
 
-void HxMarkWindow::markStarted()
+void HxMarkWindow::MarkStarted()
 {
-    updateUI();
+    UpdateUI();
 }
 
-void HxMarkWindow::markStopped()
+void HxMarkWindow::MarkStopped()
 {
-    updateUI();
+    UpdateUI();
 }
 
-void HxMarkWindow::controllerPrinted( std::shared_ptr<HxLOT> lot )
+void HxMarkWindow::ControllerPrinted( std::shared_ptr<HxLOT> lot )
 {
-    showLotStatus( lot );
-    showLotBlocks();
+    ShowLotStatus( lot );
+    ShowLotBlocks();
 }
 
 void HxMarkWindow::on_actionSelect_triggered()
 {
     ui->stackedWidget->setCurrentWidget( ui->pageSelector );
-    updateUI();
+    UpdateUI();
 }
 
 void HxMarkWindow::on_actionRun_triggered()
 {
     try
     {
-        if ( HxActuator::setEnable( true ) )
+        if ( HxActuator::SetEnable( true ) )
         {
-            HxMarker::instance()->start();
+            HxMarker::Instance()->Start();
             ui->actionSelect->setEnabled( false );
             ui->actionLoad->setEnabled( false );
             ui->actionMark->setEnabled( false );
@@ -271,13 +271,13 @@ void HxMarkWindow::on_actionRun_triggered()
             ui->actionStop->setEnabled( false );
             if ( mainWindow != nullptr )
             {
-                mainWindow->setNavEnable( false );
+                mainWindow->SetNavEnable( false );
             }
         }
     }
     catch ( HxException ex )
     {
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
         ex.where = "Khắc";
         //        Message::error(ex.message);
     }
@@ -287,9 +287,9 @@ void HxMarkWindow::on_actionStop_triggered()
 {
     try
     {
-        if ( HxActuator::setEnable( false ) )
+        if ( HxActuator::SetEnable( false ) )
         {
-            HxMarker::instance()->stop();
+            HxMarker::Instance()->Stop();
             ui->actionSelect->setEnabled( true );
             ui->actionLoad->setEnabled( false );
             ui->actionMark->setEnabled( false );
@@ -297,7 +297,7 @@ void HxMarkWindow::on_actionStop_triggered()
             ui->actionStop->setEnabled( false );
             if ( mainWindow != nullptr )
             {
-                mainWindow->setNavEnable( true );
+                mainWindow->SetNavEnable( true );
             }
         }
     }
@@ -305,7 +305,7 @@ void HxMarkWindow::on_actionStop_triggered()
     {
         //        Message::error(ex.message);
         ex.where = "Dừng khắc";
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
     }
 
 }
@@ -314,37 +314,37 @@ void HxMarkWindow::on_actionMark_triggered()
 {
     try
     {
-        HxMarker::instance()->mark( true );
+        HxMarker::Instance()->Mark( true );
         HxMessage::show( "Đã khắc xong !", "In test" );
     }
     catch ( HxException ex )
     {
         //        Message::error(ex.message);
         ex.where = "In test";
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
     }
 }
 
 void HxMarkWindow::on_tbvSelector_doubleClicked( const QModelIndex& index )
 {
     int row = index.row();
-    QString lotName = ui->tbvSelector->item( row, 0 )->text();
-    auto lot = HxLOT::find( lotName );
-    if ( HxMarker::instance()->select( lot ) )
+    QString lotName = ui->tbvSelector->Item( row, 0 )->text();
+    auto lot = HxLOT::Find( lotName );
+    if ( HxMarker::Instance()->Select( lot ) )
     {
         ui->stackedWidget->setCurrentWidget( ui->pageMark );
-        showLotInfo( HxMarker::instance()->lot );
-        showLotStatus( HxMarker::instance()->lot );
-        showLotBlocks();
-        updateUI();
+        ShowLotInfo( HxMarker::Instance()->lot );
+        ShowLotStatus( HxMarker::Instance()->lot );
+        ShowLotBlocks();
+        UpdateUI();
     }
 }
 
 void HxMarkWindow::on_actionLoad_triggered()
 {
-    showLots();
-    showLotInfo( HxMarker::instance()->lot );
-    showLotStatus( HxMarker::instance()->lot );
-    showLotBlocks();
+    ShowLots();
+    ShowLotInfo( HxMarker::Instance()->lot );
+    ShowLotStatus( HxMarker::Instance()->lot );
+    ShowLotBlocks();
 }
 

@@ -8,13 +8,12 @@
 class HxLaserDevice
 {
 private:
-    static bool detectPortExisting();
-    static QString sendData( QString data, int timeout = 30000 );
-    static QString detectError( QString data );
+    static bool DetectPortExisting();
+    static QString SendData( QString data, int timeout = 30000 );
 
 public:
-    static bool setProgram( QString name );
-    static bool setupBlockData( QString program, QMap<int, QString> data );
-    static bool setupPosition( QString program, HxPosition pos, int stopper, HxDesign design );
-    static bool burn();
+    static bool SetProgram( QString name );
+    static bool SetupBlockData( QString program, QMap<int, QString> data );
+    static bool SetupPosition( QString program, HxPosition pos, int stopper, HxDesign design );
+    static bool Burn();
 };

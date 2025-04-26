@@ -4,9 +4,9 @@
 class HxBarcodeReader
 {
 public:
-    static bool hasData();
-    static bool clear();
-    static QString read();
-    static bool sendFeedback( bool status );
+    static bool IsHasData();
+    static bool Clear();
+    static QString Read();
+    static bool SendFeedback( bool status );
 };
 

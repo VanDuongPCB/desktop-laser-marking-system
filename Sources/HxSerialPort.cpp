@@ -18,7 +18,7 @@ HxSerialPort::HxSerialPort( QString port, int baud, QObject* parent ) : QSerialP
     this->setBaudRate( baud );
 }
 
-bool HxSerialPort::writeLine( QString data, int timeout )
+bool HxSerialPort::WriteLine( QString data, int timeout )
 {
     data += "\n";
     this->write( data.toStdString().c_str() );
@@ -33,7 +33,7 @@ bool HxSerialPort::writeLine( QString data, int timeout )
     return true;
 }
 
-QString HxSerialPort::readLine( int timeout )
+QString HxSerialPort::ReadLine( int timeout )
 {
     if ( !isOpen() )
     {

@@ -11,8 +11,8 @@ HxTransferWindow::HxTransferWindow( QWidget* parent ) : QMainWindow( parent ), u
 {
     ui->setupUi( this );
     mainWindow = ( HxMainWindow* )parent;
-    connect( HxMarker::instance(), &HxMarker::started, this, &HxTransferWindow::passStarted );
-    connect( HxMarker::instance(), &HxMarker::stopped, this, &HxTransferWindow::passStopped );
+    connect( HxMarker::Instance(), &HxMarker::started, this, &HxTransferWindow::PassStarted );
+    connect( HxMarker::Instance(), &HxMarker::stopped, this, &HxTransferWindow::PassStopped );
     on_btnReload_clicked();
 }
 
@@ -21,7 +21,7 @@ HxTransferWindow::~HxTransferWindow()
     delete ui;
 }
 
-void HxTransferWindow::passStarted()
+void HxTransferWindow::PassStarted()
 {
     ui->cbxModel->setEnabled( false );
     ui->spxCvWidth->setEnabled( false );
@@ -29,7 +29,7 @@ void HxTransferWindow::passStarted()
     ui->btnStop->setEnabled( true );
 }
 
-void HxTransferWindow::passStopped()
+void HxTransferWindow::PassStopped()
 {
     ui->cbxModel->setEnabled( true );
     ui->spxCvWidth->setEnabled( true );
@@ -56,11 +56,11 @@ void HxTransferWindow::on_spxCvWidth_valueChanged( double arg1 )
 {
     try
     {
-        HxActuator::setCvWidth( ui->spxCvWidth->value() );
+        HxActuator::SetCvWidth( ui->spxCvWidth->value() );
     }
     catch ( HxException ex )
     {
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
     }
 }
 
@@ -68,7 +68,7 @@ void HxTransferWindow::on_spxCvWidth_valueChanged( double arg1 )
 void HxTransferWindow::on_cbxModel_currentTextChanged( const QString& arg1 )
 {
     if ( ui->cbxModel->isEnabled() == false ) return;
-    auto model = HxModel::find( arg1 );
+    auto model = HxModel::Find( arg1 );
     if ( model != nullptr )
     {
         ui->spxCvWidth->setValue( model->cvWidth );
@@ -79,9 +79,9 @@ void HxTransferWindow::on_btnPass_clicked()
 {
     try
     {
-        HxActuator::setCvWidth( ui->spxCvWidth->value() );
+        HxActuator::SetCvWidth( ui->spxCvWidth->value() );
         //        Actuator::setEnable(true);
-        HxActuator::setTransferMode( true );
+        HxActuator::SetTransferMode( true );
         ui->btnPass->setEnabled( false );
         ui->btnStop->setEnabled( true );
         ui->cbxModel->setEnabled( false );
@@ -89,12 +89,12 @@ void HxTransferWindow::on_btnPass_clicked()
         ui->btnReload->setEnabled( false );
         if ( mainWindow != nullptr )
         {
-            mainWindow->setNavEnable( false );
+            mainWindow->SetNavEnable( false );
         }
     }
     catch ( HxException ex )
     {
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
     }
 }
 
@@ -104,7 +104,7 @@ void HxTransferWindow::on_btnStop_clicked()
     try
     {
         //        Actuator::setEnable(false);
-        HxActuator::setTransferMode( false );
+        HxActuator::SetTransferMode( false );
         ui->btnPass->setEnabled( true );
         ui->btnStop->setEnabled( false );
         ui->cbxModel->setEnabled( true );
@@ -112,12 +112,12 @@ void HxTransferWindow::on_btnStop_clicked()
         ui->btnReload->setEnabled( true );
         if ( mainWindow != nullptr )
         {
-            mainWindow->setNavEnable( true );
+            mainWindow->SetNavEnable( true );
         }
     }
     catch ( HxException ex )
     {
-        HxSystemError::instance()->errorReport( ex );
+        HxSystemError::Instance()->ErrorReport( ex );
     }
 }
 

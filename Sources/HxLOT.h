@@ -22,20 +22,20 @@ public:
 public:
     HxLOT();
     ~HxLOT();
-    QString counter();
-    QString mac();
-    QString status();
-    bool nextItem();
-    bool isCompleted();
-    QString value( QString paramName );
+    QString Counter();
+    QString MAC();
+    QString Status();
+    bool NextItem();
+    bool IsCompleted();
+    QString Value( QString paramName );
 public:
     static std::vector<std::shared_ptr<HxLOT>> items;
-    static void sort();
-    static void load();
-    static void remove( int index );
-    static void saveAll();
-    static void saveLot( std::shared_ptr<HxLOT> data );
-    static std::shared_ptr<HxLOT> create();
-    static std::shared_ptr<HxLOT> find( QString name );
-    static QStringList paramNames();
+    static void Sort();
+    static void Load();
+    static void Remove( int index );
+    static void SaveAll();
+    static void SaveLot( std::shared_ptr<HxLOT> data );
+    static std::shared_ptr<HxLOT> Create();
+    static std::shared_ptr<HxLOT> Find( QString name );
+    static QStringList ParamNames();
 };

@@ -16,8 +16,8 @@ public:
     ~HxTransferWindow();
 
 private slots:
-    void passStarted();
-    void passStopped();
+    void PassStarted();
+    void PassStopped();
 
     void on_btnPass_clicked();
 

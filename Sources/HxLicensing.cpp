@@ -5,7 +5,7 @@
 #include "HxMessage.h"
 #include "QSettings"
 
-QString HxLicensing::readKey()
+QString HxLicensing::ReadKey()
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
     QString key = settings.value( "Key" ).toString();
@@ -19,7 +19,7 @@ QString HxLicensing::readKey()
     // return "";
 }
 
-void HxLicensing::writeKey( QString key )
+void HxLicensing::WriteKey( QString key )
 {
     QSettings settings( "HKEY_CURRENT_USER\\Software\\Laser Marker System\\License", QSettings::NativeFormat );
     settings.setValue( "Key", key );
@@ -37,19 +37,19 @@ void HxLicensing::writeKey( QString key )
     // }
 }
 
-bool HxLicensing::isRegistered()
+bool HxLicensing::IsRegistered()
 {
-    QString keyRef = keyFromId( id() );
-    QString keyStore = readKey();
+    QString keyRef = KeyFromId( ID() );
+    QString keyStore = ReadKey();
     return keyStore == keyRef;
 }
 
-QString HxLicensing::id()
+QString HxLicensing::ID()
 {
     return QSysInfo::machineUniqueId().toUpper() + "-R2024";
 }
 
-QString HxLicensing::keyFromId( QString id )
+QString HxLicensing::KeyFromId( QString id )
 {
     std::string sid = id.toStdString();
     std::vector<char> buff;
@@ -75,12 +75,12 @@ QString HxLicensing::keyFromId( QString id )
     return QString::fromStdString( buff.data() );
 }
 
-bool HxLicensing::registerKey( QString key )
+bool HxLicensing::RegisterKey( QString key )
 {
-    QString keyRef = keyFromId( id() );
+    QString keyRef = KeyFromId( ID() );
     if ( keyRef == key )
     {
-        writeKey( key );
+        WriteKey( key );
         return true;
     }
     else

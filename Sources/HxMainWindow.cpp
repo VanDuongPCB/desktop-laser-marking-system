@@ -50,12 +50,12 @@ HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
 
     for ( auto& action : actions )
     {
-        connect( action, &QAction::toggled, this, &HxMainWindow::menuTabToggled );
+        connect( action, &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
     }
     ui->actionMark->setChecked( true );
 
-    connect( HxSystemError::instance(), &HxSystemError::reported, this, &HxMainWindow::errorReported );
-    connect( HxProtector::instance(), &HxProtector::loginChanged, this, &HxMainWindow::loginChanged );
+    connect( HxSystemError::Instance(), &HxSystemError::Reported, this, &HxMainWindow::ErrorReported );
+    connect( HxProtector::Instance(), &HxProtector::LoginChanged, this, &HxMainWindow::LoginChanged );
 
     setWindowState( Qt::WindowMaximized );
 }
@@ -65,7 +65,7 @@ HxMainWindow::~HxMainWindow()
     delete ui;
 }
 
-void HxMainWindow::setNavEnable( bool en )
+void HxMainWindow::SetNavEnable( bool en )
 {
     ui->toolBar->setEnabled( en );
 }
@@ -80,19 +80,19 @@ void HxMainWindow::closeEvent( QCloseEvent* )
 
 }
 
-void HxMainWindow::errorReported( HxException ex )
+void HxMainWindow::ErrorReported( HxException ex )
 {
     HxMessage::error( ex.message, ex.where );
 }
 
-void HxMainWindow::loginChanged()
+void HxMainWindow::LoginChanged()
 {
-    updateUI();
+    UpdateUI();
 }
 
-void HxMainWindow::updateUI()
+void HxMainWindow::UpdateUI()
 {
-    HxUserProfile* user = HxProtector::instance()->currentUser();
+    HxUserProfile* user = HxProtector::Instance()->CurrentUser();
     if ( user == nullptr )
     {
         ui->actionLogin->setText( "Đăng nhập" );
@@ -118,13 +118,13 @@ void HxMainWindow::updateUI()
     }
 }
 
-void HxMainWindow::menuTabToggled( bool )
+void HxMainWindow::MenuTabToggled( bool )
 {
     for ( int i = 0; i < actions.size(); i++ )
     {
         QAction* _sender = ( QAction* )sender();
         bool match = _sender == actions[ i ];
-        disconnect( actions[ i ], &QAction::toggled, this, &HxMainWindow::menuTabToggled );
+        disconnect( actions[ i ], &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
         if ( match )
         {
             ui->stackedWidget->setCurrentWidget( pages[ i ] );
@@ -134,19 +134,19 @@ void HxMainWindow::menuTabToggled( bool )
         {
             actions[ i ]->setChecked( false );
         }
-        connect( actions[ i ], &QAction::toggled, this, &HxMainWindow::menuTabToggled );
+        connect( actions[ i ], &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
     }
 }
 
 
 void HxMainWindow::on_actionLogin_triggered()
 {
-    if ( HxProtector::instance()->currentUser() != nullptr )
+    if ( HxProtector::Instance()->CurrentUser() != nullptr )
     {
         int res = HxMessage::warning( "Bạn có chắc chắn muốn đăng xuất không ?", "Khoan đã" );
         if ( res == QMessageBox::StandardButton::Yes )
         {
-            HxProtector::instance()->logout();
+            HxProtector::Instance()->Logout();
             ui->actionMark->setChecked( true );
         }
     }

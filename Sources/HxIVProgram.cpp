@@ -16,7 +16,7 @@ HxIVProgram::~HxIVProgram()
 }
 
 std::vector<std::shared_ptr<HxIVProgram>> HxIVProgram::items;
-void HxIVProgram::load()
+void HxIVProgram::Load()
 {
     QString ivDir = QCoreApplication::applicationDirPath() + "/data/IV-PROGRAMS";
     QDir().mkdir( ivDir );
@@ -30,7 +30,7 @@ void HxIVProgram::load()
     }
 }
 
-QStringList HxIVProgram::names()
+QStringList HxIVProgram::Names()
 {
     QStringList _names;
     QString ivDir = QCoreApplication::applicationDirPath() + "/data/IV-PROGRAMS";

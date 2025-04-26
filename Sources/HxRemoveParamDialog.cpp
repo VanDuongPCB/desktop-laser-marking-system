@@ -11,7 +11,7 @@ HxRemoveParamDialog::~HxRemoveParamDialog()
     delete ui;
 }
 
-void HxRemoveParamDialog::setParams( QStringList names )
+void HxRemoveParamDialog::SetParams( QStringList names )
 {
     ui->txtParamNames->setPlainText( names.join( ',' ) );
 }

@@ -24,6 +24,6 @@ private slots:
 
 private:
     Ui::NewModelDialog* ui;
-    bool checkInputs();
+    bool CheckInputs();
 };
 

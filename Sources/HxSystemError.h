@@ -10,11 +10,11 @@ class HxSystemError : public QObject
 
 public:
     HxSystemError();
-    void errorReport( HxException ex );
+    void ErrorReport( HxException ex );
 
 signals:
-    void reported( HxException ex );
+    void Reported( HxException ex );
 
 public:
-    static HxSystemError* instance();
+    static HxSystemError* Instance();
 };

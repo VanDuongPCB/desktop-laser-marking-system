@@ -14,12 +14,12 @@ class HxMainWindow : public QMainWindow
 public:
     explicit HxMainWindow( QWidget* parent = 0 );
     ~HxMainWindow();
-    void setNavEnable( bool en );
+    void SetNavEnable( bool en );
 private slots:
-    void errorReported( HxException ex );
-    void loginChanged();
-    void updateUI();
-    void menuTabToggled( bool checked );
+    void ErrorReported( HxException ex );
+    void LoginChanged();
+    void UpdateUI();
+    void MenuTabToggled( bool checked );
     void on_actionLogin_triggered();
 
 private:
