@@ -1,5 +1,5 @@
 #pragma once
-#include <QString>
+#include "QString"
 #include <QStringList>
 #include <QMap>
 #include <vector>

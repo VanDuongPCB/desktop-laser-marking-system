@@ -6,6 +6,9 @@
 #include <QDir>
 #include <QCoreApplication>
 
+#include "HxDataGenerator.h"
+
+
 void HxLogSaver::Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design )
 {
     if ( lot == nullptr )
@@ -51,7 +54,7 @@ void HxLogSaver::Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> mode
     {
         if ( design->blocks.contains( i ) )
         {
-            itemData.push_back( HxBlock::gen( design->blocks[ i ].data, lot, model ) );
+            itemData.push_back( BlockDataGen( design->blocks[ i ].data, lot, model ) );
         }
         else
         {

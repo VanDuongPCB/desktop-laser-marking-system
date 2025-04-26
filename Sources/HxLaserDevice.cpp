@@ -87,19 +87,17 @@ bool HxLaserDevice::SetProgram( QString name )
     return true;
 }
 
-bool HxLaserDevice::SetupBlockData( QString program, QMap<int, QString> data )
+bool HxLaserDevice::SetupBlockData( QString program, std::map<int, QString> blocks )
 {
     QStringList items;
     items.push_back( "C2" );
     items.push_back( program );
-    QList<int> blockIdxs = data.keys();
-    std::sort( blockIdxs.begin(), blockIdxs.end() );
-
-    for ( auto idx : blockIdxs )
+    for ( auto &[index, data ] : blocks )
     {
-        if ( idx < 1 ) continue;
-        items.push_back( QString::number( idx ).rightJustified( 3, '0' ) );
-        items.push_back( data[ idx ] );
+        if ( index < 1 ) 
+            continue;
+        items.push_back( QString::number( index ).rightJustified( 3, '0' ) );
+        items.push_back( data );
     }
 
     if ( items.length() <= 2 ) return true;

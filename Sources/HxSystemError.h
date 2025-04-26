@@ -1,5 +1,5 @@
 #pragma once
-#include <QString>
+#include "QString"
 #include <QMap>
 #include "QObject"
 #include "HxException.h"

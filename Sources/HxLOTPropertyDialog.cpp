@@ -4,6 +4,7 @@
 #include "HxModel.h"
 #include "HxDesign.h"
 #include "HxConvert.h"
+#include "HxDataGenerator.h"
 
 
 HxLOTPropertyDialog::HxLOTPropertyDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::LOTPropertyDialog )
@@ -186,7 +187,7 @@ void HxLOTPropertyDialog::ShowBlocks()
         int blockIdx = nums[ i ];
         ui->tbvBlocks->SetText( i, "Block", QString::number( nums[ i ] ).rightJustified( 3, '0' ) );
 
-        QString data = HxBlock::gen( design->blocks[ blockIdx ].data, tmp, model );
+        QString data = BlockDataGen( design->blocks[ blockIdx ].data, tmp, model );
         ui->tbvBlocks->SetText( i, "Nội dung", data );
 
         ui->tbvBlocks->SetText( i, "Định dạng", design->blocks[ blockIdx ].data );
@@ -237,9 +238,9 @@ bool HxLOTPropertyDialog::CheckSeriRange()
     auto fromLot = std::make_shared<HxLOT>( HxLOT() );
     PasteToLot( fromLot, true );
     fromLot->progress = 0;
-    QString startSerial = HxBlock::gen( block.data, fromLot, model );
+    QString startSerial = BlockDataGen( block.data, fromLot, model );
     fromLot->progress = fromLot->quantity - 1;
-    QString endSerial = HxBlock::gen( block.data, fromLot, model );
+    QString endSerial = BlockDataGen( block.data, fromLot, model );
 
     for ( auto& it : HxLOT::items )
     {
@@ -258,9 +259,9 @@ bool HxLOTPropertyDialog::CheckSeriRange()
                 // phải sửa lại như thế này
         int backupProgress = toLot->progress;
         toLot->progress = 0;
-        QString startSerial2 = HxBlock::gen( block.data, toLot, model );
+        QString startSerial2 = BlockDataGen( block.data, toLot, model );
         toLot->progress = toLot->quantity - 1;
-        QString endSerial2 = HxBlock::gen( block.data, toLot, model );
+        QString endSerial2 = BlockDataGen( block.data, toLot, model );
         // backup
         toLot->progress = backupProgress;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "QObject"
-#include <QString>
+#include "QString"
 #include "HxUserProfile.h"
 
 class HxProtector : public QObject

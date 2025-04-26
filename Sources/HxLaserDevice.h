@@ -1,5 +1,5 @@
 #pragma once
-#include <QString>
+#include "QString"
 #include <QMap>
 #include "HxPosition.h"
 #include "HxDesign.h"
@@ -13,7 +13,7 @@ private:
 
 public:
     static bool SetProgram( QString name );
-    static bool SetupBlockData( QString program, QMap<int, QString> data );
+    static bool SetupBlockData( QString program, std::map<int, QString> blocks );
     static bool SetupPosition( QString program, HxPosition pos, int stopper, HxDesign design );
     static bool Burn();
 };

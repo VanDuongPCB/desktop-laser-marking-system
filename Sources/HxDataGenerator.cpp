@@ -1,15 +1,9 @@
-#include "HxBlock.h"
-#include "HxModel.h"
-#include "HxLOT.h"
-#include "HxDesign.h"
-#include <QStringList>
-#include <QString>
-#include <QDateTime>
+#include "HxDataGenerator.h"
 
-
-QString HxBlock::gen( QString format, std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model )
+QString BlockDataGen( QString format, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel )
 {
-    if ( format.length() < 1 ) return "";
+    if ( format.isEmpty() ) 
+        return "";
     QStringList formatItems = format.split( ',' );
     QStringList itemDatas;
     for ( auto& formatItem : formatItems )
@@ -35,12 +29,12 @@ QString HxBlock::gen( QString format, std::shared_ptr<HxLOT> lot, std::shared_pt
                 QString paramName = itemParams[ 1 ].toUpper().trimmed();
                 if ( objectName == "model" )
                 {
-                    QString value = model->Value( paramName );
+                    QString value = pModel->Value( paramName );
                     itemDatas.push_back( value );
                 }
                 else if ( objectName == "lot" )
                 {
-                    QString value = lot->Value( paramName );
+                    QString value = pLOT->Value( paramName );
                     itemDatas.push_back( value );
                 }
             }
@@ -51,21 +45,22 @@ QString HxBlock::gen( QString format, std::shared_ptr<HxLOT> lot, std::shared_pt
 }
 
 
-QMap<int, QString> HxBlock::gen( std::shared_ptr<HxDesign> design, std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model )
+std::map<int, QString> BlockDataGen( std::shared_ptr<HxDesign> pDesign, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel )
 {
-    QMap<int, QString> items;
-    if ( design == nullptr ) return items;
-    if ( model == nullptr ) return items;
-    QList<int> nums = design->blocks.keys();
+    std::map<int, QString> items;
+    if ( !pDesign || !pModel || !pLOT ) 
+        return items;
+
+    QList<int> nums = pDesign->blocks.keys();
     std::sort( nums.begin(), nums.end() );
     for ( auto num : nums )
     {
         if ( num < 1 ) continue;
-        HxBlock block = design->blocks[ num ];
+        HxBlock block = pDesign->blocks[ num ];
         QString format = block.data.trimmed();
         if ( format.length() < 1 ) continue;
-        QString data = gen( format, lot, model );
-        items.insert( num, data.replace( ",", "" ) );
+        QString data = BlockDataGen( format, pLOT, pModel );
+        items[ num ] = data.replace( ",", "" );
     }
     return items;
 }

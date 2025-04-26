@@ -1,6 +1,6 @@
 #pragma once
 #include <QMap>
-#include <QString>
+#include "QString"
 #include <memory>
 #include <vector>
 #include "HxBlock.h"

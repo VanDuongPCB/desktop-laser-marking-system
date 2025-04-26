@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <QString>
+#include "QString"
 #include <QMap>
 #include <QJsonObject>
 #include <vector>

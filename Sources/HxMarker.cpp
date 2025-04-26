@@ -23,6 +23,7 @@
 #include "HxException.h"
 #include "HxSystemError.h"
 
+#include "HxDataGenerator.h"
 
 HxMarker::HxMarker( QObject* parent ) : QObject( parent )
 {
@@ -115,7 +116,7 @@ bool HxMarker::Mark( bool test )
         for ( int i = 0; i < patternCnt; i++ )
         {
             HxPosition pos = model->positions[ i ];
-            QMap<int, QString> blockDatas = HxBlock::gen( design, tempLot, model );
+            std::map<int, QString> blockDatas = BlockDataGen ( design, tempLot, model );
 
 
             HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
@@ -130,7 +131,7 @@ bool HxMarker::Mark( bool test )
         {
             if ( tempLot->IsCompleted() ) continue;
             HxPosition pos = model->positions[ i ];
-            QMap<int, QString> blockDatas = HxBlock::gen( design, tempLot, model );
+            std::map<int, QString> blockDatas = BlockDataGen( design, tempLot, model );
 
             HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
             HxLaserDevice::SetupBlockData( design->name, blockDatas );

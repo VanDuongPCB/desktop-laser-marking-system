@@ -1,5 +1,5 @@
 #pragma once
-#include <QString>
+#include "QString"
 
 class HxBarcodeSaver
 {

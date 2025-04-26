@@ -9,7 +9,7 @@
 #include "HxLaserDevice.h"
 #include "HxActuator.h"
 
-
+#include "HxDataGenerator.h"
 
 
 
@@ -177,18 +177,18 @@ void HxMarkWindow::ShowLotBlocks()
         tempLot->progress = 0;
     }
 
-    QMap<int, QString> blockdatas = HxBlock::gen( design, tempLot, model );
-    QList<int> blockNums = blockdatas.keys();
-    std::sort( blockNums.begin(), blockNums.end() );
-    ui->tbvBlocks->SetRowCount( blockNums.size() );
-    for ( int i = 0; i < blockNums.size(); i++ )
+    std::map<int, QString> blocks = BlockDataGen( design, tempLot, model );
+    ui->tbvBlocks->SetRowCount( blocks.size() );
+    int row = 0;
+    for ( auto& [index, block] : blocks )
     {
-        ui->tbvBlocks->SetText( i, "Block", QString::number( blockNums[ i ] ).rightJustified( 3, '0' ) );
-        ui->tbvBlocks->SetText( i, "Dữ liệu", blockdatas[ blockNums[ i ] ] );
-        if ( blockNums[ i ] == codeIndex )
+        ui->tbvBlocks->SetText( row, "Block", QString::number( index ).rightJustified( 3, '0' ) );
+        ui->tbvBlocks->SetText( row, "Dữ liệu", block );
+        if ( index == codeIndex )
         {
-            ui->lblBarcode->setText( blockdatas[ blockNums[ i ] ] );
+            ui->lblBarcode->setText( block );
         }
+        row++;
     }
 
     ui->lblFormat->setText( "" );
