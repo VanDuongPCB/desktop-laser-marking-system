@@ -1,14 +1,14 @@
 #include "HxControlWindow.h"
-#include "ui_hxcontrolwindow.h"
+#include "ui_HxControlWindow.h"
 #include "HxMarker.h"
-#include "HxLaserDevice.h"
+#include "HxLaser.h"
 #include "HxException.h"
-#include "HxSystemError.h"
+#include "HxSystemReport.h"
 #include "HxMessage.h"
-#include <QFile>
-#include <QMap>
-#include "HxActuator.h"
-#include "HxBarcodeReader.h"
+#include "QFile"
+#include "QMap"
+#include "HxPLC.h"
+#include "HxBarcode.h"
 
 HxControlWindow::HxControlWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::ControlWindow )
 {
@@ -26,17 +26,17 @@ void HxControlWindow::on_btnBarcodeRead_clicked()
     ui->txtBarcodeData->setText( "" );
     try
     {
-        bool bit = HxBarcodeReader::IsHasData();
+        bool bit = Barcode()->IsHasData();
         if ( bit )
         {
-            HxBarcodeReader::Clear();
-            QString barcode = HxBarcodeReader::Read();
+            Barcode()->Clear();
+            QString barcode = Barcode()->Read();
             ui->txtBarcodeData->setText( barcode );
         }
     }
     catch ( HxException ex )
     {
-        HxMessage::error( ex.message );
+        HxMsgError( ex.Message() );
     }
 }
 
@@ -44,11 +44,11 @@ void HxControlWindow::on_spxCvWidth_valueChanged( double arg1 )
 {
     try
     {
-        HxActuator::SetCvWidth( arg1 );
+        PLC()->SetCvWidth( arg1 );
     }
     catch ( HxException ex )
     {
-        HxMessage::error( ex.message );
+        HxMsgError( ex.Message() );
     }
 }
 
@@ -56,11 +56,11 @@ void HxControlWindow::on_cbxStopper_currentIndexChanged( int index )
 {
     try
     {
-        HxActuator::SetStopper( index );
+        PLC()->SetStopper( index );
     }
     catch ( HxException ex )
     {
-        HxMessage::error( ex.message );
+        HxMsgError( ex.Message() );
     }
 }
 
@@ -68,14 +68,14 @@ void HxControlWindow::on_btnBlockClear_clicked()
 {
     if ( ui->tbvMarkBlocks->headers.empty() )
     {
-        ui->tbvMarkBlocks->SetHeaders( { "Block","Giá trị" } );
+        ui->tbvMarkBlocks->setHeaders( { "Block","Giá trị" } );
         int rows = 16;
-        ui->tbvMarkBlocks->SetRowCount( rows );
+        ui->tbvMarkBlocks->setRowCount( rows );
         for ( int row = 0; row < rows; row++ )
         {
-            ui->tbvMarkBlocks->SetText( row, 0, QString::number( row ).rightJustified( 3, '0' ) );
-            ui->tbvMarkBlocks->Item( row, 0 )->setFlags( ui->tbvMarkBlocks->Item( row, 0 )->flags() & ~Qt::ItemIsEditable );
-            ui->tbvMarkBlocks->SetText( row, 1, "" );
+            ui->tbvMarkBlocks->setText( row, 0, QString::number( row ).rightJustified( 3, '0' ) );
+            ui->tbvMarkBlocks->item( row, 0 )->setFlags( ui->tbvMarkBlocks->item( row, 0 )->flags() & ~Qt::ItemIsEditable );
+            ui->tbvMarkBlocks->setText( row, 1, "" );
         }
     }
 }
@@ -96,7 +96,7 @@ void HxControlWindow::on_btnMark_clicked()
 
     //    try{
     //        if(ui->chxChangeProgram->isChecked()){
-    //            Laser::setProgram(program);
+    //            GetLaserMachine()->setProgram(program);
     //        }
     //    }
     //    catch(Exception ex){
@@ -109,7 +109,7 @@ void HxControlWindow::on_btnMark_clicked()
     //    if(ui->chxChangeProgram->isChecked()){
     ////        Controller::instance()->setupLaserProgram(program);
     //        try{
-    //            Laser::setProgram(program);
+    //            GetLaserMachine()->setProgram(program);
     //        }
     //        catch(std::exception ex){
     //            std::cout << ex.what() << std::endl;

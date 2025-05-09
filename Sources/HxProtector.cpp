@@ -1,67 +1,94 @@
-#include "HxProtector.h"
-#include "HxSettings.h"
+﻿#include "HxProtector.h"
 
-HxProtector::HxProtector( QObject* parent ) : QObject( parent )
+#include "QApplication"
+
+#include "HxSettings.h"
+#include "HxFileManager.h"
+#include "HxMessage.h"
+#include "HxEvent.h"
+
+HxProtector::HxProtector() : QObject( nullptr )
 {
-    admin.name = "Admin";
-    admin.pass = HxSettings::password;
-    admin.isAdmin = true;
+    m_settings.Load();
+    qApp->installEventFilter( this );
 }
 
 HxProtector::~HxProtector()
-{
-
-}
+{}
 
 bool HxProtector::Login( QString name, QString pass )
 {
-    name = name.trimmed().toLower();
-    if ( name == "admin" && pass == HxSettings::password )
+    if ( pass.isEmpty() || name.isEmpty() )
     {
-        _currentUser = &admin;
-        emit LoginChanged();
+        HxMsgError( tr( "Mật khẩu hoặc tên không được để trống!" ) );
+        return false;
+    }
+    QString passwordKey = "Protect/" + name + "Password";
+    QString userName = name.trimmed().toLower();
+    QString setupPassword = m_settings.String( passwordKey );
+
+    if ( pass == setupPassword )
+    {
+        m_pProfile = HxProfile::Create();
+        m_pProfile->SetID( name.trimmed().toLower() );
+        m_pProfile->SetName( name );
+        m_pProfile->SetPassword( pass );
+
+        if ( name == "Admin" )
+        {
+            m_pProfile->SetPermission( "ADMIN", true);
+        }
+        else if ( name == "Super" )
+        {
+            m_pProfile->SetPermission( "SUPER", true );
+        }
+        else if ( name == "Leader" )
+        {
+            m_pProfile->SetPermission( "LEADER", true );
+        }
+
+        qApp->postEvent( qApp, new HxEvent( HxEvent::eLoginEvent ) );
         return true;
     }
-
-    for ( auto& user : HxUserProfile::items )
+    else
     {
-        if ( user->name.trimmed().toLower() == name )
-        {
-            if ( user->pass == "" )
-            {
-                _currentUser = user.get();
-                _currentUser->pass = pass;
-                HxUserProfile::Save();
-                emit LoginChanged();
-            }
-            else if ( user->pass == pass )
-            {
-                _currentUser = user.get();
-                emit LoginChanged();
-                return true;
-            }
-        }
+        HxMsgError( tr( "Mật khẩu không đúng!" ) );
+        return false;
     }
-    _currentUser = nullptr;
-    emit LoginChanged();
     return false;
 }
 
 void HxProtector::Logout()
 {
-    _currentUser = nullptr;
-    emit LoginChanged();
+    m_pProfile.reset();
+    qApp->postEvent( qApp, new HxEvent( HxEvent::eLogoutEvent ) );
 }
 
-HxUserProfile* HxProtector::CurrentUser()
+HxProfilePtr HxProtector::Profile()
 {
-    return _currentUser;
+    return m_pProfile;
 }
 
-
-/* -------------------------- */
-HxProtector* HxProtector::Instance()
+bool HxProtector::eventFilter( QObject* watched, QEvent* event )
 {
-    static HxProtector p;
-    return &p;
+    HxEvent* hxEvent( nullptr );
+    HxEvent::Type type;
+    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
+        return QObject::eventFilter( watched, event );
+
+    switch ( type )
+    {
+    case HxEvent::eSettingChanged:
+        m_settings.Load();
+        break;
+    default:
+        break;
+    }
+    return QObject::eventFilter( watched, event );
+}
+
+HxProtector* Protector()
+{
+    static HxProtector instance;
+    return &instance;
 }

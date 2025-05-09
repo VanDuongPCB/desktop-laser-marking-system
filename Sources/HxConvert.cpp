@@ -1,7 +1,7 @@
 #include "HxConvert.h"
 
 
-uint64_t HexStringToUInt64( QString hexStr )
+uint64_t Uint64FromHexString( const QString& hexStr )
 {
     std::string s = hexStr.trimmed().toUpper().toStdString();
     uint64_t val = 0;
@@ -22,7 +22,7 @@ uint64_t HexStringToUInt64( QString hexStr )
     return val;
 }
 
-QString UInt64ToHexString( uint64_t value, int length )
+QString HexStringFromUint64( uint64_t value, int length )
 {
     std::string base = QString::number( 0 ).rightJustified( length, '0' ).toStdString();
     for ( int i = 0; i < length; i++ )
@@ -33,4 +33,36 @@ QString UInt64ToHexString( uint64_t value, int length )
         value = value >> 4;
     }
     return QString::fromStdString( base );
+}
+
+QString ProductStatusToString( HxLOT::ProductStatus status )
+{
+    switch ( status )
+    {
+    case HxLOT::ePending:
+        return "Chưa sản xuất";
+    case HxLOT::eProduct:
+        return "Đang sản xuất";
+    case HxLOT::eCompleted:
+        return "Đã hoàn thành";
+    default:
+        break;
+    }
+    return "?";
+}
+
+QColor ProductStatusToColor( HxLOT::ProductStatus status )
+{
+    switch ( status )
+    {
+    case HxLOT::ePending:
+        return QColor( 255, 255, 255 );
+    case HxLOT::eProduct:
+        return QColor( 255, 255, 128 );
+    case HxLOT::eCompleted:
+        return QColor( 128, 255, 128 );
+    default:
+        break;
+    }
+    return QColor( 255, 255, 255 );
 }

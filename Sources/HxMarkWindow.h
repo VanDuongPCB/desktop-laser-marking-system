@@ -1,9 +1,7 @@
 #pragma once
-#include <QMainWindow>
-#include "HxMainWindow.h"
+#include "QMainWindow"
 
 #include "HxLOT.h"
-
 #include "HxException.h"
 
 namespace Ui
@@ -20,11 +18,11 @@ public:
     ~HxMarkWindow();
 
 private slots:
-    void HandleException( HxException ex );
-    void MarkStarted();
-    void MarkStopped();
+    void handleException( HxException ex );
+    void markStarted();
+    void markStopped();
 
-    void ControllerPrinted( std::shared_ptr<HxLOT> lot );
+    void controllerPrinted( std::shared_ptr<HxLOT> lot );
 
     void on_actionSelect_triggered();
 
@@ -40,14 +38,19 @@ private slots:
 
 private:
     Ui::MarkWindow* ui;
-    HxMainWindow* mainWindow = nullptr;
     std::vector<HxException> exceptions;
     void showEvent( QShowEvent* );
-    void ShowLots();
-    void ShowLotInfo( std::shared_ptr<HxLOT> lot );
-    void ShowLotStatus( std::shared_ptr<HxLOT> lot );
+    bool eventFilter( QObject* watched, QEvent* event );
+
+    void ShowLotInfo();
+    void ShowLotStatus();
     void ShowLotBlocks();
     void ShowExceptions();
     void UpdateUI();
+
+    void OnSelect();
+    void OnTest();
+    void OnRun();
+    void OnStop();
 };
 

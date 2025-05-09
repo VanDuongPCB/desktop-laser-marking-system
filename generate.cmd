@@ -21,3 +21,4 @@ mkdir %IDE_DIR%
 cd %IDE_DIR%
 cmake %SOURCE_DIR%
 cd %CURRENT_DIR%
+pause

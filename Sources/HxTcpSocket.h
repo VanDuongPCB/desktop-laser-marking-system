@@ -1,17 +1,16 @@
 #pragma once
-#include <QTcpSocket>
+#include "QTcpSocket"
 
-
-
-class HxTcpSocket : private QTcpSocket
+class HxTcpSocket : public QTcpSocket
 {
-private:
-    QString ip;
-    int port = 0;
 public:
     explicit HxTcpSocket( QObject* parent = nullptr );
-    explicit HxTcpSocket( QString ip, int port, QObject* parent = nullptr );
+    explicit HxTcpSocket( const QString& ip, int port, QObject* parent = nullptr );
     bool Connect( int timeout = 5000 );
-    bool WriteLine( QString data, int timeout = 2000 );
+    bool WriteLine( const QString& data, int timeout = 2000 );
     QString ReadLine( int timeout = 2000 );
+private:
+    QString m_ip;
+    int m_port = 0;
 };
+

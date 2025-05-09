@@ -1,41 +1,100 @@
 #pragma once
-#include "QString"
-#include <QMap>
-#include <vector>
-#include <memory>
+#include "vector"
+#include "memory"
 
-class HxLOT
+#include "QString"
+#include "QMap"
+#include "QDate"
+
+#include "HxObject.h"
+#include "HxSettings.h"
+
+class HxLOT;
+using HxLOTPtr = std::shared_ptr<HxLOT>;
+using HxLOTPtrArray = std::vector<HxLOTPtr>;
+using HxLOTPtrMap = std::map<QString, HxLOTPtr>;
+
+class HxLOT : public HxObject
 {
 public:
-    QString name;
-    QString dateCreate;
-    QString macStart = "000000000000";
-    QString macEnd = "000000000000";
-    QString counterStart = "0000";
-    int quantity = 1;
-    int progress = 0;
-    bool isRePrint = false;
-    QString modelName;
-    QMap<QString, QString> comments;
-    int sIndex = 0;
+    enum ProductStatus
+    {
+        eProduct = 0,
+        ePending = 1,
+        eCompleted = 2
+    };
 
-public:
+    enum ModifyFlag : uint64_t
+    {
+        eNew = 0x01,
+        eInfo = 0x02,
+        eProgress = 0x04,
+        eComment = 0x08
+    };
+
     HxLOT();
     ~HxLOT();
-    QString Counter();
-    QString MAC();
-    QString Status();
-    bool NextItem();
+
+    QString Name() const;
+    QString CounterStart() const;
+    QString CounterEnd() const;
+    QString Counter( int shift = 0 ) const;
+    QString MACStart() const;
+    QString MACEnd() const;
+    QString MAC( int shift = 0 ) const;
+    int Quantity() const;
+    int Progress() const;
+    QString Model() const;
+    bool IsRePrint() const;
+    QString Value( QString paramName ) const;
+    std::map<QString, QString> Comments() const;
     bool IsCompleted();
-    QString Value( QString paramName );
-public:
-    static std::vector<std::shared_ptr<HxLOT>> items;
-    static void Sort();
-    static void Load();
-    static void Remove( int index );
-    static void SaveAll();
-    static void SaveLot( std::shared_ptr<HxLOT> data );
-    static std::shared_ptr<HxLOT> Create();
-    static std::shared_ptr<HxLOT> Find( QString name );
-    static QStringList ParamNames();
+    ProductStatus Status() const;
+    void Evaluate();
+
+    void SetName( const QString& value );
+    void SetCounterStart( const QString& value );
+    void SetMACStart( const QString& value );
+    void SetMACEnd( const QString& value );
+    void SetQuantity( int value );
+    void SetProgress( int value );
+    void SetModel( const QString& value );
+    void SetRePrint( bool bIsEnabled );
+    void SetValue( const QString& name, const QString& value );
+
+    bool NextItem();
+    HxLOTPtr Clone() const;
+
+private:
+    QString m_name;
+    QString m_macStart = "";
+    QString m_macEnd = "";
+    QString m_counterStart = "";
+    int m_quantity = 1;
+    int m_progress = 0;
+    bool m_isRePrint = false;
+    QString m_modelName;
+    std::map<QString, QString> m_comments;
+    ProductStatus m_status = ePending;
 };
+
+class HxLOTManager: private QObject
+{
+    Q_OBJECT
+public:
+    HxLOTManager();
+    HxLOTPtr Create();
+    HxLOTPtr GetLOT( const QString& lotName );
+    HxLOTPtrMap GetLOTs( const QDate& fromTime = QDate( 2000, 1, 1 ) );
+    void Save( HxLOTPtr pLOT );
+    void Removes( const QStringList& names );
+    QStringList Parameters();
+    void Migration( const QString& dir );
+
+private:
+    HxRegistrySetting m_settings;
+    QStringList m_paramNames;
+    bool eventFilter( QObject* watched, QEvent* event );
+};
+
+HxLOTManager* LOTManager();

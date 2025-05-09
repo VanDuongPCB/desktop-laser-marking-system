@@ -1,12 +1,12 @@
 #pragma once
-#include <QMainWindow>
-#include <QStandardItem>
+#include "QMainWindow"
+#include "QStandardItem"
+#include "QLineEdit"
 #include "HxLOT.h"
-#include "HxLOTPropertyDialog.h"
 
 namespace Ui
 {
-    class LOTWindow;
+    class LotWindow;
 }
 
 class HxLOTWindow : public QMainWindow
@@ -18,9 +18,9 @@ public:
     ~HxLOTWindow();
 
 private slots:
-    void ControllerPrinted( std::shared_ptr<HxLOT> lot );
+    void controllerPrinted( std::shared_ptr<HxLOT> lot );
 
-    void DataChanged();
+    void dataChanged();
 
     void on_actionNew_triggered();
 
@@ -33,9 +33,18 @@ private slots:
     void on_tbvLots_doubleClicked( const QModelIndex& index );
 
 private:
-    Ui::LOTWindow* ui;
-    void showEvent( QShowEvent* );
-    void ShowLot( QString filter );
+    Ui::LotWindow* ui;
+    HxLOTPtrMap m_LOTs;
+    QLineEdit* m_pSearchTextBox;
 
+    void showEvent( QShowEvent* );
+    void showLot( QString filter );
+
+    void OnRefresh();
+    void OnFilter( const QString& filter = QString() );
+    void OnNew();
+    void OnDelete();
+    void OnUpdate();
+    void OnEdit();
 };
 

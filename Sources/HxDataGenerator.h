@@ -1,11 +1,8 @@
 #pragma once
-#include "map"
 
-#include "QString"
-
-#include "HxLOT.h"
-#include "HxModel.h"
 #include "HxDesign.h"
+#include "HxModel.h"
+#include "HxLOT.h"
 
-QString BlockDataGen( QString format, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel );
-std::map<int, QString> BlockDataGen( std::shared_ptr<HxDesign> pDesign, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel );
+QString GenMarkData( const QString& format, HxLOTPtr pLOT, HxModelPtr pModel, int shift = 0 );
+std::map<int, QString> GenMarkData( HxDesignPtr pDesign, HxLOTPtr pLOT, HxModelPtr pModel, int shift = 0 );

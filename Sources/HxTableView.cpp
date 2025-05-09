@@ -1,6 +1,6 @@
 #include "HxTableView.h"
-#include <QKeyEvent>
-
+#include "QKeyEvent"
+#include "iostream"
 
 HxTableView::HxTableView( QWidget* parent ) : QTableView( parent )
 {
@@ -23,7 +23,7 @@ void HxTableView::keyPressEvent( QKeyEvent* event )
     }
 }
 
-HxDataTable* HxTableView::DataTable()
+HxDataTable* HxTableView::dataTable()
 {
     HxDataTable* m = ( HxDataTable* )this->model();
     if ( m == nullptr )
@@ -34,25 +34,30 @@ HxDataTable* HxTableView::DataTable()
     return m;
 }
 
-void HxTableView::SetHeaders( QStringList headers )
+void HxTableView::setHeaders( QStringList headers )
 {
     this->headers = headers;
-    HxDataTable* m = DataTable();
+    HxDataTable* m = dataTable();
     m->setColumnCount( headers.size() );
     m->setHorizontalHeaderLabels( headers );
 }
 
-void HxTableView::SetRowCount( int count )
+void HxTableView::setRowCount( int count )
 {
-    DataTable()->setRowCount( count );
+    dataTable()->setRowCount( count );
 }
 
-QStandardItem* HxTableView::Item( int row, int col )
+int HxTableView::RowCount()
+{
+    return dataTable()->rowCount();
+}
+
+QStandardItem* HxTableView::item( int row, int col )
 {
     return ( ( QStandardItemModel* )model() )->item( row, col );
 }
 
-QStandardItem* HxTableView::Item( int row, QString header )
+QStandardItem* HxTableView::item( int row, QString header )
 {
     for ( int i = 0; i < headers.size(); i++ )
     {
@@ -64,9 +69,9 @@ QStandardItem* HxTableView::Item( int row, QString header )
     return nullptr;
 }
 
-void HxTableView::SetText( int row, int col, QString data )
+void HxTableView::setText( int row, int col, QString data )
 {
-    HxDataTable* m = DataTable();
+    HxDataTable* m = dataTable();
     if ( row < 0 || row >= m->rowCount() ) return;
     if ( col < 0 || col >= m->columnCount() ) return;
     QStandardItem* item = ( QStandardItem* )m->item( row, col );
@@ -78,15 +83,15 @@ void HxTableView::SetText( int row, int col, QString data )
     item->setText( data );
 }
 
-void HxTableView::SetText( int row, QString header, QString data )
+void HxTableView::setText( int row, QString header, QString data )
 {
-    HxDataTable* m = DataTable();
+    HxDataTable* m = dataTable();
     if ( row < 0 || row >= m->rowCount() ) return;
     for ( int col = 0; col < headers.size(); col++ )
     {
         if ( headers[ col ] == header )
         {
-            SetText( row, col, data );
+            setText( row, col, data );
             break;
         }
     }

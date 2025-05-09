@@ -1,6 +1,8 @@
 #pragma once
 #include <QDialog>
 
+#include "HxProfile.h"
+
 namespace Ui
 {
     class LoginDialog;
@@ -14,15 +16,8 @@ public:
     explicit HxLoginDialog( QWidget* parent = 0 );
     ~HxLoginDialog();
 
-private slots:
-    void on_txtUserName_textChanged( const QString& arg1 );
-
-    void on_txtPassword_textChanged( const QString& arg1 );
-
-    void on_btnLogin_clicked();
-
 private:
     Ui::LoginDialog* ui;
-    bool CheckInputs();
+    void OnLogin();
 };
 

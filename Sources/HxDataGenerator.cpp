@@ -1,9 +1,10 @@
 #include "HxDataGenerator.h"
 
-QString BlockDataGen( QString format, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel )
+QString GenMarkData( const QString& format, HxLOTPtr pLOT, HxModelPtr pModel, int shift )
 {
-    if ( format.isEmpty() ) 
+    if ( format.isEmpty() || !pLOT || !pModel )
         return "";
+
     QStringList formatItems = format.split( ',' );
     QStringList itemDatas;
     for ( auto& formatItem : formatItems )
@@ -35,6 +36,10 @@ QString BlockDataGen( QString format, std::shared_ptr<HxLOT> pLOT, std::shared_p
                 else if ( objectName == "lot" )
                 {
                     QString value = pLOT->Value( paramName );
+                    if ( paramName == "COUNTER" )
+                        value = pLOT->Counter( shift );
+                    else if ( paramName == "MAC" )
+                        value = pLOT->MAC( shift );
                     itemDatas.push_back( value );
                 }
             }
@@ -44,23 +49,20 @@ QString BlockDataGen( QString format, std::shared_ptr<HxLOT> pLOT, std::shared_p
     return data.replace( ",", "" );
 }
 
-
-std::map<int, QString> BlockDataGen( std::shared_ptr<HxDesign> pDesign, std::shared_ptr<HxLOT> pLOT, std::shared_ptr<HxModel> pModel )
+std::map<int, QString> GenMarkData( HxDesignPtr pDesign, HxLOTPtr pLOT, HxModelPtr pModel, int shift )
 {
     std::map<int, QString> items;
-    if ( !pDesign || !pModel || !pLOT ) 
+    if ( !pLOT || !pDesign || !pModel )
         return items;
 
-    QList<int> nums = pDesign->blocks.keys();
-    std::sort( nums.begin(), nums.end() );
-    for ( auto num : nums )
+    for ( auto& [index, block] : pDesign->Blocks() )
     {
-        if ( num < 1 ) continue;
-        HxBlock block = pDesign->blocks[ num ];
+        if ( index < 1 )
+            continue;
         QString format = block.data.trimmed();
         if ( format.length() < 1 ) continue;
-        QString data = BlockDataGen( format, pLOT, pModel );
-        items[ num ] = data.replace( ",", "" );
+        QString data = GenMarkData( format, pLOT, pModel, shift );
+        items[ index ] = data.replace( ",", "" );
     }
     return items;
 }

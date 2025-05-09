@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
-#include <memory>
+#include "vector"
+#include "memory"
 #include "QString"
 
 class HxIVProgram
@@ -14,7 +14,7 @@ public:
 
 public:
     static std::vector<std::shared_ptr<HxIVProgram>> items;
-    static void Load();
-    static QStringList Names();
+    static void load();
+    static QStringList names();
 };
 

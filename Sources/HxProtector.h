@@ -1,26 +1,22 @@
 #pragma once
 #include "QObject"
 #include "QString"
-#include "HxUserProfile.h"
+#include "HxProfile.h"
 
 class HxProtector : public QObject
 {
     Q_OBJECT
-private:
-    HxUserProfile admin;
-    HxUserProfile* _currentUser = nullptr;
 public:
-    explicit HxProtector( QObject* parent = 0 );
+    explicit HxProtector();
     ~HxProtector();
     bool Login( QString name, QString pass );
     void Logout();
-    HxUserProfile* CurrentUser();
-
-signals:
-    void LoginChanged();
-public slots:
-
-public:
-    static HxProtector* Instance();
+    HxProfilePtr Profile();
+private:
+    HxRegistrySetting m_settings;
+    HxProfilePtr m_pProfile;
+    bool eventFilter( QObject* watched, QEvent* event );
 };
 
+
+HxProtector* Protector();

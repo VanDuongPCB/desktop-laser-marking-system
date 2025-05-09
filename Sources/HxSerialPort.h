@@ -1,5 +1,5 @@
 #pragma once
-#include <QSerialPort>
+#include "QSerialPort"
 
 
 
@@ -7,9 +7,10 @@ class HxSerialPort : public QSerialPort
 {
 public:
     explicit HxSerialPort( QObject* parent = nullptr );
-    explicit HxSerialPort( QString port, QObject* parent = nullptr );
-    explicit HxSerialPort( QString port, int baud, QObject* parent = nullptr );
+    explicit HxSerialPort( const QString& port, QObject* parent = nullptr );
+    explicit HxSerialPort( const QString& port, int baud, QObject* parent = nullptr );
 
-    bool WriteLine( QString data, int timeout = 5000 );
-    QString ReadLine( int timeout = 5000 );
+    bool WriteLine( const QString& data, int timeout = 30000 );
+    QString ReadLine( int timeout = 30000 );
 };
+

@@ -1,5 +1,6 @@
 #pragma once
 #include <QMainWindow>
+#include "QLabel"
 #include "HxException.h"
 
 namespace Ui
@@ -14,19 +15,22 @@ class HxMainWindow : public QMainWindow
 public:
     explicit HxMainWindow( QWidget* parent = 0 );
     ~HxMainWindow();
-    void SetNavEnable( bool en );
 private slots:
     void ErrorReported( HxException ex );
-    void LoginChanged();
-    void UpdateUI();
-    void MenuTabToggled( bool checked );
-    void on_actionLogin_triggered();
 
 private:
     Ui::MainWindow* ui;
-    std::vector<QAction*> actions;
-    std::vector<QWidget*> pages;
-    void showEvent( QShowEvent* );
+    QLabel* m_pLblVersion = nullptr;
+    int m_currentTabIndex = 0;
+
+    void resizeEvent( QResizeEvent* event );
     void closeEvent( QCloseEvent* );
+    bool eventFilter( QObject* watched, QEvent* event );
+    void OnLoginOrLogout();
+    void OnLockUI();
+    void OnUnLockUIForLeader();
+    void OnUnLockUIForSuper();
+    void OnUnLockUIForAdmin();
+    void OnTabChanged( int index );
 };
 

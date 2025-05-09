@@ -1,8 +1,8 @@
 #pragma once
-#include <QMainWindow>
-#include <QLabel>
-#include <QLineEdit>
-#include <QStandardItem>
+#include "QMainWindow"
+#include "QLabel"
+#include "QLineEdit"
+#include "QStandardItem"
 
 #include "HxModel.h"
 
@@ -20,49 +20,30 @@ public:
     ~HxModelWindow();
 private:
     Ui::ModelWindow* ui;
-    QLineEdit* txtSearch = nullptr;
-    std::shared_ptr<HxModel> selected;
-    std::vector<std::shared_ptr<HxModel>> filtereds;
+    HxModelPtrMap m_models;
+    HxModelPtr m_pModel;
+
+    QLineEdit* m_pSearchTextBox = nullptr;
 
     void showEvent( QShowEvent* );
 
-    void ShowModels();
-    void ShowModelInfo();
-    void ShowMarkPositions();
-    void ShowMarkBlocks();
-    void ShowComments();
+    void showModels();
+    void showModelInfo();
+    void showMarkPositions();
+    void showMarkBlocks();
+    void showComments();
 
+    void OnRefresh();
+    void OnFilter(const QString& filter);
+    void OnSelect( const QModelIndex& index );
 
-private slots:
-    void ModelFilterTextChanged( QString filter );
+    void OnNew();
+    void OnRemove();
+    void OnSave();
+    void OnAddParam();
+    void OnRemoveParam();
 
-    void ModelSelectionChanged( const QModelIndex& index );
-
-    void MarkPositionChanged( QStandardItem* item );
-
-    void CommentChanged( QStandardItem* item );
-
-    void on_actionNew_triggered();
-
-    void on_actionRemove_triggered();
-
-    void on_actionSave_triggered();
-
-    void on_actionLoad_triggered();
-
-    void on_actionFromFile_triggered();
-
-    void on_actionToFile_triggered();
-
-
-
-    void on_txtModelNo_textChanged( const QString& arg1 );
-    void on_spxProgram_valueChanged( int arg1 );
-    void on_spxCvWidth_valueChanged( double arg1 );
-    void on_btnAddParam_clicked();
-    void on_btnRemoveParam_clicked();
-    void on_cbxStopper_currentTextChanged( const QString& arg1 );
-    void on_cbxIVPrograms_currentTextChanged( const QString& arg1 );
-
+    void OnInfoChanged();
+    void OnPositionChanged( QStandardItem* item );
+    void OnCommentChanged( QStandardItem* item );
 };
-

@@ -1,5 +1,5 @@
 #pragma once
-#include <QDialog>
+#include "QDialog"
 #include "HxModel.h"
 
 namespace Ui
@@ -12,18 +12,16 @@ class HxNewModelDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit HxNewModelDialog( QWidget* parent = 0 );
+    explicit HxNewModelDialog( HxModelPtrMap models, QWidget* parent = 0 );
     ~HxNewModelDialog();
-    std::shared_ptr<HxModel> data;
+    HxModelPtr GetModel();
+    HxModelPtrMap m_models;
+    HxModelPtr m_pModel;
 private slots:
-    void on_btnCreate_clicked();
-
-    void on_txtModelCode_textChanged( const QString& arg1 );
-
-    void on_txtModelName_textChanged( const QString& arg1 );
+    void OnCreate();
 
 private:
     Ui::NewModelDialog* ui;
-    bool CheckInputs();
+    bool checkInputs();
 };
 

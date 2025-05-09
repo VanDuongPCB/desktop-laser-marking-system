@@ -1,5 +1,5 @@
 #pragma once
-#include <QDialog>
+#include "QDialog"
 
 namespace Ui
 {
@@ -12,12 +12,14 @@ class HxRemoveParamDialog : public QDialog
 
 public:
     bool isApplyAll = false;
+    QStringList names;
     explicit HxRemoveParamDialog( QWidget* parent = nullptr );
     ~HxRemoveParamDialog();
-    void SetParams( QStringList names );
+    void setParams( QStringList names );
 private slots:
     void on_btnRemove_clicked();
 
 private:
     Ui::RemoveParamDialog* ui;
 };
+

@@ -1,0 +1,29 @@
+#pragma once
+#include "QString"
+#include "QMap"
+#include "QObject"
+
+#include "HxPosition.h"
+#include "HxDesign.h"
+#include "HxStopper.h"
+#include "HxSettings.h"
+
+class HxLaser : public QObject
+{
+private:
+    bool DetectPortExisting();
+    QString SendData( const QString& data, int timeout = 10000 );
+    QString DetectError( const QString& data );
+
+public:
+    HxLaser();
+    bool SetProgram( const QString& name );
+    bool SetupBlockData( const QString& program, std::map<int, QString> dataMap );
+    bool SetupPosition( const QString& program, HxPosition pos, int stopper, HxDesignPtr pDesign );
+    bool Burn();
+private:
+    HxRegistrySetting m_settings;
+    bool eventFilter( QObject* watched, QEvent* event );
+};
+
+HxLaser* Laser();

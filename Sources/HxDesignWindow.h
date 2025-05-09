@@ -1,6 +1,6 @@
 #pragma once
-#include <QMainWindow>
-#include <QStandardItem>
+#include "QMainWindow"
+#include "QStandardItem"
 #include "HxDesign.h"
 
 namespace Ui
@@ -16,33 +16,24 @@ public:
     explicit HxDesignWindow( QWidget* parent = 0 );
     ~HxDesignWindow();
 
-private slots:
-    void BlockChanged( QStandardItem* item );
-
-    void on_actionSave_triggered();
-
-    void on_actionLoad_triggered();
-
-    void on_tbvDesign_pressed( const QModelIndex& index );
-
-    void on_spxDesignWidth_valueChanged( double arg1 );
-
-    void on_spxDesignHeight_valueChanged( double arg1 );
-
-    void on_tbvModelParams_doubleClicked( const QModelIndex& index );
-
-    void on_tbvLotParams_doubleClicked( const QModelIndex& index );
-
 private:
     Ui::DesignWindow* ui;
-    std::vector<std::shared_ptr<HxDesign>> designs;
-    std::shared_ptr<HxDesign> design;
+    int m_maxBlockCount = 32;
+    HxDesignPtr m_pDesign;
+    HxDesignPtrMap m_designs;
 
     void showEvent( QShowEvent* );
-
-    void ShowDesigns( QString filter );
-    void ShowSize();
+    void ShowDesigns();
     void ShowBlocks();
     void ShowParams();
+
+
+    void OnSelected( const QModelIndex& index );
+    void OnSizeChanged( QStandardItem* item );
+    void OnBlockChanged( QStandardItem* item );
+    void OnInsertParam( const QModelIndex& index );
+    void OnRefresh();
+    void OnSave();
+
 };
 
