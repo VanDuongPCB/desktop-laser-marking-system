@@ -61,7 +61,7 @@ HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     Marker()->moveToThread( QCoreApplication::instance()->thread() );
     Marker()->Init();
 
-    //OnLockUI();
+    OnLockUI();
 
     Theme()->SetTheme( "Default" );
     setWindowState( Qt::WindowMaximized );
