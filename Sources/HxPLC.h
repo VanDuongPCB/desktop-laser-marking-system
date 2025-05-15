@@ -16,9 +16,9 @@ public:
     bool IsHasTrigger();
     bool ConfirmTrigger();
     bool SetCompleteBit();
+    void ReLoadSetting();
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject*, QEvent* );
 };
 
 HxPLC* PLC();

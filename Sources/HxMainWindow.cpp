@@ -3,6 +3,7 @@
 
 #include "QSignalBlocker"
 #include "QCloseEvent"
+#include "QCoreApplication"
 
 #include "HxSettingsWindow.h"
 #include "HxMarkWindow.h"
@@ -12,27 +13,43 @@
 #include "HxDesignWindow.h"
 #include "HxTransferWindow.h"
 #include "HxLoginDialog.h"
+#include "HxIVProgramWindow.h"
+#include "HxLogWindow.h"
 
 #include "HxProtector.h"
 #include "HxMessage.h"
 #include "HxEvent.h"
 #include "HxSystemError.h"
 #include "HxLicense.h"
+#include "HxLOT.h"
 #include "HxMarker.h"
+#include "HxLogger.h"
 
+#include "HxTheme.h"
 
 HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
 
-    ui->tabMark->layout()->addWidget( new HxMarkWindow() );
-    ui->tabTransfer->layout()->addWidget( new HxTransferWindow() );
-    ui->tabPlans->layout()->addWidget( new HxLOTWindow() );
-    ui->tabModel->layout()->addWidget( new HxModelWindow() );
-    ui->tabDesign->layout()->addWidget( new HxDesignWindow() );
-    //ui->tabIV
-    ui->tabSetting->layout()->addWidget( new HxSettingsWindow() );
-    ui->tabControl->layout()->addWidget( new HxControlWindow() );
+    m_pMarkWindow = new HxMarkWindow();
+    m_pTransferWindow = new HxTransferWindow();
+    m_pLOTWindow = new HxLOTWindow();
+    m_pModelWindow = new HxModelWindow();
+    m_pDesignWindow = new HxDesignWindow();
+    m_pIVProgramWindow = new HxIVProgramWindow();
+    m_pSettingsWindow = new HxSettingsWindow();
+    m_pControlWindow = new HxControlWindow();
+    m_pLogWindow = new HxLogWindow();
+
+    ui->tabMark->layout()->addWidget( m_pMarkWindow );
+    ui->tabTransfer->layout()->addWidget( m_pTransferWindow );
+    ui->tabPlans->layout()->addWidget( m_pLOTWindow );
+    ui->tabModel->layout()->addWidget( m_pModelWindow );
+    ui->tabDesign->layout()->addWidget( m_pDesignWindow );
+    ui->tabIV->layout()->addWidget( m_pIVProgramWindow );
+    ui->tabSetting->layout()->addWidget( m_pSettingsWindow );
+    ui->tabControl->layout()->addWidget( m_pControlWindow );
+    ui->tabData->layout()->addWidget( m_pLogWindow );
 
     qApp->installEventFilter( this );
 
@@ -41,10 +58,13 @@ HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     connect( HxSystemError::Instance(), &HxSystemError::Reported, this, &HxMainWindow::ErrorReported );
     connect( ui->tabWidget, &QTabWidget::currentChanged, this, &HxMainWindow::OnTabChanged );
 
-    OnLockUI();
-    setWindowState( Qt::WindowMaximized );
-
+    Marker()->moveToThread( QCoreApplication::instance()->thread() );
     Marker()->Init();
+
+    //OnLockUI();
+
+    Theme()->SetTheme( "Default" );
+    setWindowState( Qt::WindowMaximized );
 }
 
 HxMainWindow::~HxMainWindow()

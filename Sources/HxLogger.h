@@ -1,17 +1,36 @@
 #pragma once
+#include "HxDefines.h"
 #include "HxLOT.h"
 #include "HxModel.h"
 #include "HxDesign.h"
 #include "HxException.h"
+#include "HxSettings.h"
 
-class HxLogger
+struct HxLog
 {
-public:
-    void Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design );
+    QString Time;
+    QString Serial;
+    QString LOT;
+    QString Model;
+    QStringList items;
+};
 
-    void SavePrint( std::map<int, QString>& data, int blockCodeIndex, const QString& lotName, const QString& modelName, const QString& designName );
-    void SaveRePrint( std::map<int, QString>& data, int blockCodeIndex, const QString& lotName, const QString& modelName, const QString& designName );
-    void SaveError( HxException& ex );
+using HxLogArray = std::vector<HxLog>;
+
+class HxLogger : private QObject
+{
+    Q_OBJECT
+public:
+    HxLogger();
+    ReturnCode CheckSerialExisting( const QString& serial );
+    ReturnCode SavePrint( HxLOTPtr pLOT, HxModelPtr pModel, HxDesignPtr pDesign, std::map<int, QString>& blockdata );
+    ReturnCode SaveError( const QString& time, const QString& where, const QString& message );
+    ReturnCode SaveBarcode( const QString& code );
+    ReturnCode Get( QDate fromDate, QDate toDate, HxLogArray& items );
+    void Export( HxLogArray& items, QDate fromDate, QDate toDate );
+    void ReLoadSetting();
+private:
+    HxRegistrySetting m_settings;
 };
 
 

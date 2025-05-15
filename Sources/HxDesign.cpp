@@ -91,7 +91,7 @@ void HxDesign::SetBlock( int index, const HxBlock& block )
 
 HxDesignManager::HxDesignManager() :QObject( nullptr )
 {
-    //qApp->installEventFilter( this );
+    m_settings.Load();
 }
 
 HxDesignPtr HxDesignManager::Create()
@@ -102,6 +102,9 @@ HxDesignPtr HxDesignManager::Create()
 HxDesignPtr HxDesignManager::GetDesign( const QString& name )
 {
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return nullptr;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
@@ -160,6 +163,9 @@ HxDesignPtrMap HxDesignManager::GetDesigns()
 {
     HxDesignPtrMap map;
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return map;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
@@ -185,15 +191,24 @@ HxDesignPtrMap HxDesignManager::GetDesigns()
     return map;
 }
 
-void HxDesignManager::Save( HxDesignPtr pDesign )
+ReturnCode HxDesignManager::Save( HxDesignPtr pDesign, bool bForce )
 {
     if ( !pDesign )
-        return;
+        return RtDataNull;
+
+    if ( !bForce && !pDesign->IsMofified() )
+        return RtDataNoChanges;
+
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
+    {
+        return RtDBOpenFailed;
+    }
     HxQuery query( db );
     QString cmd;
     if ( pDesign->IsMofified( HxDesign::eNew ) )
@@ -206,7 +221,10 @@ void HxDesignManager::Save( HxDesignPtr pDesign )
             .arg( pDesign->Height() );
         if ( !query.exec( cmd ) )
         {
+
             qDebug() << query.lastError().text();
+            db.close();
+            return RtDBInsertFailed;
         }
     }
     else
@@ -246,64 +264,95 @@ void HxDesignManager::Save( HxDesignPtr pDesign )
     db.close();
     bool isNew = pDesign->IsMofified( HxDesign::eNew );
     pDesign->ClearModified();
-    qApp->postEvent( qApp, new HxEvent( isNew ? HxEvent::eDesignAdded : HxEvent::eDesignChanged ) );
+    return RtNormal;
 }
 
-bool HxDesignManager::eventFilter( QObject* watched, QEvent* event )
-{
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
+//
+//void HxDesignManager::Migration( const QString& dir )
+//{
+//    for ( int i = 0; i < 2000; i++ )
+//    {
+//        QString name = QString::number( i ).rightJustified( 4, '0' );
+//        QString designPath = dir + "/" + name + ".design";
+//        QFile fileReader( designPath );
+//        if ( !fileReader.open( QIODevice::ReadOnly ) )
+//            continue;
+//
+//        QByteArray json = fileReader.readAll();
+//        fileReader.close();
+//        QJsonDocument doc = QJsonDocument::fromJson( json );
+//        QJsonObject obj = doc.object();
+//
+//        HxDesignPtr pDesign = Create();
+//        pDesign->SetName( name );
+//        pDesign->SetWidth( obj.value( "width" ).toDouble( 5 ) );
+//        pDesign->SetHeight( obj.value( "height" ).toDouble( 5 ) );
+//
+//        QJsonArray arr = obj.value( "blocks" ).toArray();
+//        for ( auto arrItem : arr )
+//        {
+//            QJsonObject objBlock = arrItem.toObject();
+//            int index = objBlock.value( "index" ).toInt( 0 );
+//            if ( index < 1 )
+//                continue;
+//
+//            HxBlock block;
+//            block.isCode = objBlock.value( "is-code" ).toBool( false );
+//            block.data = objBlock.value( "data" ).toString();
+//            block.textLen = objBlock.value( "text-length" ).toInt( 1 );
+//            pDesign->SetBlock( index, block );
+//        }
+//
+//        Save( pDesign );
+//    }
+//}
 
-    switch ( type )
+ReturnCode HxDesignManager::DeleteAll()
+{
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
     {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
+        qDebug() << "Delete Design: " << db.lastError().text();
+        return RtDBOpenFailed;
     }
-    return QObject::eventFilter( watched, event );
+    HxQuery query( db );
+    QString cmd;
+
+    cmd = QString( "DELETE FROM Designs" );
+    if ( !query.exec( cmd ) )
+    {
+        qDebug() << "Delete Design: " << query.lastError().text();
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM DesignParams" );
+    if ( !query.exec( cmd ) )
+    {
+        qDebug() << "Delete Design: " << query.lastError().text();
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM DesignBlocks" );
+    if ( !query.exec( cmd ) )
+    {
+        qDebug() << "Delete Design: " << query.lastError().text();
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    db.close();
+    return RtNormal;
 }
 
-void HxDesignManager::Migration( const QString& dir )
+void HxDesignManager::ReLoadSetting()
 {
-    for ( int i = 0; i < 2000; i++ )
-    {
-        QString name = QString::number( i ).rightJustified( 4, '0' );
-        QString designPath = dir + "/" + name + ".design";
-        QFile fileReader( designPath );
-        if ( !fileReader.open( QIODevice::ReadOnly ) )
-            continue;
-
-        QByteArray json = fileReader.readAll();
-        fileReader.close();
-        QJsonDocument doc = QJsonDocument::fromJson( json );
-        QJsonObject obj = doc.object();
-
-        HxDesignPtr pDesign = Create();
-        pDesign->SetName( name );
-        pDesign->SetWidth( obj.value( "width" ).toDouble( 5 ) );
-        pDesign->SetHeight( obj.value( "height" ).toDouble( 5 ) );
-
-        QJsonArray arr = obj.value( "blocks" ).toArray();
-        for ( auto arrItem : arr )
-        {
-            QJsonObject objBlock = arrItem.toObject();
-            int index = objBlock.value( "index" ).toInt( 0 );
-            if ( index < 1 )
-                continue;
-
-            HxBlock block;
-            block.isCode = objBlock.value( "is-code" ).toBool( false );
-            block.data = objBlock.value( "data" ).toString();
-            block.textLen = objBlock.value( "text-length" ).toInt( 1 );
-            pDesign->SetBlock( index, block );
-        }
-
-        Save( pDesign );
-    }
+    m_settings.Load();
 }
 
 HxDesignManager* DesignManager()

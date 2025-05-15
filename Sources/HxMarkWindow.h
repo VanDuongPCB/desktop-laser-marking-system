@@ -17,25 +17,6 @@ public:
     explicit HxMarkWindow( QWidget* parent = 0 );
     ~HxMarkWindow();
 
-private slots:
-    void handleException( HxException ex );
-    void markStarted();
-    void markStopped();
-
-    void controllerPrinted( std::shared_ptr<HxLOT> lot );
-
-    void on_actionSelect_triggered();
-
-    void on_actionRun_triggered();
-
-    void on_actionStop_triggered();
-
-    void on_actionMark_triggered();
-
-    void on_tbvSelector_doubleClicked( const QModelIndex& index );
-
-    void on_actionLoad_triggered();
-
 private:
     Ui::MarkWindow* ui;
     std::vector<HxException> exceptions;
@@ -46,7 +27,11 @@ private:
     void ShowLotStatus();
     void ShowLotBlocks();
     void ShowExceptions();
+
+    void LockUI();
     void UpdateUI();
+
+    void OnException( QJsonObject exData );
 
     void OnSelect();
     void OnTest();

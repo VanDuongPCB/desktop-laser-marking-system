@@ -3,6 +3,7 @@
 #include "QStandardItem"
 #include "HxLOT.h"
 #include "HxModel.h"
+#include "HxDesign.h"
 
 namespace Ui
 {
@@ -14,27 +15,9 @@ class HxLOTPropertyDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit HxLOTPropertyDialog( const QString& lotName, HxLOTPtrMap LOTs, QWidget* parent = 0 );
+    explicit HxLOTPropertyDialog( HxLOTPtr pLOT, HxLOTPtrMap LOTs, QWidget* parent = 0 );
     ~HxLOTPropertyDialog();
-
-signals:
-    void dataChanged();
-private slots:
-    void OnParamChanged( QStandardItem* );
-
-    // void on_btnCreateOrChange_clicked();
-
-    // void on_txtMACStart_textChanged( const QString& arg1 );
-
-    // void on_txtMACEnd_textEdited( const QString& arg1 );
-
-    // void on_spxQuantity_valueChanged( int arg1 );
-
-    // void on_txtCounterStart_textChanged( const QString& arg1 );
-
-    // void on_cbxModel_currentTextChanged( const QString& arg1 );
-
-    // void on_txtName_textChanged( const QString& arg1 );
+    HxLOTPtr GetLOT() const;
 
 private:
     Ui::LotPropertyDialog* ui;
@@ -43,8 +26,9 @@ private:
     HxLOTPtrMap m_LOTs;
     HxLOTPtr m_pLOT;
     HxModelPtr m_pModel;
+    HxDesignPtr m_pDesign;
 
-    void OnInit(const QString& lotName);
+    void OnInit( HxLOTPtr pLOT );
 
 
     void ShowInfo();
@@ -62,6 +46,7 @@ private:
     bool CheckInputs();
     void OnInfoChanged();
     void OnModelChanged();
+    void OnParamChanged( QStandardItem* item );
     void OnApply();
 };
 

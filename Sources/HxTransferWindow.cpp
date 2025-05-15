@@ -11,9 +11,7 @@
 HxTransferWindow::HxTransferWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::TransferWindow )
 {
     ui->setupUi( this );
-    qApp->installEventFilter( this );
 
-    OnShowModels();
     UpdateUI();
 
     connect( ui->cbxModel, &QComboBox::currentTextChanged, this, &HxTransferWindow::OnSelect );
@@ -25,6 +23,11 @@ HxTransferWindow::HxTransferWindow( QWidget* parent ) : QMainWindow( parent ), u
 HxTransferWindow::~HxTransferWindow()
 {
     delete ui;
+}
+
+void HxTransferWindow::showEvent( QShowEvent* )
+{
+    OnShowModels();
 }
 //
 //void HxTransferWindow::on_btnReload_clicked()
@@ -151,8 +154,8 @@ bool HxTransferWindow::eventFilter( QObject* watched, QEvent* event )
 
 void HxTransferWindow::OnShowModels()
 {
+    QSignalBlocker blocker( ui->cbxModel );
     QString old = ui->cbxModel->currentText();
-    ui->cbxModel->setEnabled( false );
     ui->cbxModel->clear();
     auto Models = ModelManager()->GetModels();
     for ( auto& [name, md] : Models )
@@ -160,7 +163,6 @@ void HxTransferWindow::OnShowModels()
         ui->cbxModel->addItem( md->Name() );
     }
     ui->cbxModel->setCurrentText( old );
-    ui->cbxModel->setEnabled( true );
 }
 
 void HxTransferWindow::OnSelect( const QString& modelName )
@@ -190,12 +192,22 @@ void HxTransferWindow::OnCvWidthChanged( double width )
 
 void HxTransferWindow::OnTransfer()
 {
+    LockUI();
     Marker()->Transfer();
 }
 
 void HxTransferWindow::OnStop()
 {
+    LockUI();
     Marker()->Pause();
+}
+
+void HxTransferWindow::LockUI()
+{
+    ui->cbxModel->setEnabled( false );
+    ui->spxCvWidth->setEnabled( false );
+    ui->btnPass->setEnabled( false );
+    ui->btnStop->setEnabled( false );
 }
 
 void HxTransferWindow::UpdateUI()

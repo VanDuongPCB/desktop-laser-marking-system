@@ -16,22 +16,23 @@ class HxModelWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit HxModelWindow( QWidget* parent = 0 );
+    explicit HxModelWindow( QWidget* parent = nullptr );
     ~HxModelWindow();
 private:
     Ui::ModelWindow* ui;
     HxModelPtrMap m_models;
     HxModelPtr m_pModel;
+    HxModelPtrMap m_modelToSave;
 
     QLineEdit* m_pSearchTextBox = nullptr;
 
     void showEvent( QShowEvent* );
 
-    void showModels();
-    void showModelInfo();
-    void showMarkPositions();
-    void showMarkBlocks();
-    void showComments();
+    void ShowModels();
+    void ShowModelInfo();
+    void ShowMarkPositions();
+    void ShowMarkBlocks();
+    void ShowComments();
 
     void OnRefresh();
     void OnFilter(const QString& filter);

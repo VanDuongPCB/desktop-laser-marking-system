@@ -6,7 +6,10 @@
 #include "HxStopper.h"
 #include "HxMarker.h"
 #include "HxProfile.h"
-
+#include "HxLogger.h"
+#include "HxPLC.h"
+#include "HxBarcode.h"
+#include "HxLaser.h"
 #include "HxMessage.h"
 
 #include "QSerialPort"
@@ -15,7 +18,8 @@
 
 #include "HxFileManager.h"
 #include "HxEvent.h"
-
+#include "HxMigration.h"
+#include "HxMigrationDialog.h"
 
 HxSettingsWindow::HxSettingsWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::SettingsWindow )
 {
@@ -25,9 +29,11 @@ HxSettingsWindow::HxSettingsWindow( QWidget* parent ) : QMainWindow( parent ), u
 
     connect( ui->actionLoad, &QAction::triggered, this, &HxSettingsWindow::OnLoad );
     connect( ui->actionSave, &QAction::triggered, this, &HxSettingsWindow::OnSave );
+    connect( ui->actionMigration, &QAction::triggered, this, &HxSettingsWindow::OnMigration );
     connect( ui->btnBrowseData, &QPushButton::clicked, this, &HxSettingsWindow::OnBrowseDataDir );
     connect( ui->btnBrowseIV, &QPushButton::clicked, this, &HxSettingsWindow::OnBrowseIVDir );
     connect( ui->btnEnumCOM, &QPushButton::clicked, this, &HxSettingsWindow::OnEnumerateLaserPorts );
+    
 }
 
 HxSettingsWindow::~HxSettingsWindow()
@@ -82,55 +88,6 @@ void HxSettingsWindow::Show()
         row++;
     }
 }
-//
-//void HxSettingsWindow::ShowProtectSetting()
-//{
-//    //if ( !m_pSettings )
-//    //    m_pSettings = Settings()->Get();
-//    ////ui->txtPassword->setText( FileManager()->GetSettings(HxFileManager::eSettingProtect)->value("Password").toString() );
-//}
-//
-//void HxSettingsWindow::ShowActuatorSettings()
-//{
-//    //if ( !m_pSettings )
-//    //    m_pSettings = Settings()->Get();
-//
-//    //ui->txtIVDir->setText( m_pSettings->IVProgramDir );
-//    //ui->txtPLCIP->setText( m_pSettings->PLCConnIPAddress );
-//    //ui->spxPLCPort->setValue( m_pSettings->PLCConnPort );
-//
-//    //ui->txtRegCvWidth->setText( m_pSettings->RegCvWidth );
-//    //ui->txtRegStopper->setText( m_pSettings->RegStopper );
-//    //ui->txtRegPassMode->setText( m_pSettings->RegPassMode );
-//    //ui->txtRegSWReady->setText( m_pSettings->RegSoftwareReady );
-//    //ui->txtRegTrigger->setText( m_pSettings->RegLaserTrigger );
-//    //ui->txtRegTriggerConfirm->setText( m_pSettings->RegLaserTriggerConfirm );
-//    //ui->txtRegStop->setText( m_pSettings->RegLaserStop );
-//    //ui->txtRegStopConfirm->setText( m_pSettings->RegLaserStopConfirm );
-//    //ui->txtRegBarCode->setText( m_pSettings->RegBarcodeHasData );
-//    //ui->txtRegBarcodeConfirm->setText( m_pSettings->RegBarcodeConfirm );
-//    //ui->txtRegBarcodeData->setText( m_pSettings->RegBarcodeData );
-//    //ui->txtRegBarcodeOK->setText( m_pSettings->RegBarcodeOK );
-//    //ui->txtRegBarcodeNG->setText( m_pSettings->RegBarcodeNG );
-//    //ui->txtRegPrintRes->setText( m_pSettings->RegMarkingResult );
-//}
-
-//void HxSettingsWindow::ShowLaserSettings()
-//{
-//    
-//}
-//
-//void HxSettingsWindow::ShowStoppers()
-//{
-//    ui->tbvStoppers->setRowCount( m_pStoppers.size() );
-//    int row = 0;
-//    for ( auto &[index, pStopper] : m_pStoppers )
-//    {
-//        ui->tbvStoppers->setText( row, "X", QString::number( pStopper->x, 'f', 2 ) );
-//        ui->tbvStoppers->setText( row, "Y", QString::number( pStopper->y, 'f', 2 ) );
-//        row++;
-//    }
-//}
 
 void HxSettingsWindow::OnLoad()
 {
@@ -162,23 +119,23 @@ void HxSettingsWindow::OnBrowseIVDir()
 
 void HxSettingsWindow::OnEnumerateLaserPorts()
 {
-    //QList<QSerialPortInfo> portInfos = QSerialPortInfo::availablePorts();
-    //QStringList portnames;
-    //for ( auto& portinfo : portInfos )
-    //{
-    //    portnames.push_back( portinfo.portName() );
-    //}
-    //if ( !portnames.contains( HxSettings::laserPort ) )
-    //{
-    //    portnames.push_back( HxSettings::laserPort );
-    //}
+    QList<QSerialPortInfo> portInfos = QSerialPortInfo::availablePorts();
+    QStringList portnames;
+    for ( auto& portinfo : portInfos )
+    {
+        portnames.push_back( portinfo.portName() );
+    }
+    if ( !portnames.contains( m_regSettings.String(LaserConnPort ) ) )
+    {
+        portnames.push_back( m_regSettings.String( LaserConnPort ) );
+    }
 
-    //std::sort( portnames.begin(), portnames.end() );
-    //ui->cbxLaserPort->clear();
-    //ui->cbxLaserPort->addItem( "" );
-    //ui->cbxLaserPort->addItems( portnames );
+    std::sort( portnames.begin(), portnames.end() );
+    ui->cbxLaserPort->clear();
+    ui->cbxLaserPort->addItem( "" );
+    ui->cbxLaserPort->addItems( portnames );
 
-    //ui->cbxLaserPort->setCurrentText( HxSettings::laserPort );
+    ui->cbxLaserPort->setCurrentText( m_regSettings.String( LaserConnPort ) );
 }
 
 void HxSettingsWindow::OnSave()
@@ -223,38 +180,23 @@ void HxSettingsWindow::OnSave()
         StopperManager()->Save( i + 1, pStopper );
     }
 
+    LOTManager()->ReloadSetting();
+    ModelManager()->ReloadSetting();
+    DesignManager()->ReLoadSetting();
+    Logger()->ReLoadSetting();
+    Marker()->ReLoadSetting();
+    PLC()->ReLoadSetting();
+    Barcode()->ReLoadSetting();
+    Laser()->ReLoadSetting();
+    StopperManager()->ReLoadSetting();
+
     qApp->postEvent( qApp, new HxEvent( HxEvent::eSettingChanged ) );
     HxMsgInfo( "Đã lưu cài đặt !", "Thông báo" );
 }
-//
-//void HxSettingsWindow::on_btnBrowseDataDir_clicked()
-//{
-//    //QString dir = QFileDialog::getExistingDirectory( this, "Chọn thư mục dữ liệu", ui->txtDataDir->text() );
-//    //if ( !dir.isEmpty() )
-//    //{
-//    //    ui->txtDataDir->setText( dir );
-//
-//    //}
-//}
-//
-//void HxSettingsWindow::on_btnEnum_clicked()
-//{
-//    //QList<QSerialPortInfo> portInfos = QSerialPortInfo::availablePorts();
-//    //QStringList portnames;
-//    //for ( auto& portinfo : portInfos )
-//    //{
-//    //    portnames.push_back( portinfo.portName() );
-//    //}
-//    //if ( !portnames.contains( HxSettings::laserPort ) )
-//    //{
-//    //    portnames.push_back( HxSettings::laserPort );
-//    //}
-//
-//    //std::sort( portnames.begin(), portnames.end() );
-//    //ui->cbxLaserPort->clear();
-//    //ui->cbxLaserPort->addItem( "" );
-//    //ui->cbxLaserPort->addItems( portnames );
-//
-//    //ui->cbxLaserPort->setCurrentText( HxSettings::laserPort );
-//}
-//
+
+void HxSettingsWindow::OnMigration()
+{
+    HxMigrationDialog dialog( this );
+    dialog.exec();
+    OnLoad();
+}

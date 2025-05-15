@@ -22,7 +22,8 @@ public:
         eOnTransfering,
         eOnMarking,
         eOnFinish,
-        eOnStopping
+        eOnStopping,
+        eOnError
     };
 
     enum SetupMode
@@ -45,7 +46,7 @@ public:
     HxLOTPtr LOT() const;
     HxModelPtr Model() const;
     HxDesignPtr Design() const;
-
+    void ReLoadSetting();
 private:
     HxLOTPtr m_pLOT;
     HxModelPtr m_pModel;
@@ -54,12 +55,14 @@ private:
     State m_state = eOnUnInit;
     std::atomic_bool runFlag = false;
     void CheckAndPostEvent( State& lastState, State currentState, HxEvent::Type eventType );
-    bool CheckSerialExisting( const QString& serial );
     void Task();
 
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
+
+signals:
+    void requestSaveLOT( HxLOTPtr pLOT );
+    void requestSavePrintData( std::map<int, QString>& blockdata, HxLOTPtr pLOT, HxModelPtr pModel, HxDesignPtr pDesign );
 };
 
 

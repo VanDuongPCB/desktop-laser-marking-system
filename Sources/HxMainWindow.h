@@ -2,6 +2,18 @@
 #include <QMainWindow>
 #include "QLabel"
 #include "HxException.h"
+#include "HxLOT.h"
+
+#include "HxMarkWindow.h"
+#include "HxSettingsWindow.h"
+#include "HxTransferWindow.h"
+#include "HxControlWindow.h"
+#include "HxModelWindow.h"
+#include "HxLOTWindow.h"
+#include "HxDesignWindow.h"
+#include "HxLoginDialog.h"
+#include "HxIVProgramWindow.h"
+#include "HxLogWindow.h"
 
 namespace Ui
 {
@@ -22,6 +34,17 @@ private:
     Ui::MainWindow* ui;
     QLabel* m_pLblVersion = nullptr;
     int m_currentTabIndex = 0;
+
+    HxMarkWindow* m_pMarkWindow = nullptr;
+    HxTransferWindow* m_pTransferWindow = nullptr;
+    HxLOTWindow* m_pLOTWindow = nullptr;
+    HxModelWindow* m_pModelWindow = nullptr;
+    HxDesignWindow* m_pDesignWindow = nullptr;
+    HxIVProgramWindow* m_pIVProgramWindow = nullptr;
+    HxSettingsWindow* m_pSettingsWindow = nullptr;
+    HxControlWindow* m_pControlWindow = nullptr;
+    HxLogWindow* m_pLogWindow = nullptr;
+
 
     void resizeEvent( QResizeEvent* event );
     void closeEvent( QCloseEvent* );

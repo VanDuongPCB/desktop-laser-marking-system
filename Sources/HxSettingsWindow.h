@@ -31,5 +31,6 @@ private:
     void OnBrowseIVDir();
     void OnEnumerateLaserPorts();
     void OnSave();
+    void OnMigration();
 };
 

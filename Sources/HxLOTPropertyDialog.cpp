@@ -7,7 +7,7 @@
 #include "HxMessage.h"
 #include "HxDataGenerator.h"
 
-HxLOTPropertyDialog::HxLOTPropertyDialog( const QString& lotName, HxLOTPtrMap LOTs, QWidget* parent ) : QDialog( parent ), ui( new Ui::LotPropertyDialog )
+HxLOTPropertyDialog::HxLOTPropertyDialog( HxLOTPtr pLOT, HxLOTPtrMap LOTs, QWidget* parent ) : QDialog( parent ), ui( new Ui::LotPropertyDialog )
 {
     ui->setupUi( this );
     m_LOTs = LOTs;
@@ -15,7 +15,7 @@ HxLOTPropertyDialog::HxLOTPropertyDialog( const QString& lotName, HxLOTPtrMap LO
     ui->tbvBlocks->setHeaders( { "Block","Nội dung","Độ dài","Định dạng" } );
     ui->tbvBlocks->setColumnWidth( 1, 300 );
 
-    OnInit( lotName );
+    OnInit( pLOT );
     ShowInfo();
     ShowPrintLo();
     ShowParams();
@@ -35,10 +35,24 @@ HxLOTPropertyDialog::~HxLOTPropertyDialog()
     delete ui;
 }
 
-void HxLOTPropertyDialog::OnInit( const QString& lotName )
+HxLOTPtr HxLOTPropertyDialog::GetLOT() const
+{
+    return m_pLOT;
+}
+
+void HxLOTPropertyDialog::OnInit( HxLOTPtr pLOT )
 {
     QSignalBlocker blocker( this );
-    m_pLOT = LOTManager()->GetLOT( lotName );
+    m_pModel.reset();
+    m_pDesign.reset();
+    m_pLOT.reset();
+    if(pLOT )
+        m_pLOT = pLOT->Clone();
+    if ( m_pLOT )
+        m_pModel = ModelManager()->GetModel( m_pLOT->Model() );
+    if ( m_pModel )
+        m_pDesign = DesignManager()->GetDesign( m_pModel->Design() );
+
     m_bIsCreate = m_pLOT == nullptr;
     if ( m_bIsCreate )
     {
@@ -87,8 +101,6 @@ void HxLOTPropertyDialog::OnInit( const QString& lotName )
     default:
         break;
     }
-
-    m_pModel = ModelManager()->GetModel( m_pLOT->Name() );
 }
 
 void HxLOTPropertyDialog::ShowInfo()
@@ -101,13 +113,26 @@ void HxLOTPropertyDialog::ShowInfo()
     ui->txtMACEnd->setText( m_pLOT->MACEnd() );
     ui->spxQuantity->setValue( m_pLOT->Quantity() );
     ui->txtCounterStart->setText( m_pLOT->CounterStart() );
+    if ( m_pModel )
+    {
+        ui->txtDesign->setText( m_pModel->Design() );
+        ui->txtProgram->setText( m_pModel->IVProgram() );
+        ui->chxRePrint->setVisible( m_pModel->IsPrintLo() );
+    }
+    else
+    {
+        ui->txtDesign->setText( "" );
+        ui->txtProgram->setText( "" );
+        ui->chxRePrint->setVisible( false );
+    }
 }
 
 void HxLOTPropertyDialog::ShowPrintLo()
 {
     ui->chxRePrint->setVisible( false );
-    auto pModel = ModelManager()->GetModel( m_pLOT->Model() );
-    if ( pModel == nullptr || pModel->IsPrintLo() == false )
+    m_pDesign.reset();
+    m_pModel = ModelManager()->GetModel( m_pLOT->Model() );
+    if ( m_pModel == nullptr || m_pModel->IsPrintLo() == false )
         return;
     ui->chxRePrint->setVisible( true );
 }
@@ -148,15 +173,15 @@ void HxLOTPropertyDialog::ShowBlocks()
     QSignalBlocker blocker( this );
     GetInputs();
     ui->tbvBlocks->setRowCount( 0 );
-    auto pModel = ModelManager()->GetModel( m_pLOT->Model() );
-    if ( !pModel )
+    m_pModel = ModelManager()->GetModel( m_pLOT->Model() );
+    if ( !m_pModel )
         return;
 
-    auto pDesign = DesignManager()->GetDesign( pModel->Design() );
-    if ( !pDesign )
+    m_pDesign = DesignManager()->GetDesign( m_pModel->Design() );
+    if ( !m_pDesign )
         return;
 
-    auto blocks = pDesign->Blocks();
+    auto blocks = m_pDesign->Blocks();
     int maxRows = 32;
     ui->tbvBlocks->setRowCount( maxRows );
     for ( int row = 0; row < maxRows; row++ )
@@ -172,7 +197,7 @@ void HxLOTPropertyDialog::ShowBlocks()
         }
         else
         {
-            QString data = GenMarkData( it->second.data, m_pLOT, pModel );
+            QString data = GenMarkData( it->second.data, m_pLOT, m_pModel );
             ui->tbvBlocks->setText( row, "Nội dung", data );
             ui->tbvBlocks->setText( row, "Độ dài", QString::number( data.length() ) + "/" + QString::number( it->second.textLen ) );
             ui->tbvBlocks->setText( row, "Định dạng", it->second.data );
@@ -281,6 +306,21 @@ bool HxLOTPropertyDialog::CheckMacs()
     if ( !m_pLOT )
         return false;
 
+    if ( m_pDesign )
+    {
+        auto blocks = m_pDesign->Blocks();
+        for ( auto& [index, block] : blocks )
+        {
+            if ( !block.data.contains( "LOT.MAC" ) )
+                continue;
+            if ( m_pLOT->MACStart().length() != 12 || m_pLOT->MACEnd().length() != 12 )
+            {
+                HxMsgError( tr( "Thiết kế tem yêu cầu thông tin MAC nhưng cài đặt chưa hợp lệ!" ), tr( "Thiếu thông tin MAC" ) );
+                return false;
+            }
+        }
+    }
+
     if ( m_pLOT->MACStart().isEmpty() && m_pLOT->MACEnd().isEmpty() )
         return true;
 
@@ -304,8 +344,6 @@ bool HxLOTPropertyDialog::CheckMacs()
         HxMsgError( tr( "MAC chứa ký tự không hợp lệ!" ), tr( "MAC không hợp lệ" ) );
         return false;
     }
-
-
 
     uint64_t numMACStart = Uint64FromHexString( m_pLOT->MACStart() );
     uint64_t numMACEnd = Uint64FromHexString( m_pLOT->MACEnd() );
@@ -445,12 +483,14 @@ void HxLOTPropertyDialog::OnParamChanged( QStandardItem* item )
 void HxLOTPropertyDialog::OnModelChanged()
 {
     m_pLOT->Model() = ui->cbxModel->currentText();
-    auto pModel = ModelManager()->GetModel( m_pLOT->Model() );
-    if ( pModel )
+    m_pModel = ModelManager()->GetModel( m_pLOT->Model() );
+    m_pDesign.reset();
+    if ( m_pModel )
     {
-        ui->txtDesign->setText( pModel->Design() );
-        ui->txtProgram->setText( pModel->IVProgram() );
-        ui->chxRePrint->setVisible( pModel->IsPrintLo() );
+        m_pDesign = DesignManager()->GetDesign( m_pModel->Design() );
+        ui->txtDesign->setText( m_pModel->Design() );
+        ui->txtProgram->setText( m_pModel->IVProgram() );
+        ui->chxRePrint->setVisible( m_pModel->IsPrintLo() );
     }
     else
     {
@@ -466,7 +506,7 @@ void HxLOTPropertyDialog::OnApply()
     if ( !CheckInputs() )
         return;
 
-    LOTManager()->Save( m_pLOT );
+    //LOTManager()->Save( m_pLOT );
     close();
     setResult( 1 );
 }

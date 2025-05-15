@@ -108,7 +108,7 @@
      </widget>
     </item>
     <item row="2" column="1" rowspan="2">
-     <widget class="QWidget" name="widget_2" native="true">
+     <widget class="QWidget" name="widInfo" native="true">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -420,7 +420,7 @@
      </widget>
     </item>
     <item row="2" column="2" rowspan="2">
-     <widget class="QWidget" name="widget_3" native="true">
+     <widget class="QWidget" name="widPosition" native="true">
       <layout class="QGridLayout" name="gridLayout_4">
        <property name="leftMargin">
         <number>0</number>
@@ -481,7 +481,7 @@
      </widget>
     </item>
     <item row="2" column="3" rowspan="2">
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="widParams" native="true">
       <layout class="QGridLayout" name="gridLayout_3">
        <property name="leftMargin">
         <number>0</number>
@@ -595,8 +595,6 @@
    <addaction name="actionRemove"/>
    <addaction name="actionSave"/>
    <addaction name="actionLoad"/>
-   <addaction name="actionFromFile"/>
-   <addaction name="actionToFile"/>
    <addaction name="separator"/>
   </widget>
   <action name="actionNew">

@@ -27,7 +27,7 @@ HxMarkWindow::HxMarkWindow( QWidget* parent ) : QMainWindow( parent ), ui( new U
     //connect( HxMarker::instance(), &HxMarker::printed, this, &HxMarkWindow::controllerPrinted );
     //connect( HxMarker::instance(), &HxMarker::started, this, &HxMarkWindow::markStarted );
     //connect( HxMarker::instance(), &HxMarker::stopped, this, &HxMarkWindow::markStopped );
-    connect( GetSystemReport(), &HxSystemReport::reported, this, &HxMarkWindow::handleException );
+    //connect( GetSystemReport(), &HxSystemReport::reported, this, &HxMarkWindow::handleException );
 
     // showLots();
     // showLotInfo( nullptr );
@@ -84,7 +84,13 @@ bool HxMarkWindow::eventFilter( QObject* watched, QEvent* event )
     case HxEvent::eMarkerGoFinish:
         UpdateUI();
         break;
+    case HxEvent::eDatabaseError:
     case HxEvent::eMarkerGoError:
+    {
+        QVariant data = hxEvent->Data();
+        QJsonObject obj = data.toJsonObject();
+        OnException( obj );
+    }
         break;
     case HxEvent::eMarkerStopped:
         break;
@@ -211,6 +217,14 @@ void HxMarkWindow::ShowExceptions()
     ui->tbvErrors->scrollToBottom();
 }
 
+void HxMarkWindow::LockUI()
+{
+    ui->actionSelect->setEnabled( false );
+    ui->actionMark->setEnabled( false );
+    ui->actionRun->setEnabled( false );
+    ui->actionStop->setEnabled( false );
+}
+
 void HxMarkWindow::UpdateUI()
 {
     auto pLOT = Marker()->LOT();
@@ -220,137 +234,37 @@ void HxMarkWindow::UpdateUI()
     ui->actionMark->setEnabled( pLOT != nullptr && state == HxMarker::eOnFree );
     ui->actionRun->setEnabled( pLOT != nullptr && state == HxMarker::eOnFree );
     ui->actionStop->setEnabled( state == HxMarker::eOnMarking );
-
-    //auto lot = HxMarker::instance()->m_pLOT;
-    //bool hasData = lot != nullptr;
-    //bool canMark = hasData && lot->IsCompleted() == false;
-    //bool busy = HxMarker::instance()->IsBusy();
-
-    //ui->actionSelect->setEnabled( !busy );
-    //ui->actionLoad->setEnabled( !busy );
-    //ui->actionMark->setEnabled( hasData && !busy );
-    //ui->actionRun->setEnabled( canMark && !busy );
-    //ui->actionStop->setEnabled( busy );
 }
 
-void HxMarkWindow::handleException( HxException ex )
+void HxMarkWindow::OnException( QJsonObject exData )
 {
-    exceptions.push_back( ex );
-    ShowExceptions();
+    int row = ui->tbvErrors->RowCount();
+    ui->tbvErrors->setRowCount( row + 1 );
+    ui->tbvErrors->setText( row, 0, exData.value( "time" ).toString() );
+    ui->tbvErrors->setText( row, 1, exData.value( "where" ).toString() );
+    ui->tbvErrors->setText( row, 2, exData.value( "message" ).toString().replace( "\n", "" ) );
 }
 
-void HxMarkWindow::markStarted()
-{
-    UpdateUI();
-}
-
-void HxMarkWindow::markStopped()
-{
-    UpdateUI();
-}
-
-void HxMarkWindow::controllerPrinted( std::shared_ptr<HxLOT> lot )
-{
-    //showLotStatus( lot );
-    //showLotBlocks();
-}
-
-void HxMarkWindow::on_actionSelect_triggered()
-{
-    //ui->stackedWidget->setCurrentWidget( ui->pageSelector );
-    UpdateUI();
-}
-
-void HxMarkWindow::on_actionRun_triggered()
-{
-    //try
-    //{
-    //    if ( GetPLC()->SetEnable( true ) )
-    //    {
-    //        HxMarker::instance()->Start();
-    //        ui->actionSelect->setEnabled( false );
-    //        ui->actionLoad->setEnabled( false );
-    //        ui->actionMark->setEnabled( false );
-    //        ui->actionRun->setEnabled( false );
-    //        ui->actionStop->setEnabled( true );
-    //        if ( mainWindow != nullptr )
-    //        {
-    //            mainWindow->setNavEnable( false );
-    //        }
-    //    }
-    //}
-    //catch ( HxException ex )
-    //{
-    //    GetSystemReport()->Report( ex );
-    //    //ex.where = "Khắc";
-    //    //        Message::error(ex.message);
-    //}
-}
-
-void HxMarkWindow::on_actionStop_triggered()
-{
-    //try
-    //{
-    //    if ( GetPLC()->SetEnable( false ) )
-    //    {
-    //        HxMarker::instance()->Stop();
-    //        ui->actionSelect->setEnabled( true );
-    //        ui->actionLoad->setEnabled( true );
-    //        ui->actionMark->setEnabled( true );
-    //        ui->actionRun->setEnabled( true );
-    //        ui->actionStop->setEnabled( false );
-    //        if ( mainWindow != nullptr )
-    //        {
-    //            mainWindow->setNavEnable( true );
-    //        }
-    //    }
-    //}
-    //catch ( HxException ex )
-    //{
-    //    //        Message::error(ex.message);
-    //    //ex.where = "Dừng khắc";
-    //    GetSystemReport()->Report( ex );
-    //}
-
-}
-
-void HxMarkWindow::on_actionMark_triggered()
-{
-    //try
-    //{
-    //    HxMarker::instance()->Mark( true );
-    //    HxMsgInfo( "Đã khắc xong !", "In test" );
-    //}
-    //catch ( HxException ex )
-    //{
-    //    //        Message::error(ex.message);
-    //    //ex.where = "In test";
-    //    GetSystemReport()->Report( ex );
-    //}
-}
-
-void HxMarkWindow::on_tbvSelector_doubleClicked( const QModelIndex& index )
-{
-    //int row = index.row();
-    //QString lotName = ui->tbvSelector->item( row, 0 )->text();
-    //auto pLOT = GetLOTManager()->GetLOT( lotName );
-    //if ( HxMarker::instance()->Select( pLOT ) )
-    //{
-    //    ui->stackedWidget->setCurrentWidget( ui->pageMark );
-    //    showLotInfo( HxMarker::instance()->m_pLOT );
-    //    showLotStatus( HxMarker::instance()->m_pLOT );
-    //    showLotBlocks();
-    //    updateUI();
-    //}
-}
-
-void HxMarkWindow::on_actionLoad_triggered()
-{
-    //showLots();
-    //showLotInfo( HxMarker::instance()->m_pLOT );
-    //showLotStatus( HxMarker::instance()->m_pLOT );
-    //showLotBlocks();
-}
+//void HxMarkWindow::handleException( HxException ex )
+//{
+//    exceptions.push_back( ex );
+//    ShowExceptions();
+//}
+//
+//void HxMarkWindow::on_actionMark_triggered()
+//{
+//    //try
+//    //{
+//    //    HxMarker::instance()->Mark( true );
+//    //    HxMsgInfo( "Đã khắc xong !", "In test" );
+//    //}
+//    //catch ( HxException ex )
+//    //{
+//    //    //        Message::error(ex.message);
+//    //    //ex.where = "In test";
+//    //    GetSystemReport()->Report( ex );
+//    //}
+//}
 
 void HxMarkWindow::OnSelect()
 {
@@ -364,15 +278,18 @@ void HxMarkWindow::OnSelect()
 
 void HxMarkWindow::OnTest()
 {
+    LockUI();
     Marker()->Test();
 }
 
 void HxMarkWindow::OnRun()
 {
+    LockUI();
     Marker()->Mark();
 }
 
 void HxMarkWindow::OnStop()
 {
+    LockUI();
     Marker()->Pause();
 }

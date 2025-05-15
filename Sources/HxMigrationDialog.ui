@@ -6,173 +6,196 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>665</width>
-    <height>364</height>
+    <width>653</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Migration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Chương trình IV</string>
+   <item row="8" column="1">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Stopper</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit_2"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton_2">
-        <property name="text">
-         <string>Chọn</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Dữ liệu</string>
+   <item row="2" column="1">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>LOT</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
-      </item>
-      <item row="0" column="0" colspan="3">
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>Thay đổi đường dẫn dữ liệu</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>Chọn</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Đường dẫn</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="text">
-         <string>Chọn</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QRadioButton" name="radioButton_2">
-        <property name="text">
-         <string>Chuyển đổi từ phiên bản cũ</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="lineEdit_3"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Đường dẫn</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="1">
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="text">
-        <string>Chuyển đổi</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Orientation::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
+   <item row="5" column="1">
+    <widget class="QLabel" name="label_8">
+     <property name="text">
+      <string>Dữ liệu in</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QPushButton" name="btnMigratePrintData">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QPushButton" name="btnMigrateModels">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Đường dẫn</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLineEdit" name="txtModelDir"/>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Thiết kế</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLineEdit" name="txtRootDir">
+     <property name="text">
+      <string>D:\LMS</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QPushButton" name="btnBrowseDataDir">
+     <property name="text">
+      <string>Chọn</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QLineEdit" name="txtRePrintLogDir"/>
+   </item>
+   <item row="4" column="2">
+    <widget class="QLineEdit" name="txtDesinDir"/>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Dữ liệu barcode</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLineEdit" name="txtLOTDir"/>
+   </item>
+   <item row="2" column="3">
+    <widget class="QPushButton" name="btnMigrateLOTs">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="2">
+    <widget class="QLineEdit" name="txtBarcodeDir"/>
+   </item>
+   <item row="5" column="2">
+    <widget class="QLineEdit" name="txtPrintLogDir"/>
+   </item>
+   <item row="8" column="2">
+    <widget class="QLineEdit" name="txtStopperFile"/>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>Dữ liệu in lại</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="3">
+    <widget class="QPushButton" name="btnMigrateStoppers">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="3">
+    <widget class="QPushButton" name="btnMigrateRePrintData">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QPushButton" name="btnMigrateDesigns">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Model</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3">
+    <widget class="QPushButton" name="btnMigrateBarcode">
+     <property name="text">
+      <string>Migrate</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Cơ sở dữ liệu</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLineEdit" name="txtDBFile"/>
    </item>
   </layout>
  </widget>

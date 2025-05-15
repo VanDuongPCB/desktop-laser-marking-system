@@ -32,7 +32,6 @@
 HxMarker::HxMarker() : QObject( nullptr )
 {
     m_settings.Load();
-    runFlag = false;
 }
 
 HxMarker::~HxMarker()
@@ -60,6 +59,7 @@ void HxMarker::DeInit()
 
 bool HxMarker::Setup( SetupMode mode, const QString& param )
 {
+    //disconnect( this, &HxMarker::SaveData, this, &HxMarker::OnSaveData );
     if ( m_state != eOnFree && m_state != eOnFinish )
     {
         HxMsgError( tr( "Đang khắc hoặc đang vận chuyển!" ), tr( "Cài đặt không thành công" ) );
@@ -88,7 +88,7 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
         }
         catch ( HxException ex )
         {
-            qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError ) );
+            qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError, ex.toJsonObject() ) );
             HxMsgError( ex.Message(), ex.Where() );
             return false;
         }
@@ -143,9 +143,9 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
         }
         catch ( HxException ex )
         {
-            qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError ) );
+            qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError, ex.toJsonObject() ) );
             HxMsgError( ex.Message(), ex.Where() );
-            //return false;
+            return false;
         }
 #endif // !DEBUG_MODE
 
@@ -201,112 +201,18 @@ HxDesignPtr HxMarker::Design() const
     return m_pDesign;
 }
 
+void HxMarker::ReLoadSetting()
+{
+    m_settings.Load();
+}
+
 void HxMarker::CheckAndPostEvent( State& lastState, State currentState, HxEvent::Type eventType )
 {
     if ( lastState == currentState )
         return;
     qApp->postEvent( qApp, new HxEvent( eventType ) );
     lastState = currentState;
-    qDebug() << "POST EVENT = " << eventType;
 }
-
-bool HxMarker::CheckSerialExisting( const QString& serial )
-{
-    return false;
-}
-//
-//bool HxMarker::MarkingObjects( bool bIsTest )
-//{
-//    auto& positions = m_pModel->Positions();
-//    int patternCnt = positions.size();
-//    int blockCodeIndex = m_pDesign->IndexOfBlockCode();
-//    bool bIsRePrint = false;
-//
-//
-//    for ( auto& [index, position] : positions )
-//    {
-//        std::map<int, QString> blockDatas = GenMarkData( m_pDesign, m_pLOT, m_pModel );
-//        // check duplicate serial
-//        if ( !bIsRePrint && !bIsTest )
-//        {
-//            QString code = blockDatas[ blockCodeIndex ];
-//            if ( CheckSerialExisting( code ) )
-//            {
-//
-//                
-//            }
-//        }
-//
-//        try
-//        {
-//#ifndef DEBUG_MODE
-//            Laser()->SetupPosition( m_pDesign->Name(), position, m_pModel->Stopper(), m_pDesign );
-//            Laser()->SetupBlockData( m_pDesign->Name(), blockDatas );
-//            Laser()->Burn();
-//#endif // !DEBUG_MODE
-//
-//            if ( !bIsTest )
-//            {
-//                m_pLOT->SetProgress( m_pLOT->Progress() + 1 );
-//                m_pLOT->Evaluate();
-//                // save
-//                if ( bIsRePrint )
-//                    Logger()->SaveRePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
-//                else
-//                    Logger()->SavePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
-//            }
-//
-//            // check finish
-//            if ( m_pLOT->IsCompleted() )
-//            {
-//
-//            }
-//            qDebug() << "Marking: " << index;
-//            
-//        }
-//        catch ( HxException ex )
-//        {
-//
-//        }
-//    }
-//
-//    //auto tempLot = std::make_shared<HxLOT>( HxLOT() );
-//    //tempLot.get()[ 0 ] = lot.get()[ 0 ];
-//    //
-//
-//    //if ( bIsTest )
-//    //{
-//    //    for ( int i = 0; i < patternCnt; i++ )
-//    //    {
-//    //        HxPosition pos = model->positions[ i ];
-//    //        std::map<int, QString> blockDatas = BlockDataGen( design, tempLot, model );
-//
-//
-//    //        HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
-//    //        HxLaserDevice::SetupBlockData( design->name, blockDatas );
-//    //        HxLaserDevice::Burn();
-//    //        tempLot->progress++;
-//    //    }
-//    //}
-//    //else
-//    //{
-//    //    for ( int i = 0; i < patternCnt; i++ )
-//    //    {
-//    //        if ( tempLot->IsCompleted() ) continue;
-//    //        HxPosition pos = model->positions[ i ];
-//    //        std::map<int, QString> blockDatas = BlockDataGen( design, tempLot, model );
-//
-//    //        HxLaserDevice::SetupPosition( design->name, pos, model->stopper, design.get()[ 0 ] );
-//    //        HxLaserDevice::SetupBlockData( design->name, blockDatas );
-//    //        HxLaserDevice::Burn();
-//    //        HxLogSaver::Save( tempLot, model, design );
-//    //        tempLot->progress++;
-//    //    }
-//    //    lot.get()[ 0 ] = tempLot.get()[ 0 ];
-//    //    HxLOT::SaveLot( lot );
-//    //}
-//    return true;
-//}
 
 void HxMarker::Task()
 {
@@ -316,6 +222,7 @@ void HxMarker::Task()
     bool bNeedStop = false;
     while ( true )
     {
+    START_LOOP:
         QThread::msleep( 20 );
         if ( bNeedStop )
             break;
@@ -335,6 +242,9 @@ void HxMarker::Task()
             CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerStopped );
             bNeedStop = true;
             break;
+        case HxMarker::eOnError:
+            CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoError );
+            break;
         case HxMarker::eOnTesting:
         case HxMarker::eOnMarking:
         {
@@ -344,7 +254,7 @@ void HxMarker::Task()
             auto& positions = m_pModel->Positions();
             int patternCnt = positions.size();
             int blockCodeIndex = m_pDesign->IndexOfBlockCode();
-            bool bIsRePrint = false;
+            bool bIsRePrint = ( false ) || ( false );
 
             for ( auto& [index, position] : positions )
             {
@@ -359,22 +269,49 @@ void HxMarker::Task()
                     }
                 }
 
-                std::map<int, QString> blockDatas = GenMarkData( m_pDesign, m_pLOT, m_pModel );
-                QString code = blockDatas[ blockCodeIndex ];
+                std::map<int, QString> dataBlocks = GenMarkData( m_pDesign, m_pLOT, m_pModel );
+                QString code = dataBlocks[ blockCodeIndex ];
+
                 if ( !bIsRePrint && !bIsTest )
                 {
-                    
-                    if ( CheckSerialExisting( code ) )
-                    {
+                    ReturnCode checkCode{};
+                    QMetaObject::invokeMethod( this, [ & ]()
+                                               {
+                                                   checkCode = Logger()->CheckSerialExisting( code );
+                                                   if ( checkCode != RtNormal )
+                                                   {
+                                                       if ( checkCode == RtDBDataExisting )
+                                                       {
+                                                           HxMsgError( tr( "PHÁT HIỆN TRÙNG TEM\n"
+                                                                           "LIÊN LẠC QUẢN LÝ NGAY !!!\n\n"
+                                                                           "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
+                                                                       tr( "Tên LOT: %1\n"
+                                                                           "Số seri trùng: %2" )
+                                                                       .arg( m_pLOT->Name() )
+                                                                       .arg( code ),
+                                                                       tr( "Trùng lặp tem" ), true );
+                                                       }
+                                                       else
+                                                       {
 
+                                                       }
+                                                   }
+                                               }, Qt::BlockingQueuedConnection );
+
+                    // chỗ này nên ném exeption
+                    if ( checkCode != RtNormal )
+                    {
+                        m_state = eOnError;
+                        goto START_LOOP;
                     }
+
                 }
 
                 try
                 {
 #ifndef DEBUG_MODE
                     Laser()->SetupPosition( m_pDesign->Name(), position, m_pModel->Stopper(), m_pDesign );
-                    Laser()->SetupBlockData( m_pDesign->Name(), blockDatas );
+                    Laser()->SetupBlockData( m_pDesign->Name(), dataBlocks );
                     Laser()->Burn();
 #endif // !DEBUG_MODE
 
@@ -384,7 +321,31 @@ void HxMarker::Task()
                         m_pLOT->SetProgress( m_pLOT->Progress() + 1 );
                         m_pLOT->Evaluate();
 
-                        Logger()->SavePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
+                        ReturnCode codeSaveLOT{}, savePrintCode{};
+                        QMetaObject::invokeMethod( this, [ & ]()
+                                                   {
+                                                       codeSaveLOT = LOTManager()->Save( m_pLOT );
+                                                       savePrintCode = Logger()->SavePrint( m_pLOT, m_pModel, m_pDesign, dataBlocks );
+
+                                                       if ( savePrintCode == RtDBDataExisting )
+                                                       {
+                                                           HxMsgError( tr( "PHÁT HIỆN TRÙNG TEM\n"
+                                                                           "LIÊN LẠC QUẢN LÝ NGAY !!!\n\n"
+                                                                           "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
+                                                                       tr( "Tên LOT: %1\n"
+                                                                           "Số seri trùng: %2" )
+                                                                       .arg( m_pLOT->Name() )
+                                                                       .arg( code ),
+                                                                       tr( "Trùng lặp tem" ), true );
+                                                       }
+                                                   }, Qt::BlockingQueuedConnection );
+
+                        // chỗ này nên ném exeption
+                        if ( savePrintCode != RtNormal )
+                        {
+                            m_state = eOnError;
+                            goto START_LOOP;
+                        }
 
                         if ( m_pLOT->IsCompleted() )
                         {
@@ -392,10 +353,8 @@ void HxMarker::Task()
                             CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoFinish );
                             break;
                         }
-                    }
-                    else
-                    {
-                        Logger()->SaveRePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
+
+                        QThread::msleep( 50 );
                     }
                 }
                 catch ( HxException ex )
@@ -406,147 +365,11 @@ void HxMarker::Task()
 
             if ( m_state == eOnTesting )
                 m_state = eOnFree;
-//
-//            auto& positions = m_pModel->Positions();
-//            int patternCnt = positions.size();
-//            int blockCodeIndex = m_pDesign->IndexOfBlockCode();
-//            bool bIsRePrint = false;
-//
-//            for ( auto& [index, position] : positions )
-//            {
-//                m_pLOT->Evaluate();
-//                if ( m_pLOT->IsCompleted() )
-//                {
-//                    m_state = eOnFinish;
-//                    break;
-//                }
-//
-//                std::map<int, QString> blockDatas = GenMarkData( m_pDesign, m_pLOT, m_pModel );
-//                // check duplicate serial
-//                if ( !bIsRePrint && !bIsTest )
-//                {
-//                    QString code = blockDatas[ blockCodeIndex ];
-//                    if ( CheckSerialExisting( code ) )
-//                    {
-//
-//                    }
-//                }
-//
-//                try
-//                {
-//#ifndef DEBUG_MODE
-//                    Laser()->SetupPosition( m_pDesign->Name(), position, m_pModel->Stopper(), m_pDesign );
-//                    Laser()->SetupBlockData( m_pDesign->Name(), blockDatas );
-//                    Laser()->Burn();
-//#endif // !DEBUG_MODE
-//
-//                    if ( !bIsTest )
-//                    {
-//                        m_pLOT->SetProgress( m_pLOT->Progress() + 1 );
-//                        m_pLOT->Evaluate();
-//                        // save
-//                        if ( bIsRePrint )
-//                            Logger()->SaveRePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
-//                        else
-//                            Logger()->SavePrint( blockDatas, blockCodeIndex, m_pLOT->Name(), m_pModel->Name(), m_pDesign->Name() );
-//                    }
-//
-//                    // check finish
-//                    if ( m_pLOT->IsCompleted() )
-//                    {
-//
-//                    }
-//                    qDebug() << "Marking: " << index;
-//
-//                }
-//                catch ( HxException ex )
-//                {
-//
-//                }
-//
         }
-            break;
+        break;
         default:
             break;
         }
-
-        //if ( m_state == eOnMarking )
-        //{
-        //    if ( lastState != m_state )
-        //    {
-        //        qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoTransfer ) );
-        //        lastState = m_state;
-
-
-        //    }
-        //    
-
-        //    //// Barcode
-        //    //try
-        //    //{
-        //    //    if ( Barcode()->IsHasData() )
-        //    //    {
-        //    //        Barcode()->Clear();
-        //    //        QString code = Barcode()->Read().trimmed();
-        //    //        if ( code.length() > 0 && code.startsWith( "ERROR" ) == false )
-        //    //        {
-        //    //            Barcode()->Save( code );
-        //    //            Barcode()->SendFeedback( true );
-        //    //        }
-        //    //        else
-        //    //        {
-        //    //            Barcode()->SendFeedback( false );
-        //    //        }
-        //    //    }
-        //    //}
-        //    //catch ( HxException ex )
-        //    //{
-        //    //    ex.SetWhere( "Đọc barcode" );
-        //    //    HxSystemError::Instance()->ErrorReport( ex );
-
-        //    //    HxException ex2;
-        //    //    ex2.SetWhere( "Khắc" );
-        //    //    ex2.SetMessage( "Quá trình khắc đã dừng lại do phát hiện lỗi!" );
-        //    //    HxSystemError::Instance()->ErrorReport( ex2 );
-        //    //    runFlag = false;
-        //    //    break;
-        //    //}
-
-
-        //    // Marking
-        //    //try
-        //    //{
-        //    //    if ( PLC()->IsHasTrigger() )
-        //    //    {
-        //    //        PLC()->ConfirmTrigger();
-        //    //        bool status = Mark( false );
-        //    //        PLC()->SetMarkResult( status );
-        //    //        if ( lot->IsCompleted() )
-        //    //        {
-        //    //            PLC()->SetCompleteBit();
-        //    //        }
-        //    //        emit printed( lot );
-        //    //    }
-        //    //}
-        //    //catch ( HxException ex )
-        //    //{
-        //    //    ex.SetWhere( "Khắc" );
-        //    //    HxSystemError::Instance()->ErrorReport( ex );
-
-        //    //    HxException ex2;
-        //    //    ex2.SetWhere( "Khắc" );
-        //    //    ex2.SetMessage( "Quá trình khắc đã dừng lại do phát hiện lỗi!" );
-        //    //    HxSystemError::Instance()->ErrorReport( ex2 );
-
-        //    //    runFlag = false;
-        //    //    break;
-        //    //}
-
-
-
-        //    qDebug() << "eOnMarking " << ( iDebug++ );
-        //    continue;
-        //}
     }
     m_state = eOnUnInit;
     qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerStopped ) );
@@ -769,24 +592,6 @@ void HxMarker::Task()
 //    runFlag = false;
 //    emit stopped();
 //}
-
-bool HxMarker::eventFilter( QObject* watched, QEvent* event )
-{
-    auto type = event->type();
-    if ( type != QEvent::User )
-        return QObject::eventFilter( watched, event );
-
-    HxEvent* hevent = static_cast< HxEvent* >( event );
-    auto customType = hevent->GetType();
-    switch ( customType )
-    {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
-    }
-}
 
 HxMarker* Marker()
 {

@@ -65,6 +65,10 @@ QString HxLOT::MACEnd() const
 
 QString HxLOT::MAC( int shift ) const
 {
+    if ( m_macStart.length() != 12 || m_macEnd.length() != 12 )
+    {
+        return "LOT.MAC?";
+    }
     uint64_t start = Uint64FromHexString( m_macStart );
     uint64_t cnt = start + m_progress + shift;
     return HexStringFromUint64( cnt, 12 );
@@ -198,7 +202,7 @@ HxLOTPtr HxLOT::Clone() const
 
 HxLOTManager::HxLOTManager() : QObject( nullptr )
 {
-    //qApp->installEventFilter( this );
+    m_settings.Load();
 }
 
 HxLOTPtr HxLOTManager::Create()
@@ -209,6 +213,8 @@ HxLOTPtr HxLOTManager::Create()
 HxLOTPtr HxLOTManager::GetLOT( const QString& lotName )
 {
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return nullptr;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
@@ -271,7 +277,8 @@ HxLOTPtrMap HxLOTManager::GetLOTs( const QDate& fromTime )
 {
     HxLOTPtrMap map;
     QString dbFilePath = m_settings.String( DatabaseFilePath );
-
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return map;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
@@ -306,20 +313,22 @@ HxLOTPtrMap HxLOTManager::GetLOTs( const QDate& fromTime )
     return map;
 }
 
-void HxLOTManager::Save( HxLOTPtr pLOT )
+ReturnCode HxLOTManager::Save( HxLOTPtr pLOT )
 {
     if ( !pLOT )
-        return;
+        return RtDataNull;
 
     if ( !pLOT->IsMofified() )
-        return;
+        return RtDataNoChanges;
 
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
+        return RtDBOpenFailed;
     HxQuery query( db );
 
     QString finishDate = "9999-99-99";
@@ -348,6 +357,8 @@ void HxLOTManager::Save( HxLOTPtr pLOT )
         {
             qDebug() << query.lastError().text();
             qDebug() << cmd;
+            db.close();
+            return RtDBQueryFailed;
         }
     }
     else
@@ -364,6 +375,8 @@ void HxLOTManager::Save( HxLOTPtr pLOT )
             {
                 qDebug() << query.lastError().text();
                 qDebug() << cmd;
+                db.close();
+                return RtDBQueryFailed;
             }
         }
 
@@ -379,7 +392,11 @@ void HxLOTManager::Save( HxLOTPtr pLOT )
                 .arg( pLOT->Quantity() )
                 .arg( pLOT->Model() )
                 .arg( pLOT->Name() );
-            query.exec( cmd );
+            if ( !query.exec( cmd ) )
+            {
+                db.close();
+                return RtDBQueryFailed;
+            }
         }
     }
 
@@ -403,30 +420,88 @@ void HxLOTManager::Save( HxLOTPtr pLOT )
     db.close();
     bool isNew = pLOT->IsMofified( HxLOT::eNew );
     pLOT->ClearModified();
-    if ( isNew )
-        qApp->postEvent( qApp, new HxEvent( HxEvent::eLOTAdded ) );
-    else
-        qApp->postEvent( qApp, new HxEvent( HxEvent::eLOTChanged ) );
+    //if ( isNew )
+    //    qApp->postEvent( qApp, new HxEvent( HxEvent::eLOTAdded ) );
+    //else
+    //    qApp->postEvent( qApp, new HxEvent( HxEvent::eLOTChanged ) );
+    return RtNormal;
 }
 
-void HxLOTManager::Removes( const QStringList& names )
+ReturnCode HxLOTManager::Remove( HxLOTPtr pLOT )
 {
+    if ( !pLOT )
+        return RtDataNull;
+
+    if ( pLOT->Progress() > 0 )
+        return RtDataCannotDelete;
+
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
+    {
+        return RtDBOpenFailed;
+    }
     HxQuery query( db );
+    QString cmd = QString( "DELETE FROM LOTs WHERE Name = '%1'" ).arg( pLOT->Name() );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM LOTParams WHERE Name = '%1'" ).arg( pLOT->Name() );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    db.close();
+    return RtNormal;
+}
+
+ReturnCode HxLOTManager::Remove( const QString& name )
+{
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
+    }
+    HxQuery query( db );
+    QString cmd = QString( "DELETE FROM LOTs WHERE Name = '%1'" ).arg( name );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM LOTParams WHERE Name = '%1'" ).arg( name );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    db.close();
+    return RtNormal;
+}
+
+ReturnCode HxLOTManager::Removes( const std::set<QString>& names )
+{
     for ( auto& name : names )
     {
-        QString cmd = QString( "DELETE FROM LOTs WHERE Name = '%1'" ).arg( name );
-        query.exec( cmd );
-
-        cmd = QString( "DELETE FROM LOTParams WHERE Name = '%1'" ).arg( name );
-        query.exec( cmd );
+        Remove( name );
     }
-    db.close();
-    qApp->postEvent( qApp, new HxEvent( HxEvent::eLOTDeleted ) );
+    return RtNormal;
 }
 
 QStringList HxLOTManager::Parameters()
@@ -442,80 +517,101 @@ QStringList HxLOTManager::Parameters()
     return items;
 }
 
-void HxLOTManager::Migration( const QString& dir )
+//ReturnCode HxLOTManager::Migration( const QString& dir )
+//{
+//    QString lotDir = dir;
+//    QDir().mkdir( lotDir );
+//    QFileInfoList fileInfos = QDir( lotDir ).entryInfoList( { "*.lot" } );
+//
+//    HxLOTPtrArray pLOTs;
+//    std::set<QString> paramNames;
+//
+//    for ( auto& fileInfo : fileInfos )
+//    {
+//        QString lotName = fileInfo.baseName().toUpper();
+//        QString filePath = dir + "/" + lotName + ".lot";
+//
+//        QFileInfo fileInfo( filePath );
+//        QFile fileReader( filePath );
+//        if ( !fileReader.open( QIODevice::ReadOnly ) )
+//            continue;
+//
+//        QDateTime lastWrite = fileInfo.lastModified();
+//
+//        QByteArray json = fileReader.readAll();
+//        fileReader.close();
+//
+//        QJsonDocument doc = QJsonDocument::fromJson( json );
+//        QJsonObject obj = doc.object();
+//
+//        HxLOTPtr pLOT = Create();
+//
+//        pLOT->SetName( fileInfo.baseName().toUpper() );
+//        pLOT->SetMACStart( obj.value( "mac-start" ).toString() );
+//        pLOT->SetMACEnd( obj.value( "mac-end" ).toString() );
+//        pLOT->SetCounterStart( obj.value( "counter-start" ).toString() );
+//        pLOT->SetQuantity( obj.value( "quantity" ).toInt() );
+//        pLOT->SetProgress( obj.value( "progress" ).toInt( 0 ) );
+//        pLOT->SetModel( obj.value( "model" ).toString() );
+//        pLOT->SetRePrint( obj.value( "is-re-print" ).toBool() );
+//        QJsonObject cmtObj = obj.value( "comments" ).toObject();
+//        QStringList keys = cmtObj.keys();
+//        for ( auto& key : keys )
+//        {
+//            pLOT->SetValue( key, cmtObj.value( key ).toString() );
+//            paramNames.insert( key.trimmed().toUpper() );
+//        }
+//        pLOT->Evaluate();
+//        pLOTs.push_back( pLOT );
+//    }
+//
+//    QString cmdFormat = "";
+//    for ( auto &pLOT : pLOTs )
+//        Save( pLOT );
+//
+//    for ( auto &paramName : paramNames )
+//    {
+//
+//    }
+//    return RtNormal;
+//}
+
+ReturnCode HxLOTManager::DeleteAll()
 {
-    QString lotDir = dir;
-    QDir().mkdir( lotDir );
-    QFileInfoList fileInfos = QDir( lotDir ).entryInfoList( { "*.lot" } );
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
 
-    HxLOTPtrArray pLOTs;
-    std::set<QString> paramNames;
-
-    for ( auto& fileInfo : fileInfos )
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
     {
-        QString lotName = fileInfo.baseName().toUpper();
-        QString filePath = dir + "/" + lotName + ".lot";
+        return RtDBOpenFailed;
+    }
+    HxQuery query( db );
+    QString cmd;
 
-        QFileInfo fileInfo( filePath );
-        QFile fileReader( filePath );
-        if ( !fileReader.open( QIODevice::ReadOnly ) )
-            continue;
-
-        QDateTime lastWrite = fileInfo.lastModified();
-
-        QByteArray json = fileReader.readAll();
-        fileReader.close();
-
-        QJsonDocument doc = QJsonDocument::fromJson( json );
-        QJsonObject obj = doc.object();
-
-        HxLOTPtr pLOT = Create();
-
-        pLOT->SetName( fileInfo.baseName().toUpper() );
-        pLOT->SetMACStart( obj.value( "mac-start" ).toString() );
-        pLOT->SetMACEnd( obj.value( "mac-end" ).toString() );
-        pLOT->SetCounterStart( obj.value( "counter-start" ).toString() );
-        pLOT->SetQuantity( obj.value( "quantity" ).toInt() );
-        pLOT->SetProgress( obj.value( "progress" ).toInt( 0 ) );
-        pLOT->SetModel( obj.value( "model" ).toString() );
-        pLOT->SetRePrint( obj.value( "is-re-print" ).toBool() );
-        QJsonObject cmtObj = obj.value( "comments" ).toObject();
-        QStringList keys = cmtObj.keys();
-        for ( auto& key : keys )
-        {
-            pLOT->SetValue( key, cmtObj.value( key ).toString() );
-            paramNames.insert( key.trimmed().toUpper() );
-        }
-        pLOT->Evaluate();
-        pLOTs.push_back( pLOT );
+    cmd = QString( "DELETE FROM LOTs" );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
     }
 
-    QString cmdFormat = "";
-    for ( auto &pLOT : pLOTs )
-        Save( pLOT );
-
-    for ( auto &paramName : paramNames )
+    cmd = QString( "DELETE FROM LOTParams" );
+    if ( !query.exec( cmd ) )
     {
-
+        db.close();
+        return RtDBQueryFailed;
     }
+
+    db.close();
+    return RtNormal;
 }
 
-bool HxLOTManager::eventFilter( QObject* watched, QEvent* event )
+void HxLOTManager::ReloadSetting()
 {
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
-
-    switch ( type )
-    {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
-    }
-    return QObject::eventFilter( watched, event );
+    m_settings.Load();
 }
 
 HxLOTManager* LOTManager()

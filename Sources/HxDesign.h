@@ -6,6 +6,7 @@
 #include "QString"
 #include "QObject"
 
+#include "HxDefines.h"
 #include "HxBlock.h"
 #include "HxObject.h"
 #include "HxSettings.h"
@@ -40,7 +41,7 @@ public:
     void SetBlock( int index, const HxBlock& block );
     
 private:
-    QString m_name = "0000";
+    QString m_name = "";
     double m_width = 10;
     double m_height = 10;
     std::map<int, HxBlock> m_blocks;
@@ -54,11 +55,11 @@ public:
     HxDesignPtr Create();
     HxDesignPtr GetDesign( const QString& name );
     HxDesignPtrMap GetDesigns();
-    void Save( HxDesignPtr pDesign );
-    void Migration( const QString& dir );
+    ReturnCode Save( HxDesignPtr pDesign, bool bForce = false );
+    ReturnCode DeleteAll();
+    void ReLoadSetting();
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxDesignManager* DesignManager();

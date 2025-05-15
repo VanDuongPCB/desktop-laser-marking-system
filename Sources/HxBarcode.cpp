@@ -10,58 +10,58 @@
 
 #include "HxFileManager.h"
 #include "HxEvent.h"
+#include "HxException.h"
+
+#define GetData(command) \
+QString fb;\
+try\
+{\
+HxTcpSocket sock( m_settings.String( PLCConnIPAddress ),m_settings.Int( PLCConnPort ) );\
+sock.Connect();\
+sock.WriteLine( command, 5000 );\
+fb = sock.ReadLine().trimmed();\
+}\
+catch(HxException ex)\
+{\
+ex.SetWhere("Barcode");\
+throw ex;\
+}\
 
 HxBarcode::HxBarcode() : QObject( nullptr )
 {
     m_settings.Load();
-    qApp->installEventFilter( this );
-}
-
-bool HxBarcode::eventFilter( QObject* watched, QEvent* event )
-{
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
-
-    switch ( type )
-    {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
-    }
-    return QObject::eventFilter( watched, event );
 }
 
 bool HxBarcode::IsHasData()
 {
     QString cmd = "RD " +m_settings.String( RegBarcodeHasData ) + "\r";
-    HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
-    sock.Connect();
-    sock.WriteLine( cmd, 2000 );
-    QString fb = sock.readLine( 2000 );
+    //HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
+    //sock.Connect();
+    //sock.WriteLine( cmd, 2000 );
+    //QString fb = sock.readLine( 2000 );
+    GetData( cmd );
     return fb == "1";
 }
 
 bool HxBarcode::Clear()
 {
     QString cmd = "WR " + m_settings.String( RegLaserTriggerConfirm ) + " 1\r";
-    HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
-    sock.Connect();
-    sock.WriteLine( cmd, 2000 );
-    QString fb = sock.readLine( 2000 );
+    //HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
+    //sock.Connect();
+    //sock.WriteLine( cmd, 2000 );
+    //QString fb = sock.readLine( 2000 );
+    GetData( cmd );
     return fb == "OK";
 }
 
 QString HxBarcode::Read()
 {
     QString cmd = "RDS " + m_settings.String( RegBarcodeData ) + " 40\r";
-    HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
-    sock.Connect();
-    sock.WriteLine( cmd, 2000 );
-    QString fb = sock.readLine( 2000 );
+    //HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
+    //sock.Connect();
+    //sock.WriteLine( cmd, 2000 );
+    //QString fb = sock.readLine( 2000 );
+    GetData( cmd );
     QStringList codeItems = fb.split( ' ' );
     if ( codeItems.size() < 1 ) 
         return "";
@@ -82,13 +82,22 @@ bool HxBarcode::SendFeedback( bool status )
     QString val1 = status == 1 ? "1" : "0";
     QString val2 = status == 1 ? "0" : "1";
     QString cmd = "WRS " + m_settings.String( RegBarcodeOK ) + " 2 " + val1 + " " + val2 + "\r";
-    HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
-    sock.Connect();
-    sock.WriteLine( cmd, 2000 );
-    QString fb = sock.readLine( 2000 );
-    cmd = "WR " + m_settings.String( RegBarcodeConfirm ) + " 1\r";
-    sock.WriteLine( cmd, 2000 );
-    fb = sock.readLine( 2000 );
+    QString fb;
+    try
+    {
+        HxTcpSocket sock( m_settings.String( PLCConnIPAddress ), m_settings.Int( PLCConnPort ) );
+        sock.Connect();
+        sock.WriteLine( cmd, 2000 );
+        fb = sock.readLine( 2000 );
+        cmd = "WR " + m_settings.String( RegBarcodeConfirm ) + " 1\r";
+        sock.WriteLine( cmd, 2000 );
+        fb = sock.readLine( 2000 );
+    }
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Barcode" );
+        throw ex;
+    }
     return fb == "OK";
 }
 
@@ -118,6 +127,10 @@ void HxBarcode::Save( const QString& code )
     }
 }
 
+void HxBarcode::ReLoadSetting()
+{
+    m_settings.Load();
+}
 
 HxBarcode* Barcode()
 {

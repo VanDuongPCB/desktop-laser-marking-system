@@ -14,6 +14,11 @@
 
 #include "HxMessage.h"
 
+namespace
+{
+    int s_maxPointSupported = 60;
+}
+
 HxModelWindow::HxModelWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::ModelWindow )
 {
     ui->setupUi( this );
@@ -49,11 +54,8 @@ HxModelWindow::HxModelWindow( QWidget* parent ) : QMainWindow( parent ), ui( new
     ui->tbvBlocks->setColumnWidth( 1, 60 );
     ui->tbvBlocks->setColumnWidth( 2, 60 );
 
-
-
-
-    OnRefresh();
-
+    connect( ui->tbvModels, &HxTableView::pressed, this, &HxModelWindow::OnSelect );
+    
     connect( ui->txtModelCode, &QLineEdit::editingFinished, this, &HxModelWindow::OnInfoChanged );
     connect( ui->txtModelName, &QLineEdit::editingFinished, this, &HxModelWindow::OnInfoChanged );
     connect( ui->txtModelNo, &QLineEdit::editingFinished, this, &HxModelWindow::OnInfoChanged );
@@ -61,12 +63,17 @@ HxModelWindow::HxModelWindow( QWidget* parent ) : QMainWindow( parent ), ui( new
     connect( ui->spxProgram, &QSpinBox::editingFinished, this, &HxModelWindow::OnInfoChanged );
     connect( ui->cbxIVPrograms, &QComboBox::currentIndexChanged, this, &HxModelWindow::OnInfoChanged );
     connect( ui->spxCvWidth, &QDoubleSpinBox::editingFinished, this, &HxModelWindow::OnInfoChanged );
-    //connect( ui->chxPrintLo, &QCheckBox::toggled, this, &HxModelWindow::OnInfoChanged );
+    connect( ui->chxPrintLo, &QCheckBox::toggled, this, &HxModelWindow::OnInfoChanged );
 
-    connect( ui->tbvModels, &HxTableView::pressed, this, &HxModelWindow::OnSelect );
-    // connect( ui->tbvComments->dataTable(), &QStandardItemModel::itemChanged, this, &HxModelWindow::OnCommentChanged );
+    
+    connect( ui->tbvComments->dataTable(), &QStandardItemModel::itemChanged, this, &HxModelWindow::OnCommentChanged );
     connect( ui->tbvMarkPos->dataTable(), &QStandardItemModel::itemChanged, this, &HxModelWindow::OnPositionChanged );
 
+    connect( ui->actionNew, &QAction::triggered, this, &HxModelWindow::OnNew );
+    connect( ui->actionRemove, &QAction::triggered, this, &HxModelWindow::OnRemove );
+    connect( ui->actionSave, &QAction::triggered, this, &HxModelWindow::OnSave );
+    connect( ui->btnAddParam, &QPushButton::clicked, this, &HxModelWindow::OnAddParam );
+    connect( ui->btnRemoveParam, &QPushButton::clicked, this, &HxModelWindow::OnRemoveParam );
 }
 
 HxModelWindow::~HxModelWindow()
@@ -80,7 +87,7 @@ void HxModelWindow::showEvent( QShowEvent* )
     OnRefresh();
 }
 
-void HxModelWindow::showModels()
+void HxModelWindow::ShowModels()
 {
     QSignalBlocker blocker( this );
     int rows = m_models.size();
@@ -97,9 +104,9 @@ void HxModelWindow::showModels()
     }
 }
 
-void HxModelWindow::showModelInfo()
+void HxModelWindow::ShowModelInfo()
 {
-    QSignalBlocker bocker( this );
+    QSignalBlocker bocker( ui->widInfo );
     auto& model = m_pModel;
     if ( !model )
         model = ModelManager()->Create();
@@ -125,18 +132,18 @@ void HxModelWindow::showModelInfo()
     ui->cbxStopper->setCurrentText( QString::number( model->Stopper() ) );
     ui->cbxStopper->setEnabled( true );
 
-    //ui->chxPrintLo->setChecked( model->IsPrintLo() );
+    ui->chxPrintLo->setChecked( model->IsPrintLo() );
 }
 
-void HxModelWindow::showMarkPositions()
+void HxModelWindow::ShowMarkPositions()
 {
-    QSignalBlocker blocker( this );
-    auto model = m_pModel;
+    QSignalBlocker blocker( ui->widPosition );
+    auto& model = m_pModel;
     if ( !model )
         model = ModelManager()->Create();
 
-    auto positions = model->Positions();
-    int rows = 60;
+    auto& positions = model->Positions();
+    int rows = s_maxPointSupported;
     ui->tbvMarkPos->setRowCount( rows );
 
     for ( int row = 0; row < rows; row++ )
@@ -157,7 +164,7 @@ void HxModelWindow::showMarkPositions()
     }
 }
 
-void HxModelWindow::showMarkBlocks()
+void HxModelWindow::ShowMarkBlocks()
 {
     auto& model = m_pModel;
     if ( !model )
@@ -186,7 +193,7 @@ void HxModelWindow::showMarkBlocks()
     }
 }
 
-void HxModelWindow::showComments()
+void HxModelWindow::ShowComments()
 {
     disconnect( ui->tbvComments->dataTable(), &QStandardItemModel::itemChanged, this, &HxModelWindow::OnCommentChanged );
     ui->tbvComments->setRowCount( 0 );
@@ -223,7 +230,7 @@ void HxModelWindow::OnFilter( const QString& filter = QString() )
     HxModelPtrArray items;
     for ( auto& [code, pModel] : m_models )
     {
-        bool bIsMatch = pModel->Name().contains( input );
+        bool bIsMatch = pModel->Code().contains( input ) || pModel->Name().contains( input );
 
         if ( bIsMatch )
             items.push_back( pModel );
@@ -245,29 +252,48 @@ void HxModelWindow::OnFilter( const QString& filter = QString() )
 
 void HxModelWindow::OnSelect( const QModelIndex& index )
 {
-    if ( signalsBlocked() )
+    int row = index.row();
+    if ( signalsBlocked() || row < 0 )
         return;
 
-    if ( m_pModel != nullptr && m_pModel->IsMofified() )
-        OnSave();
-
+    QString modelCode = ui->tbvModels->item( row, 0 )->text();
     m_pModel.reset();
-    int row = index.row();
-    if ( row >= 0 )
-    {
-        QString modelCode = ui->tbvModels->item( row, 0 )->text();
-        m_pModel = ModelManager()->GetModel( modelCode );
-    }
+    auto it = m_modelToSave.find( modelCode );
+    if ( it != m_modelToSave.end() )
+        m_pModel = it->second;
 
-    showModelInfo();
-    showMarkPositions();
-    showComments();
-    showMarkBlocks();
+    if ( !m_pModel )
+        m_pModel = ModelManager()->GetModel( modelCode );
+
+    ShowModelInfo();
+    ShowMarkPositions();
+    ShowComments();
+    ShowMarkBlocks();
+}
+
+void HxModelWindow::OnInfoChanged()
+{
+    if ( !m_pModel || ui->widInfo->signalsBlocked() )
+        return;
+
+    m_pModel->SetCode( ui->txtModelCode->text().trimmed() );
+    m_pModel->SetName( ui->txtModelName->text().trimmed() );
+    m_pModel->SetPrintLo( ui->chxPrintLo->isChecked() );
+    m_pModel->SetkNo( ui->txtModelNo->text().trimmed() );
+    m_pModel->SetStopper( ui->cbxStopper->currentIndex() + 1 );
+    m_pModel->SetDesign( ui->spxProgram->value() );
+    m_pModel->SetIVProgram( ui->cbxIVPrograms->currentText() );
+    m_pModel->SetCvWidth( ui->spxCvWidth->value() );
+
+    if ( m_pModel->IsMofified() )
+    {
+        m_modelToSave[ m_pModel->Code() ] = m_pModel;
+    }
 }
 
 void HxModelWindow::OnPositionChanged( QStandardItem* item )
 {
-    if ( !m_pModel || signalsBlocked() )
+    if ( !m_pModel || ui->widPosition->signalsBlocked() )
         return;
 
     int row = item->row();
@@ -280,7 +306,8 @@ void HxModelWindow::OnPositionChanged( QStandardItem* item )
     if ( text1.isEmpty() && text2.isEmpty() && text3.isEmpty() )
     {
         m_pModel->RemovePosition( index );
-        showMarkPositions();
+        m_modelToSave[ m_pModel->Code()] = m_pModel;
+        ShowMarkPositions();
     }
     else
     {
@@ -293,47 +320,15 @@ void HxModelWindow::OnPositionChanged( QStandardItem* item )
         {
             position.angle = position.angle / 90 * 90;
             m_pModel->SetPosition( index, position );
-            showMarkPositions();
+            m_modelToSave[ m_pModel->Code() ] = m_pModel;
+            ShowMarkPositions();
         }
     }
-
-    // // int row = item->row();
-    // // int col = item->column();
-    // bool bIsVaild = false;
-    // int value = tableModel->item(row, col)->text().trimmed().toInt(&bIsVaild);
-
-    // if(!bIsVaild)
-    // {
-    //     showMarkPositions();
-    //     return;
-    // }
-
-    // int index = row + 1;
-    // HxPosition position = m_pModel->Position( index );
-    // switch (col) {
-    // case 0:
-    //     position.x = value;
-    //     break;
-    // case 1:
-    //     position.y = value;
-    //     break;
-    // case 2:
-    // {
-    //     value = value / 90 * 90;
-    //     position.angle = value;
-    // }
-    // break;
-    // default:
-    //     break;
-    // }
-    // m_pModel->SetPosition( index, position );
-    // showMarkPositions();
 }
 
 void HxModelWindow::OnCommentChanged( QStandardItem* item )
 {
-    qDebug() << "CALL";
-    if ( !m_pModel || signalsBlocked() )
+    if ( !m_pModel || ui->widParams->signalsBlocked() )
     {
         // showComments();
         return;
@@ -349,17 +344,17 @@ void HxModelWindow::OnCommentChanged( QStandardItem* item )
 
 void HxModelWindow::OnNew()
 {
-    OnSave();
-    auto dialog = HxNewModelDialog( m_models, this );
+    auto dialog = HxNewModelDialog( m_models, m_modelToSave, this );
     if ( dialog.exec() )
     {
         m_pModel = dialog.GetModel();
-        m_models[ m_pModel->Name() ] = m_pModel;
-        showModels();
-        showModelInfo();
-        showMarkPositions();
-        showComments();
-        showMarkBlocks();
+        m_models[ m_pModel->Code() ] = m_pModel;
+        m_modelToSave[ m_pModel->Code() ] = m_pModel;
+        ShowModels();
+        ShowModelInfo();
+        ShowMarkPositions();
+        ShowComments();
+        ShowMarkBlocks();
         m_pSearchTextBox->setText( m_pModel->Name() );
         OnFilter();
     }
@@ -367,55 +362,50 @@ void HxModelWindow::OnNew()
 
 void HxModelWindow::OnRemove()
 {
-    QStringList names;
+    QStringList codes;
     if ( m_pModel )
-        names.push_back( m_pModel->Name() );
+        codes.push_back( m_pModel->Name() );
 
     for ( auto& it : ui->tbvModels->selectionModel()->selectedRows() )
     {
-        QString name = ui->tbvModels->item( it.row(), 1 )->text();
-        if ( !names.contains( name ) )
-            names.push_back( name );
+        QString code = ui->tbvModels->item( it.row(), 0 )->text();
+        if ( !codes.contains( code ) )
+            codes.push_back( code );
     }
 
-    if ( names.isEmpty() )
+    if ( codes.isEmpty() )
         return;
 
-    ModelManager()->Removes( names );
+    ModelManager()->Removes( codes );
+    for ( auto &code : codes )
+    {
+        m_models.erase( code );
+        m_modelToSave.erase( code );
+    }
+
     m_pModel.reset();
+
     OnRefresh();
-    showModels();
-    showModelInfo();
-    showMarkPositions();
-    showComments();
-    showMarkBlocks();
+    ShowModels();
+    ShowModelInfo();
+    ShowMarkPositions();
+    ShowComments();
+    ShowMarkBlocks();
 }
 
 void HxModelWindow::OnSave()
 {
-    if ( !m_pModel )
-        return;
-
     OnInfoChanged();
-    if ( HxMsgQuestion( tr( "Lưu thông tin thay đổi của model \"%1\"?" ).arg( m_pModel->Name() ), tr( "Lưu dữ liệu" ) ) == HxMsgButton::Yes )
-    {
-        ModelManager()->Save( m_pModel );
-    }
-}
-
-void HxModelWindow::OnInfoChanged()
-{
-    if ( m_pModel == nullptr || signalsBlocked() )
+    if ( m_modelToSave.empty() )
         return;
 
-    m_pModel->SetCode( ui->txtModelCode->text().trimmed() );
-    m_pModel->SetName( ui->txtModelName->text().trimmed() );
-    //m_pModel->SetPrintLo( ui->chxPrintLo->isChecked() );
-    m_pModel->SetkNo( ui->txtModelNo->text().trimmed() );
-    m_pModel->SetStopper( ui->cbxStopper->currentIndex() + 1 );
-    m_pModel->SetDesign( ui->spxProgram->value() );
-    m_pModel->SetIVProgram( ui->cbxIVPrograms->currentText() );
-    m_pModel->SetCvWidth( ui->spxCvWidth->value() );
+    if ( HxMsgQuestion( tr( "Lưu thông tin thay đổi của %1 model?" ).arg( m_modelToSave.size() ), tr( "Lưu dữ liệu" ) ) == HxMsgButton::Yes )
+    {
+        for ( auto& [code, pModel] : m_modelToSave )
+            ModelManager()->Save( pModel );
+        m_modelToSave.clear();
+        OnRefresh();
+    }
 }
 
 void HxModelWindow::OnAddParam()
@@ -431,7 +421,7 @@ void HxModelWindow::OnAddParam()
         if ( bIsApplyALL )
             ModelManager()->AddComments( items );
 
-        showComments();
+        ShowComments();
     }
 }
 
@@ -456,7 +446,7 @@ void HxModelWindow::OnRemoveParam()
         if ( bIsApplyALL )
             ModelManager()->RemoveComments( names );
 
-        showComments();
+        ShowComments();
     }
 }
 

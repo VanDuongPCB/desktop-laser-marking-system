@@ -11,9 +11,7 @@
 class HxLaser : public QObject
 {
 private:
-    bool DetectPortExisting();
     QString SendData( const QString& data, int timeout = 10000 );
-    QString DetectError( const QString& data );
 
 public:
     HxLaser();
@@ -21,9 +19,9 @@ public:
     bool SetupBlockData( const QString& program, std::map<int, QString> dataMap );
     bool SetupPosition( const QString& program, HxPosition pos, int stopper, HxDesignPtr pDesign );
     bool Burn();
+    void ReLoadSetting();
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxLaser* Laser();

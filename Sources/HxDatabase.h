@@ -11,4 +11,5 @@ public:
     HxDatabase();
     HxDatabase( const QSqlDatabase& other );
     HxDatabase( const QString& fileDB );
+    static bool CheckDatabaseFileExisting( const QString& file );
 };

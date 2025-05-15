@@ -1,4 +1,4 @@
-#include "HxLogger.h"
+﻿#include "HxLogger.h"
 #include "HxModel.h"
 #include "HxLOT.h"
 #include "HxDesign.h"
@@ -6,119 +6,237 @@
 #include <QDir>
 #include <QCoreApplication>
 
+#include "QStandardPaths"
+#include "QFileDialog"
+
 #include "HxDataGenerator.h"
+#include "HxDatabase.h"
+#include "HxMessage.h"
 
-
-void HxLogger::Save( std::shared_ptr<HxLOT> lot, std::shared_ptr<HxModel> model, std::shared_ptr<HxDesign> design )
+HxLogger::HxLogger()
 {
-    //if ( lot == nullptr )
-    //{
-    //    return;
-    //}
-
-    //if ( model == nullptr )
-    //{
-    //    return;
-    //}
-
-    //if ( design == nullptr )
-    //{
-    //    return;
-    //}
-
-    //QString dir = QCoreApplication::applicationDirPath() + "/data/" + ( lot->isRePrint ? "/REPRINT-LOGS" : "/PRINT-LOGS" );
-    //QDir().mkdir( dir );
-
-    //QString fileName = QDateTime::currentDateTime().toString( "yyyyMMdd" ) + ".csv";
-    //QString filePath = dir + "/" + fileName;
-
-    //QFile fileWriter( filePath );
-    //if ( !fileWriter.exists() )
-    //{
-    //    if ( fileWriter.open( QIODevice::WriteOnly ) )
-    //    {
-    //        fileWriter.write( "TIME,LOT,MODEL,DESIGN,DATA-1,DATA-2,DATA-3,DATA-4,DATA-5,DATA-6,DATA-7,DATA-8,DATA-9,DATA-10" );
-    //        fileWriter.close();
-    //    }
-    //}
-
-    //QStringList itemData;
-    //itemData.push_back( "\n" + QDateTime::currentDateTime().toString( "HH:mm:ss" ) );
-    //itemData.push_back( lot->name );
-    //itemData.push_back( model->name );
-    //itemData.push_back( design->name );
-
-
-
-    //for ( int i = 1; i <= 10; i++ )
-    //{
-    //    if ( design->blocks.contains( i ) )
-    //    {
-    //        itemData.push_back( BlockDataGen( design->blocks[ i ].data, lot, model ) );
-    //    }
-    //    else
-    //    {
-    //        itemData.push_back( "" );
-    //    }
-    //}
-
-    //QString data = itemData.join( "," );
-    //if ( fileWriter.open( QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text ) )
-    //{
-    //    fileWriter.write( data.toStdString().c_str(), data.length() );
-    //    fileWriter.close();
-    //}
+    m_settings.Load();
 }
 
-void HxLogger::SavePrint( std::map<int, QString>& data, int blockCodeIndex, const QString& lotName, const QString& modelName, const QString& designName )
+ReturnCode HxLogger::CheckSerialExisting( const QString& serial )
 {
-    if ( data.empty() )
-        return;
-
-    QString code = data[ blockCodeIndex ];
-    if ( code.isEmpty() )
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
     {
-        for ( auto& [index, text] : data )
-        {
-            if ( text.trimmed().length() > 0 )
-                code = text.trimmed();
-        }
+        return RtDBOpenFailed;
     }
 
-    if ( code.isEmpty() )
+    QString cmd = QString( "SELECT 1 FROM PrintLogs WHERE Serial='%1' LIMIT 1" ).arg( serial );
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
     {
-        code = "NO CODE - " + QDateTime::currentDateTime().toString( "yyMMddHHmmssfff" );
+        db.close();
+        return RtDBQueryFailed;
+    }
+    bool exist = query.next();
+    db.close();
+
+    return exist ? RtDBDataExisting : RtNormal;
+}
+
+ReturnCode HxLogger::SavePrint( HxLOTPtr pLOT, HxModelPtr pModel, HxDesignPtr pDesign, std::map<int, QString>& blockdata )
+{
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
     }
     
-    qDebug() << "PRINT CODE = " << code;
-}
-
-void HxLogger::SaveRePrint( std::map<int, QString>& data, int blockCodeIndex, const QString& lotName, const QString& modelName, const QString& designName )
-{
-    if ( data.empty() )
-        return;
-
-    QString code = data[ blockCodeIndex ];
+    bool bIsRePrint = ( pModel->IsPrintLo() ) || ( pLOT->IsRePrint() );
+    QString tableName = bIsRePrint ? "RePrintLogs" : "PrintLogs";
+    
+    QDateTime time = QDateTime::currentDateTime();
+    int codeBockIndex = pDesign->IndexOfBlockCode();
+    QString code = blockdata[ codeBockIndex ];
     if ( code.isEmpty() )
     {
-        for ( auto& [index, text] : data )
-        {
-            if ( text.trimmed().length() > 0 )
-                code = text.trimmed();
-        }
+        code = QString( "ATLCODE-%1" ).arg( time.toString( "HHmmsszzz" ) );
     }
 
-    if ( code.isEmpty() )
+    QStringList itemData;
+    for ( auto& [index, data] : blockdata )
+        itemData.push_back( data );
+
+    QString cmd = QString( "INSERT INTO %1 "
+                           "(Time,Serial,LOT,Model,Data) "
+                           "VALUES('%2','%3','%4','%5','%6')" )
+        .arg( tableName )
+        .arg( time.toString( "yyyy-MM-dd HH:mm:ss.zzz" ) )
+        .arg( code )
+        .arg( pLOT->Name() )
+        .arg( pModel->Name() )
+        .arg( itemData.join( "," ) );
+
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
     {
-        code = "NO CODE - " + QDateTime::currentDateTime().toString( "yyMMddHHmmssfff" );
+        db.close();
+        QString errorMsg = query.lastError().text();
+        qDebug() << errorMsg;
+        if ( errorMsg.contains( "UNIQUE" ) )
+            return RtDBDataExisting;
+        return RtDBInsertFailed;
     }
 
-    qDebug() << "RE PRINT CODE = " << code;
+    db.close();
+    return RtNormal;
 }
 
-void HxLogger::SaveError( HxException& ex )
+ReturnCode HxLogger::SaveError( const QString& time, const QString& where, const QString& message )
 {
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
+    }
 
+    QString cmd = QString( "INSERT INTO Exceptions "
+                           "(Time,Object,Exception) "
+                           "VALUES('%1','%2','%3')" )
+        .arg( time )
+        .arg( where )
+        .arg( message );
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBInsertFailed;
+    }
+    db.close();
+    return RtNormal;
+}
+
+ReturnCode HxLogger::SaveBarcode( const QString& code )
+{
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
+    }
+
+    QString cmd = QString( "INSERT INTO BarcodeLogs "
+                           "(Time,Data) "
+                           "VALUES('%1','%2')" )
+        .arg( QDateTime::currentDateTime().toString( "yyyy-MM-dd HH:mm:ss.zzz" ) )
+        .arg( code );
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBInsertFailed;
+    }
+    db.close();
+    return RtNormal;
+}
+
+ReturnCode HxLogger::Get( QDate fromDate, QDate toDate, HxLogArray& items )
+{
+    items.clear();
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
+    }
+
+    QString from = fromDate.toString( "yyyy-MM-dd 00:00:00.000" );
+    QString to = toDate.toString( "yyyy-MM-dd 23:59:59.999" );
+    QString cmd = QString( "SELECT Time,Serial,LOT,Model,Data "
+                           "FROM PrintLogs "
+                           "WHERE Time>='%1' AND Time<='%2'" )
+        .arg( from )
+        .arg( to );
+
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    while ( query.next() )
+    {
+        HxLog log;
+        log.Time = query.value( 0 ).toString();
+        log.Serial = query.value( 1 ).toString();
+        log.LOT = query.value( 2 ).toString();
+        log.Model = query.value( 3 ).toString();
+        log.items = query.value( 4 ).toString().split( "," );
+        items.push_back( log );
+    }
+    db.close();
+    return RtNormal;
+}
+
+void HxLogger::Export( HxLogArray& items, QDate fromDate, QDate toDate )
+{
+    QString tempFile;
+    if ( fromDate == toDate )
+        tempFile = QString( "%1.csv" ).arg( fromDate.toString( "yyyy-MM-dd" ) );
+    else
+        tempFile = QString( "%1_%2.csv" )
+        .arg( fromDate.toString( "yyyy-MM-dd" ) )
+        .arg( toDate.toString( "yyyy-MM-dd" ) );
+    QStringList csvLineData;
+    csvLineData.push_back( "\"TIME\",\"SERIAL\",\"LOT\",\"MODEL\",\"DATA1\",\"DATA2\",\"DATA3\",\"DATA4\",\"DATA5\",\"DATA6\",\"DATA7\",\"DATA8\",\"DATA9\",\"DATA10\"," );
+    for ( auto& log : items )
+    {
+        QString lineData;
+        lineData += QString( "\"%1\"," ).arg( log.Time );
+        lineData += QString( "\"%1\"," ).arg( log.Serial );
+        lineData += QString( "\"%1\"," ).arg( log.LOT );
+        lineData += QString( "\"%1\"," ).arg( log.Model );
+        for ( auto& it : log.items )
+            lineData += QString( "\"%1\"," ).arg( it );
+
+        csvLineData.push_back( lineData );
+    }
+
+    QString csvData = csvLineData.join( "\n" );
+
+    static QString oldDir = QStandardPaths::writableLocation( QStandardPaths::DocumentsLocation );
+    QString filePath = QFileDialog::getSaveFileName( nullptr, "Chọn thư mục dữ liệu", oldDir + "/" + tempFile, "Csv Files (*.csv);;All Files (*)");
+    QFile fileWriter( filePath );
+    if ( fileWriter.open( QIODevice::WriteOnly | QIODevice::Text ) )
+    {
+        fileWriter.write( csvData.toUtf8() );
+        fileWriter.close();
+        HxMsgInfo( tr( "Đã lưu csv" ), tr( "Lưu log" ) );
+        oldDir = QFileInfo( filePath ).absoluteDir().absolutePath();
+    }
+    else
+    {
+        HxMsgError( tr( "Không thể mở file. Kiểm tra lại đường dẫn!" ) );
+    }
+}
+
+void HxLogger::ReLoadSetting()
+{
+    m_settings.Load();
 }
 
 HxLogger* Logger()

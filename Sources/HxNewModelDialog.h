@@ -12,10 +12,11 @@ class HxNewModelDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit HxNewModelDialog( HxModelPtrMap models, QWidget* parent = 0 );
+    explicit HxNewModelDialog( HxModelPtrMap models, HxModelPtrMap modelToSaves, QWidget* parent = 0 );
     ~HxNewModelDialog();
-    HxModelPtr GetModel();
+    HxModelPtr GetModel() const;
     HxModelPtrMap m_models;
+    HxModelPtrMap m_modelToSaves;
     HxModelPtr m_pModel;
 private slots:
     void OnCreate();

@@ -11,27 +11,6 @@
 #include "HxEvent.h"
 
 
-bool HxLaser::DetectPortExisting()
-{
-    ////if ( !m_pSettings )
-    ////    m_pSettings = Settings()->Get();
-
-    //QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-    //for ( auto& it : ports )
-    //{
-    //    if ( it.portName() == m_pSettings->LaserConnPort )
-    //    {
-    //        return true;
-    //    }
-    //}
-    return false;
-}
-
-QString HxLaser::DetectError( const QString& data )
-{
-    return "";
-}
-
 QString HxLaser::SendData( const QString& data, int timeout )
 {
     QString portName = m_settings.String( LaserConnPort );
@@ -75,64 +54,6 @@ QString HxLaser::SendData( const QString& data, int timeout )
     port.close();
     QString feedback = QString::fromStdString( buffer.data() ).trimmed();
     return feedback;
-
-
-
-
-
-
-    //if ( !m_pSettings )
-    //    m_pSettings = Settings()->Get();
-
-    /*QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
-    for ( auto& it : ports )
-    {
-        if ( it.portName() == m_pSettings->LaserConnPort )
-        {
-
-            QSerialPort port( m_pSettings->LaserConnPort );
-            port.setBaudRate( 9600 );
-
-            if ( !port.open( QIODevice::ReadWrite ) )
-            {
-                throw HxException( "Không mở được cổng kết nối tới máy khắc laser !\nCổng : " + m_pSettings->LaserConnPort );
-            }
-
-            port.write( data.toStdString().c_str() );
-            if ( !port.waitForBytesWritten( timeout ) )
-            {
-                port.close();
-                throw HxException( "Gửi dữ liệu đến máy khắc laser thất bại !\nCổng : " + m_pSettings->LaserConnPort );
-            }
-
-            if ( !port.waitForReadyRead( timeout ) )
-            {
-                port.close();
-                throw HxException( "Máy khắc laser không phản hồi !\nCổng : " + m_pSettings->LaserConnPort );
-            }
-
-            std::vector<char> buffer;
-            char oneBuff[ 1 ];
-            do
-            {
-                if ( port.bytesAvailable() )
-                {
-                    port.read( oneBuff, 1 );
-                    if ( oneBuff[ 0 ] != 13 ) buffer.push_back( oneBuff[ 0 ] );
-                    else break;
-                }
-                else if ( !port.waitForReadyRead( 20 ) )
-                {
-                    break;
-                }
-            } while ( true );
-            buffer.push_back( 0 );
-            port.close();
-            QString feedback = QString::fromStdString( buffer.data() ).trimmed();
-            return feedback;
-        }
-    }
-    throw HxException( "Không có kết nối với máy laser trên cổng " + m_pSettings->LaserConnPort );*/
 }
 
 HxLaser::HxLaser() : QObject( nullptr )
@@ -144,14 +65,23 @@ HxLaser::HxLaser() : QObject( nullptr )
 bool HxLaser::SetProgram( const QString& name )
 {
     QString cmd = "GA," + name + "\r";
-    QString fb = SendData( cmd, 3000 );
-    if ( fb != "GA,0" )
+    try
     {
-        QString msg = tr( "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-                          "Dữ liệu: %1")
-            .arg( fb );
-        throw HxException( "Laser", msg);
+        QString fb = SendData( cmd, 3000 );
+        if ( fb != "GA,0" )
+        {
+            QString msg = tr( "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                              "Dữ liệu: %1" )
+                .arg( fb );
+            throw HxException( "Laser", msg );
+        }
     }
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
+    
     return true;
 }
 
@@ -171,15 +101,24 @@ bool HxLaser::SetupBlockData( const QString& program, std::map<int, QString> dat
 
     if ( items.length() <= 2 ) return true;
     QString cmd = items.join( "," ) + "\r";
-    QString fb = SendData( cmd, 3000 );
-    if ( fb != "C2,0" )
+    try
     {
-        QString cmd = tr(
-            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-            "Dữ liệu: %1" )
-            .arg( fb );
-        throw HxException( cmd );
+        QString fb = SendData( cmd, 3000 );
+        if ( fb != "C2,0" )
+        {
+            QString cmd = tr(
+                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                "Dữ liệu: %1" )
+                .arg( fb );
+            throw HxException( cmd );
+        }
     }
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
+    
     return true;
 }
 
@@ -191,7 +130,7 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
             "Phát hiện góc cài đặt tem không đúng (0,90,180,270)\n"
             "Góc hiện tại: %1" )
             .arg( pos.angle );
-        throw HxException( cmd );
+        throw HxException( "Laser", cmd);
     }
 
     // 1. lấy tọa độ hiện tại dx, dy
@@ -220,17 +159,23 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdORG = items.join( "," ) + "\r";
-    fb = SendData( cmdORG, 3000 );
-    if ( fb != "AG,0" )
+    try
     {
-        QString cmd = tr(
-            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-            "Dữ liệu: %1" )
-            .arg( fb );
-        throw HxException( cmd );
+        fb = SendData( cmdORG, 3000 );
+        if ( fb != "AG,0" )
+        {
+            QString cmd = tr(
+                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                "Dữ liệu: %1" )
+                .arg( fb );
+            throw HxException( cmd );
+        }
     }
-
-
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
 
     // 3. xoay góc yêu cầu
     int angle = ( 90 * pos.angle / 90 ) % 360;
@@ -244,16 +189,24 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0" );
     items.push_back( QString::number( angle ) );
     QString cmdRotate = items.join( "," ) + "\r";
-    fb = SendData( cmdRotate, 3000 );
-    if ( fb != "VG,0" )
+    try
     {
-        QString cmd = tr(
-            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-            "Dữ liệu: %1" )
-            .arg( fb );
-        throw HxException( cmd );
+        fb = SendData( cmdRotate, 3000 );
+        if ( fb != "VG,0" )
+        {
+            QString cmd = tr(
+                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                "Dữ liệu: %1" )
+                .arg( fb );
+            throw HxException( cmd );
+        }
     }
-
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
+    
     // 4. lấy thông tin stopper đang dùng
     auto stp = StopperManager()->GetStopper( stopper );
     if ( stp == nullptr )
@@ -322,47 +275,53 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdMove = items.join( "," ) + "\r";
-    fb = SendData( cmdMove, 3000 );
-    if ( fb != "AG,0" )
+    try
     {
-        QString cmd = tr(
-            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-            "Dữ liệu: %1" )
-            .arg( fb );
-        throw HxException( cmd );
+        fb = SendData( cmdMove, 3000 );
+        if ( fb != "AG,0" )
+        {
+            QString cmd = tr(
+                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                "Dữ liệu: %1" )
+                .arg( fb );
+            throw HxException( cmd );
+        }
     }
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
+
     return true;
 }
 
 bool HxLaser::Burn()
 {
-    QString fb = SendData( "NT\r" );
-    if ( fb == "NT,0" ) return true;
-    else
+    try
     {
-        QString code = fb.split( ',' ).last();
-        throw HxException( tr( "Lệnh in thất bại.\nMã lỗi: %1" ).arg( code ) );
+        QString fb = SendData( "NT\r" );
+        if ( fb == "NT,0" ) return true;
+        else
+        {
+            QString code = fb.split( ',' ).last();
+            throw HxException( tr( "Lệnh in thất bại.\nMã lỗi: %1" ).arg( code ) );
+        }
     }
+    catch ( HxException ex )
+    {
+        ex.SetWhere( "Laser" );
+        throw ex;
+    }
+    
     return true;
 }
 
-bool HxLaser::eventFilter( QObject* watched, QEvent* event )
+void HxLaser::ReLoadSetting()
 {
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
-
-    switch ( type )
-    {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
-    }
-    return QObject::eventFilter( watched, event );
+    m_settings.Load();
 }
+
 HxLaser* Laser()
 {
     static HxLaser instance;

@@ -14,10 +14,9 @@ public:
     QString Read();
     bool SendFeedback( bool status );
     void Save( const QString& code );
-
+    void ReLoadSetting();
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxBarcode* Barcode();

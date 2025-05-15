@@ -138,7 +138,7 @@
        </size>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::EditTrigger::AllEditTriggers</set>
+       <set>QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::EditKeyPressed</set>
       </property>
       <property name="alternatingRowColors">
        <bool>false</bool>
@@ -165,7 +165,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="tbrMenu">
+  <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -187,10 +187,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew"/>
-   <addaction name="actionRemove"/>
    <addaction name="actionSave"/>
    <addaction name="actionLoad"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionNew">
    <property name="enabled">

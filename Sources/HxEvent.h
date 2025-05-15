@@ -8,6 +8,9 @@ public:
     enum Type
     {
         eCustomEvent,
+
+        eDatabaseError,
+
         eLoginEvent,
         eLogoutEvent,
 

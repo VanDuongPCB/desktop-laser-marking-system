@@ -56,6 +56,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     file(COPY $ENV{QT_DIR}/plugins/imageformats DESTINATION $ENV{BUILD_DIR})
     file(COPY $ENV{QT_DIR}/plugins/sqldrivers DESTINATION $ENV{BUILD_DIR})
     file(COPY "../Default Files" DESTINATION $ENV{BUILD_DIR})
+    file(COPY "../Assets/Themes" DESTINATION $ENV{BUILD_DIR})
 endif() 
 
 

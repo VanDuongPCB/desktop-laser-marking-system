@@ -6,6 +6,7 @@
 #include "QMap"
 #include "QDate"
 
+#include "HxDefines.h"
 #include "HxObject.h"
 #include "HxSettings.h"
 
@@ -78,23 +79,25 @@ private:
     ProductStatus m_status = ePending;
 };
 
-class HxLOTManager: private QObject
+class HxLOTManager: public QObject
 {
     Q_OBJECT
 public:
-    HxLOTManager();
+    explicit HxLOTManager();
     HxLOTPtr Create();
     HxLOTPtr GetLOT( const QString& lotName );
     HxLOTPtrMap GetLOTs( const QDate& fromTime = QDate( 2000, 1, 1 ) );
-    void Save( HxLOTPtr pLOT );
-    void Removes( const QStringList& names );
+    ReturnCode Save( HxLOTPtr pLOT );
+    ReturnCode Remove( HxLOTPtr pLOT );
+    ReturnCode Remove( const QString& name );
+    ReturnCode Removes( const std::set<QString>& names );
     QStringList Parameters();
-    void Migration( const QString& dir );
+    ReturnCode DeleteAll();
+    void ReloadSetting();
 
 private:
     HxRegistrySetting m_settings;
     QStringList m_paramNames;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxLOTManager* LOTManager();

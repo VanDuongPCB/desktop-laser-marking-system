@@ -1,6 +1,6 @@
 #pragma once
 #include "QException"
-
+#include "QJsonObject"
 
 
 class HxException : public QException
@@ -17,7 +17,7 @@ public:
 
     void SetWhere( const QString& where );
     void SetMessage( const QString& message );
-    QByteArray toJson();
+    QJsonObject toJsonObject();
 
 private:
     QString m_time = "0000/00/00 00:00:00";

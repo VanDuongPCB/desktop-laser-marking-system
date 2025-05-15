@@ -9,73 +9,10 @@
 #include "HxFileManager.h"
 #include "HxDatabase.h"
 #include "HxEvent.h"
-//
-//QMap<int, std::shared_ptr<HxStopper>> HxStopper::items;
-//
-//void HxStopper::load()
-//{
-//    //if ( !items.contains( 1 ) ) items.insert( 1, std::make_shared<HxStopper>( HxStopper() ) );
-//    //if ( !items.contains( 2 ) ) items.insert( 2, std::make_shared<HxStopper>( HxStopper() ) );
-//    //if ( !items.contains( 3 ) ) items.insert( 3, std::make_shared<HxStopper>( HxStopper() ) );
-//
-//    //QString dir = FileManager()->GetPath( HxFileManager::eDBSettingDir );
-//    //QDir().mkdir( dir );
-//    //QString path = FileManager()->GetPath( HxFileManager::eDBStopperFile );
-//    //QFile reader( path );
-//    //if ( reader.open( QIODevice::ReadOnly ) )
-//    //{
-//    //    QByteArray json = reader.readAll();
-//    //    reader.close();
-//    //    QJsonDocument doc = QJsonDocument::fromJson( json );
-//    //    QJsonArray arr = doc.array();
-//    //    for ( auto arrItem : arr )
-//    //    {
-//    //        QJsonObject obj = arrItem.toObject();
-//    //        int index = obj.value( "index" ).toInt( 0 );
-//    //        if ( !items.contains( index ) ) continue;
-//    //        items[ index ]->x = obj.value( "x" ).toDouble( 0 );
-//    //        items[ index ]->y = obj.value( "y" ).toDouble( 0 );
-//    //    }
-//    //}
-//}
-//
-//void HxStopper::save()
-//{
-//    //QJsonArray arr;
-//    //for ( int i = 1; i <= 3; i++ )
-//    //{
-//    //    if ( !items.contains( i ) ) continue;
-//    //    QJsonObject obj;
-//    //    obj.insert( "index", i );
-//    //    obj.insert( "x", items[ i ]->x );
-//    //    obj.insert( "y", items[ i ]->y );
-//    //    arr.push_back( obj );
-//    //}
-//
-//    //QJsonDocument doc;
-//    //doc.setArray( arr );
-//
-//
-//    //QString dir = FileManager()->GetPath( HxFileManager::eDBSettingDir );
-//    //QDir().mkdir( dir );
-//    //QString path = FileManager()->GetPath( HxFileManager::eDBStopperFile );
-//    //QFile writer( path );
-//    //if ( writer.open( QIODevice::WriteOnly ) )
-//    //{
-//    //    writer.write( doc.toJson() );
-//    //    writer.close();
-//    //}
-//}
-//
-//std::shared_ptr<HxStopper> HxStopper::find( int index )
-//{
-//    if ( items.contains( index ) ) return items[ index ];
-//    return {};
-//}
 
 HxStopperManager::HxStopperManager() : QObject( nullptr )
 {
-    //qApp->installEventFilter( this );
+    m_settings.Load();
 }
 
 HxStopperPtr HxStopperManager::Create()
@@ -86,9 +23,10 @@ HxStopperPtr HxStopperManager::Create()
 HxStopperPtr HxStopperManager::GetStopper( int index )
 {
     HxStopperPtr pStopper;
-    HxStopperPtrMap map;
 
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return pStopper;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
@@ -120,6 +58,8 @@ HxStopperPtrMap HxStopperManager::GetStoppers()
     HxStopperPtrMap map;
 
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return map;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
@@ -144,14 +84,20 @@ HxStopperPtrMap HxStopperManager::GetStoppers()
     return map;
 }
 
-void HxStopperManager::Save( int index, HxStopperPtr pStopper )
+ReturnCode HxStopperManager::Save( int index, HxStopperPtr pStopper )
 {
+    if ( !pStopper )
+        return RtDataNull;
+
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
 
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
+        return RtDBOpenFailed;
+
     HxQuery query( db );
     QString cmd = QString( "UPDATE Stoppers "
                            "SET X = '%1',Y = '%2' "
@@ -159,50 +105,20 @@ void HxStopperManager::Save( int index, HxStopperPtr pStopper )
         .arg( pStopper->x )
         .arg( pStopper->y )
         .arg( index );
-    query.exec( cmd );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
     db.close();
+    return RtNormal;
 }
 
-bool HxStopperManager::eventFilter( QObject* watched, QEvent* event )
+void HxStopperManager::ReLoadSetting()
 {
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
-
-    switch ( type )
-    {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
-    }
-    return QObject::eventFilter( watched, event );
+    m_settings.Load();
 }
 
-void HxStopperManager::Migration( const QString& dir )
-{
-    QDir().mkdir( dir );
-    QString path = dir + "/stoppers.json";
-    QFile reader( path );
-    if ( !reader.open( QIODevice::ReadOnly ) )
-        return;
-
-    QByteArray json = reader.readAll();
-    reader.close();
-    QJsonDocument doc = QJsonDocument::fromJson( json );
-    QJsonArray arr = doc.array();
-    for ( auto arrItem : arr )
-    {
-        QJsonObject obj = arrItem.toObject();
-        HxStopperPtr pStopper = Create();
-        int index = obj.value( "index" ).toInt( 0 );
-        pStopper->x = obj.value( "x" ).toDouble( 0 );
-        pStopper->y = obj.value( "y" ).toDouble( 0 );
-        Save( index, pStopper );
-    }
-}
 HxStopperManager* StopperManager()
 {
     static HxStopperManager instance;

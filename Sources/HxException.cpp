@@ -44,13 +44,11 @@ void HxException::SetMessage( const QString& message )
     m_message = message;
 }
 
-QByteArray HxException::toJson()
+QJsonObject HxException::toJsonObject()
 {
     QJsonObject obj;
     obj.insert( "time", m_time );
     obj.insert( "where", m_where );
     obj.insert( "message", m_message );
-    QJsonDocument doc;
-    doc.setObject( obj );
-    return doc.toJson();
+    return obj;
 }

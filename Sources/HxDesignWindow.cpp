@@ -2,14 +2,23 @@
 #include "ui_HxDesignWindow.h"
 
 #include "QPushButton"
+#include "QLabel"
 
 #include "HxModel.h"
 #include "HxLOT.h"
 #include "HxMessage.h"
+#include "HxEvent.h"
+
+namespace
+{
+    int s_maxBlockCount = 32;
+}
 
 HxDesignWindow::HxDesignWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::DesignWindow )
 {
     ui->setupUi( this );
+    m_pLblMessage = new QLabel();
+    ui->toolBar->addWidget( m_pLblMessage );
 
     ui->tbvDesign->setHeaders( { "C. trình","Rộng","Cao" } );
     ui->tbvDesign->setColumnWidth( 1, 60 );
@@ -20,16 +29,10 @@ HxDesignWindow::HxDesignWindow( QWidget* parent ) : QMainWindow( parent ), ui( n
     ui->tbvBlocks->setColumnWidth( 0, 80 );
     ui->tbvBlocks->setColumnWidth( 1, 80 );
     ui->tbvBlocks->setColumnWidth( 2, 80 );
-    ui->tbvBlocks->setRowCount( m_maxBlockCount );
+    ui->tbvBlocks->setRowCount( s_maxBlockCount );
 
     ui->tbvModelParams->setHeaders( { "Thông số model" } );
     ui->tbvLotParams->setHeaders( { "Thông số lot" } );
-
-    m_designs = DesignManager()->GetDesigns();
-
-    ShowDesigns();
-    ShowParams();
-    ShowBlocks();
 
     connect( ui->actionSave, &QAction::triggered, this, &HxDesignWindow::OnSave );
     connect( ui->tbvDesign, &QTableView::pressed, this, &HxDesignWindow::OnSelected );
@@ -50,6 +53,7 @@ void HxDesignWindow::showEvent( QShowEvent* )
 
 void HxDesignWindow::ShowDesigns()
 {
+    m_designs = DesignManager()->GetDesigns();
     disconnect( ui->tbvDesign->dataTable(), &QStandardItemModel::itemChanged, this, &HxDesignWindow::OnSizeChanged );
     int rows = 2000;
     ui->tbvDesign->setRowCount( rows );
@@ -77,14 +81,14 @@ void HxDesignWindow::ShowDesigns()
 
 void HxDesignWindow::ShowBlocks()
 {
-    auto& pDesign = m_pDesign;
-    if ( !pDesign )
-        pDesign = DesignManager()->Create();
+    std::map<int, HxBlock> blocks;
+    if ( m_pDesign )
+        blocks = m_pDesign->Blocks();
 
     disconnect( ui->tbvBlocks->dataTable(), &QStandardItemModel::itemChanged, this, &HxDesignWindow::OnBlockChanged );
-    for ( int row = 0; row < m_maxBlockCount; row++ )
+    for ( int row = 0; row < s_maxBlockCount; row++ )
     {
-        HxBlock block = pDesign->Block( row );
+        HxBlock block = blocks[ row ];
         ui->tbvBlocks->setText( row, "Block", QString::number( row ).rightJustified( 3, '0' ) );
         ui->tbvBlocks->item( row, "Block" )->setFlags( ui->tbvBlocks->item( row, 0 )->flags() & ~Qt::ItemIsEditable );
 
@@ -121,64 +125,95 @@ void HxDesignWindow::ShowParams()
 
 void HxDesignWindow::OnSelected( const QModelIndex& index )
 {
-    
     int row = index.row();
     if ( row < 0 )
         return;
-
-    static int lastRow( -1 );
-    if ( row != lastRow )
+    QString designName = ui->tbvDesign->item( row, 0 )->text().replace( "*", "" );
+    auto it = m_designChanges.find( designName );
+    if ( it != m_designChanges.end() )
     {
-        OnSave();
-        lastRow = row;
+        m_pDesign = m_designChanges[ designName ];
     }
-
-    QString designName = QString::number( row ).rightJustified( 4, '0' );
-    m_pDesign = DesignManager()->GetDesign( designName );
-    if ( !m_pDesign )
+    else
     {
-        m_pDesign = DesignManager()->Create();
-        m_pDesign->SetName( designName );
+        m_pDesign = DesignManager()->GetDesign( designName );
     }
-
     ShowBlocks();
 }
 
 void HxDesignWindow::OnSizeChanged( QStandardItem* item )
 {
+    int row = item->row();
+    QString designName = ui->tbvDesign->item( row, 0 )->text().replace( "*", "" );
+    double wvalue = ui->tbvDesign->item( row, 1 )->text().toDouble();
+    double hvalue = ui->tbvDesign->item( row, 2 )->text().toDouble();
+
     if ( !m_pDesign )
-        return;
-
-    int col = item->column();
-    bool bConverted;
-    double value = item->text().toDouble( &bConverted );
-    if ( bConverted )
     {
-        if ( col == 1 )
-            m_pDesign->SetWidth( value );
-        else if ( col == 2 )
-            m_pDesign->SetHeight( value );
+        m_pDesign = DesignManager()->GetDesign( designName );
+        if ( !m_pDesign )
+        {
+            m_pDesign = DesignManager()->Create();
+            m_pDesign->SetName( designName );
+            qDebug() << m_pDesign->ModifyFlags();
+        }
     }
+    m_pDesign->SetWidth( wvalue );
+    m_pDesign->SetHeight( hvalue );
 
-    if ( col == 1 )
-        item->setText( QString::number( m_pDesign->Width() ) );
-    else if ( col == 2 )
-        item->setText( QString::number( m_pDesign->Height() ) );
+    QString designNameChanged = designName + ( m_pDesign->IsMofified() ? "*" : "" );
+    QSignalBlocker blocker( ui->tbvDesign->dataTable() );
+    ui->tbvDesign->setText( row, 0, designNameChanged );
+    ui->tbvDesign->setText( row, 1, QString::number( wvalue ) );
+    ui->tbvDesign->setText( row, 2, QString::number( hvalue ) );
 
+    if ( m_pDesign->IsMofified() && m_designChanges.find( designName ) == m_designChanges.end() )
+    {
+        m_designChanges[ designName ] = m_pDesign;
+    }
 }
 
 void HxDesignWindow::OnBlockChanged( QStandardItem* item )
 {
-    if ( !m_pDesign )
-        return;
-
     int row = item->row();
+    if ( row < 1 )
+    {
+        item->setText( "" );
+        return;
+    }
+    if ( ui->tbvDesign->currentIndex().row() < 0 )
+    {
+        HxMsgWarning( tr( "Hãy chọn một chương trình trước." ) );
+        QSignalBlocker blocker( ui->tbvBlocks->dataTable() );
+        item->setText( "" );
+        return;
+    }
+
+    QString designName = ui->tbvDesign->item( ui->tbvDesign->currentIndex().row(), 0 )->text().replace( "*", "" );
+
+    if ( !m_pDesign )
+    {
+        m_pDesign = DesignManager()->Create();
+        m_pDesign->SetName( designName );
+        m_designChanges[ designName ] = m_pDesign;
+    }
+
+    
     HxBlock block;
 
     block.isCode = ui->tbvBlocks->item( row, "Là mã ?" )->checkState() == Qt::Checked;
     block.textLen = ui->tbvBlocks->item( row, "Độ dài" )->text().trimmed().toInt();
     block.data = ui->tbvBlocks->item( row, "Nội dung" )->text();
-    m_pDesign->SetBlock( row + 1, block );
+    m_pDesign->SetBlock( row, block );
+
+    QString designNameChanged = designName + ( m_pDesign->IsMofified() ? "*" : "" );
+    int designRow = ui->tbvDesign->currentIndex().row();
+    ui->tbvDesign->setText( designRow, 0, designNameChanged );
+    ui->tbvDesign->setText( designRow, 1, QString::number( m_pDesign->Width() ) );
+    ui->tbvDesign->setText( designRow, 2, QString::number( m_pDesign->Height() ) );
+    ui->tbvDesign->update( ui->tbvDesign->dataTable()->index( designRow, 0 ) );
+    ui->tbvDesign->update( ui->tbvDesign->dataTable()->index( designRow, 1 ) );
+    ui->tbvDesign->update( ui->tbvDesign->dataTable()->index( designRow, 2 ) );
 }
 
 void HxDesignWindow::OnInsertParam( const QModelIndex& index )
@@ -195,13 +230,11 @@ void HxDesignWindow::OnInsertParam( const QModelIndex& index )
         paramName = "LOT." + paramName;
     else if ( pTableView == ui->tbvModelParams )
         paramName = "MODEL." + paramName;
-    else 
+    else
         return;
 
-
-
     QString oldText = ui->tbvBlocks->item( ui->tbvBlocks->currentIndex().row(), "Nội dung" )->text();
-    if ( oldText.length() > 0 ) 
+    if ( oldText.length() > 0 )
         oldText += ",";
     oldText += paramName;
     ui->tbvBlocks->setText( ui->tbvBlocks->currentIndex().row(), "Nội dung", oldText );
@@ -209,16 +242,27 @@ void HxDesignWindow::OnInsertParam( const QModelIndex& index )
 
 void HxDesignWindow::OnRefresh()
 {
+    ShowDesigns();
+    ShowParams();
     ShowBlocks();
 }
 
 void HxDesignWindow::OnSave()
 {
-    if ( !m_pDesign || !m_pDesign->IsMofified() )
+    if ( m_designChanges.size() < 1 )
         return;
 
-    if ( HxMsgQuestion( tr( "Lưu dữ liệu mẫu tem: %1?" ).arg( m_pDesign->Name() ), tr( "Lưu dữ liệu" ) ) )
+    if ( HxMsgQuestion( tr( "Lưu dữ liệu mẫu tem bị thay đổi?" ), tr( "Lưu dữ liệu" ) ) )
     {
-        DesignManager()->Save( m_pDesign );
+        int saveCnt = 0;
+        for ( auto &[name, design] : m_designChanges )
+        {
+            if ( DesignManager()->Save( m_pDesign ) == RtNormal )
+                saveCnt++;
+        }
+        if(saveCnt>0 )
+            qApp->postEvent( qApp, new HxEvent( HxEvent::eDesignChanged ) );
+        m_designChanges.clear();
+        ShowDesigns();
     }
 }

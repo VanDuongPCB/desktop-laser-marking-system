@@ -1,6 +1,10 @@
 #pragma once
 #include "QMainWindow"
+#include "QLabel"
 #include "QStandardItem"
+
+
+
 #include "HxDesign.h"
 
 namespace Ui
@@ -18,9 +22,12 @@ public:
 
 private:
     Ui::DesignWindow* ui;
-    int m_maxBlockCount = 32;
-    HxDesignPtr m_pDesign;
+    QLabel* m_pLblMessage = nullptr;
+
+
     HxDesignPtrMap m_designs;
+    HxDesignPtr m_pDesign;
+    HxDesignPtrMap m_designChanges;
 
     void showEvent( QShowEvent* );
     void ShowDesigns();

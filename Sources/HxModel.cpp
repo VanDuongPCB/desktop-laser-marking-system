@@ -239,7 +239,6 @@ QStringList HxModel::paramNames()
 HxModelManager::HxModelManager() :QObject( nullptr )
 {
     m_settings.Load();
-    //qApp->installEventFilter( this );
 }
 
 HxModelPtr HxModelManager::Create( const QString& code, const QString& name )
@@ -252,8 +251,11 @@ HxModelPtr HxModelManager::Create( const QString& code, const QString& name )
 
 QStringList HxModelManager::Names()
 {
-    QString dbFilePath = m_settings.String( DatabaseFilePath );
     QStringList items;
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return items;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
@@ -283,8 +285,11 @@ QStringList HxModelManager::ParamNames()
 
 HxModelPtrMap HxModelManager::GetModels()
 {
-    QString dbFilePath = m_settings.String( DatabaseFilePath );
     HxModelPtrMap map;
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return map;
+   
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
@@ -320,7 +325,9 @@ HxModelPtrMap HxModelManager::GetModels()
 HxModelPtr HxModelManager::GetModel( const QString& code )
 {
     QString dbFilePath = m_settings.String( DatabaseFilePath );
-    HxModelPtrMap map;
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return nullptr;
+    
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
@@ -391,17 +398,27 @@ HxModelPtr HxModelManager::GetModel( const QString& code )
     return pModel;
 }
 
-void HxModelManager::Save( HxModelPtr pModel )
+ReturnCode HxModelManager::Save( HxModelPtr pModel )
 {
     if ( !pModel )
-        return;
+        return RtDataNull;
+
+    if ( !pModel->IsMofified() )
+        return RtDataNoChanges;
+
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
-    HxQuery query( db );
+    {
+        qDebug() << "Save Model: " << db.lastError().text();
+        return RtDBOpenFailed;
+    }
 
+    HxQuery query( db );
 
     if ( pModel->IsMofified( HxModel::eNew ) )
     {
@@ -416,7 +433,12 @@ void HxModelManager::Save( HxModelPtr pModel )
             .arg( pModel->CvWidth() )
             .arg( pModel->Stopper() )
             .arg( pModel->IsPrintLo() );
-        query.exec( cmd );
+        if ( !query.exec( cmd ) )
+        {
+            qDebug() << "Save Model: " << query.lastError().text();
+            db.close();
+            return RtDBQueryFailed;
+        }
     }
     else if ( pModel->IsMofified( HxModel::eInfo ) )
     {
@@ -431,7 +453,12 @@ void HxModelManager::Save( HxModelPtr pModel )
             .arg( pModel->Stopper() )
             .arg( pModel->IsPrintLo() )
             .arg( pModel->Code() );
-        query.exec( cmd );
+        if ( !query.exec( cmd ) )
+        {
+            qDebug() << "Save Model: " << query.lastError().text();
+            db.close();
+            return RtDBQueryFailed;
+        }
     }
 
     if ( pModel->IsMofified( HxModel::ePosition ) )
@@ -450,7 +477,12 @@ void HxModelManager::Save( HxModelPtr pModel )
                 .arg( position.x )
                 .arg( position.y )
                 .arg( position.angle );
-            query.exec( cmd );
+            if ( !query.exec( cmd ) )
+            {
+                qDebug() << "Save Model: " << query.lastError().text();
+                db.close();
+                return RtDBQueryFailed;
+            }
         }
     }
 
@@ -468,24 +500,30 @@ void HxModelManager::Save( HxModelPtr pModel )
                 .arg( pModel->Code() )
                 .arg( key )
                 .arg( value );
-            query.exec( cmd );
+            if ( !query.exec( cmd ) )
+            {
+                qDebug() << "Save Model: " << query.lastError().text();
+                db.close();
+                return RtDBQueryFailed;
+            }
         }
     }
-    bool bIsNew = pModel->IsMofified( HxModel::eNew );
     pModel->ClearModified();
-    if ( bIsNew )
-        qApp->postEvent( qApp, new HxEvent( HxEvent::eModelAdded ) );
-    else
-        qApp->postEvent( qApp, new HxEvent( HxEvent::eModelChanged ) );
+    db.close();
+    return RtNormal;
 }
 
-void HxModelManager::Removes( const QStringList& names )
+ReturnCode HxModelManager::Removes( const QStringList& names )
 {
     QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+
     HxDatabase db = HxDatabase::database( "SQLITE" );
     db.setDatabaseName( dbFilePath );
     if ( !db.open() )
-        return;
+        return RtDBOpenFailed;
+
     HxQuery query( db );
 
     for ( auto& name : names )
@@ -501,6 +539,7 @@ void HxModelManager::Removes( const QStringList& names )
     }
     db.close();
     qApp->postEvent( qApp, new HxEvent( HxEvent::eModelDeleted ) );
+    return RtNormal;
 }
 
 void HxModelManager::AddComments( const QStringList& keys )
@@ -512,100 +551,127 @@ void HxModelManager::RemoveComments( const QStringList& keys )
 {
 
 }
+//
+//void HxModelManager::Migration( const QString& dir )
+//{
+//    QString lotDir = dir;
+//    QDir().mkdir( lotDir );
+//    QFileInfoList fileInfos = QDir( lotDir ).entryInfoList( { "*.model" } );
+//
+//    std::set<QString> paramNames;
+//
+//    for ( auto& fileInfo : fileInfos )
+//    {
+//        QString designName = fileInfo.baseName().toUpper();
+//        QString filePath = dir + "/" + designName + ".model";
+//
+//        QFileInfo fileInfo( filePath );
+//        QFile fileReader( filePath );
+//        if ( !fileReader.open( QIODevice::ReadOnly ) )
+//            continue;
+//
+//        QByteArray json = fileReader.readAll();
+//        fileReader.close();
+//
+//        QJsonDocument doc = QJsonDocument::fromJson( json );
+//        QJsonObject obj = doc.object();
+//
+//        HxModelPtr pModel = Create();
+//
+//        pModel->SetCode( obj.value( "code" ).toString() );
+//        pModel->SetName( designName );
+//        pModel->SetPrintLo( obj.value( "is-print-lo" ).toBool() );
+//        pModel->SetkNo( obj.value( "k-no" ).toString() );
+//        pModel->SetIVProgram( obj.value( "iv-program" ).toString() );
+//        pModel->SetDesign( obj.value( "design" ).toString() );
+//        pModel->SetCvWidth( obj.value( "cv-width" ).toDouble() );
+//        pModel->SetStopper( obj.value( "stopper" ).toInt( 1 ) );
+//
+//        // markPositions;
+//        QJsonArray posArr = obj.value( "pos" ).toArray();
+//        int posIndex = 1;
+//        for ( auto posItem : posArr )
+//        {
+//            QJsonObject objPos = posItem.toObject();
+//            HxPosition pos;
+//            pos.index = objPos.value( "index" ).toInt();
+//            if ( pos.index <= 0 )
+//                pos.index = posIndex;
+//            pos.x = objPos.value( "x" ).toDouble( 0 );
+//            pos.y = objPos.value( "y" ).toDouble( 0 );
+//            pos.angle = objPos.value( "angle" ).toDouble( 0 );
+//
+//            pModel->SetPosition( pos.index, pos );
+//            posIndex++;
+//        }
+//
+//        // comments;
+//        QJsonObject commentObj = obj.value( "comments" ).toObject();
+//        QStringList keys = commentObj.keys();
+//        for ( auto& key : keys )
+//        {
+//            if ( key.startsWith( "LBLDIR" ) ) continue;
+//            if ( key.startsWith( "LBLPOSX" ) ) continue;
+//            if ( key.startsWith( "LBLPOSY" ) ) continue;
+//            if ( key.startsWith( "LBLSIZE" ) ) continue;
+//            if ( key.startsWith( "LBLTYPE" ) ) continue;
+//            pModel->SetComment( key, commentObj.value( key ).toString() );
+//        }
+//
+//        Save( pModel );
+//    }
+//
+//    QString cmdFormat = "";
+//
+//    for ( auto& paramName : paramNames )
+//    {
+//
+//    }
+//}
 
-bool HxModelManager::eventFilter( QObject* watched, QEvent* event )
+ReturnCode HxModelManager::DeleteAll()
 {
-    HxEvent* hxEvent( nullptr );
-    HxEvent::Type type;
-    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
-        return QObject::eventFilter( watched, event );
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
 
-    switch ( type )
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
     {
-    case HxEvent::eSettingChanged:
-        m_settings.Load();
-        break;
-    default:
-        break;
+        return RtDBOpenFailed;
     }
-    return QObject::eventFilter( watched, event );
+    HxQuery query( db );
+    QString cmd;
+
+    cmd = QString( "DELETE FROM Models" );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM ModelParams" );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    cmd = QString( "DELETE FROM ModelPositions" );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    db.close();
+    return RtNormal;
 }
 
-void HxModelManager::Migration( const QString& dir )
+void HxModelManager::ReloadSetting()
 {
-    QString lotDir = dir;
-    QDir().mkdir( lotDir );
-    QFileInfoList fileInfos = QDir( lotDir ).entryInfoList( { "*.model" } );
-
-    std::set<QString> paramNames;
-
-    for ( auto& fileInfo : fileInfos )
-    {
-        QString designName = fileInfo.baseName().toUpper();
-        QString filePath = dir + "/" + designName + ".model";
-
-        QFileInfo fileInfo( filePath );
-        QFile fileReader( filePath );
-        if ( !fileReader.open( QIODevice::ReadOnly ) )
-            continue;
-
-        QByteArray json = fileReader.readAll();
-        fileReader.close();
-
-        QJsonDocument doc = QJsonDocument::fromJson( json );
-        QJsonObject obj = doc.object();
-
-        HxModelPtr pModel = Create();
-
-        pModel->SetCode( obj.value( "code" ).toString() );
-        pModel->SetName( designName );
-        pModel->SetPrintLo( obj.value( "is-print-lo" ).toBool() );
-        pModel->SetkNo( obj.value( "k-no" ).toString() );
-        pModel->SetIVProgram( obj.value( "iv-program" ).toString() );
-        pModel->SetDesign( obj.value( "design" ).toString() );
-        pModel->SetCvWidth( obj.value( "cv-width" ).toDouble() );
-        pModel->SetStopper( obj.value( "stopper" ).toInt( 1 ) );
-
-        // markPositions;
-        QJsonArray posArr = obj.value( "pos" ).toArray();
-        int posIndex = 1;
-        for ( auto posItem : posArr )
-        {
-            QJsonObject objPos = posItem.toObject();
-            HxPosition pos;
-            pos.index = objPos.value( "index" ).toInt();
-            if ( pos.index <= 0 )
-                pos.index = posIndex;
-            pos.x = objPos.value( "x" ).toDouble( 0 );
-            pos.y = objPos.value( "y" ).toDouble( 0 );
-            pos.angle = objPos.value( "angle" ).toDouble( 0 );
-
-            pModel->SetPosition( pos.index, pos );
-            posIndex++;
-        }
-
-        // comments;
-        QJsonObject commentObj = obj.value( "comments" ).toObject();
-        QStringList keys = commentObj.keys();
-        for ( auto& key : keys )
-        {
-            if ( key.startsWith( "LBLDIR" ) ) continue;
-            if ( key.startsWith( "LBLPOSX" ) ) continue;
-            if ( key.startsWith( "LBLPOSY" ) ) continue;
-            if ( key.startsWith( "LBLSIZE" ) ) continue;
-            if ( key.startsWith( "LBLTYPE" ) ) continue;
-            pModel->SetComment( key, commentObj.value( key ).toString() );
-        }
-
-        Save( pModel );
-    }
-
-    QString cmdFormat = "";
-
-    for ( auto& paramName : paramNames )
-    {
-
-    }
+    m_settings.Load();
 }
 
 HxModelManager* ModelManager()

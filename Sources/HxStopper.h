@@ -5,9 +5,11 @@
 #include "vector"
 #include "memory"
 
+#include "HxDefines.h"
 #include "HxSettings.h"
 
-class HxStopper;
+
+struct HxStopper;
 using HxStopperPtr = std::shared_ptr<HxStopper>;
 using HxStopperPtrMap = std::map<int, HxStopperPtr>;
 
@@ -25,12 +27,11 @@ public:
     HxStopperPtr Create();
     HxStopperPtr GetStopper( int index );
     HxStopperPtrMap GetStoppers();
-    void Save( int index, HxStopperPtr pStopper );
-    void Migration( const QString& dir );
+    ReturnCode Save( int index, HxStopperPtr pStopper );
+    void ReLoadSetting();
 private:
     std::map<int, HxStopperPtr> m_items;
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxStopperManager* StopperManager();

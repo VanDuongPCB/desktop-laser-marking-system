@@ -82,6 +82,78 @@ void HxControlWindow::on_btnBlockClear_clicked()
 
 void HxControlWindow::on_btnMark_clicked()
 {
+    QString program = QString::number( ui->spxProgram->value() ).rightJustified( 4, '0' );
+    int stopper = ui->cbxStopper->currentIndex() + 1;
+    QMap<QString, QString> data;
+    int rows = 16;
+    for ( int row = 0; row < rows; row++ )
+    {
+        if ( ui->tbvMarkBlocks->item( row, 1 ) == nullptr ) continue;
+        QString text = ui->tbvMarkBlocks->item( row, 1 )->text().trimmed();
+        if ( text.length() < 1 ) continue;
+        QString block = ui->tbvMarkBlocks->item( row, 0 )->text();
+        data.insert( block, text );
+    }
+
+    try
+    {
+        if ( ui->chxChangeProgram->isChecked() )
+        {
+            Laser()->SetProgram( program );
+        }
+    }
+    catch ( HxException ex )
+    {
+        HxMsgError( ex.Message() );
+    }
+
+    if ( ui->chxChangeProgram->isChecked() )
+    {
+        try
+        {
+            Laser()->SetProgram( program );
+        }
+        catch ( HxException ex )
+        {
+            HxMsgError( ex.Message() );
+        }
+    }
+
+    if ( ui->chxChangePos->isChecked() )
+    {
+        HxPosition pos;
+        pos.x = ui->spxMarkX->value();
+        pos.y = ui->spxMarkY->value();
+        pos.angle = ui->spxMarkAngle->value();
+        HxDesignPtr pDesign= DesignManager()->Create();
+
+        Laser()->SetupPosition( program, pos, stopper, pDesign );
+    }
+
+    if ( ui->chxChangeContent->isChecked() )
+    {
+        std::map<int, QString> data;
+        int rows = 16;
+        for ( int row = 0; row < rows; row++ )
+        {
+            if ( ui->tbvMarkBlocks->item( row, 1 ) == nullptr ) 
+                continue;
+            QString text = ui->tbvMarkBlocks->item( row, 1 )->text().trimmed();
+            if ( text.length() < 1 ) 
+                continue;
+            int block = ui->tbvMarkBlocks->item( row, 0 )->text().toInt();
+            data[ block ] = text;
+        }
+        Laser()->SetupBlockData( program, data );
+    }
+
+    if ( ui->chxPrint->isChecked() )
+    {
+        Laser()->Burn();
+    }
+
+
+
     //    QString program = QString::number(ui->spxProgram->value()).rightJustified(4,'0');
     //    int stopper = ui->cbxStopper->currentIndex() + 1;
     //    QMap<QString, QString> data;

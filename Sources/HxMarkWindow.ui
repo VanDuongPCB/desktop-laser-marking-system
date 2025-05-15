@@ -30,81 +30,61 @@
     <property name="spacing">
      <number>9</number>
     </property>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_12">
+    <item row="2" column="0" colspan="2">
+     <widget class="QLabel" name="label_14">
       <property name="font">
        <font>
         <bold>true</bold>
        </font>
       </property>
       <property name="text">
-       <string>Thông tin lỗi</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="2">
-     <widget class="QGroupBox" name="groupBox_4">
-      <property name="title">
        <string>Trạng thái</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_8">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblStatus">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>50</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>---</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="maximumSize">
-       <size>
-        <width>450</width>
-        <height>16777215</height>
-       </size>
+    <item row="5" column="0" colspan="2">
+     <widget class="HxTableView" name="tbvErrors">
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
       </property>
-      <property name="title">
-       <string>Thông tin chung</string>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>125</number>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>24</number>
+      </attribute>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QWidget" name="widget_2" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <property name="horizontalSpacing">
-        <number>15</number>
-       </property>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_5">
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_6">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
-          <string>MAC cuối</string>
+          <string>Mẫu thiết kế</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QLabel" name="lblModelName">
+       <item row="1" column="1">
+        <widget class="QLabel" name="lblCounterStart">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -116,11 +96,12 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
@@ -131,23 +112,24 @@
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
-        <widget class="QLabel" name="label_7">
+       <item row="8" column="1">
+        <widget class="QLabel" name="lblIVProgram">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
-          <string>Chương trình IV</string>
+          <string>-</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
-        <widget class="QLabel" name="lblModelCode">
+       <item row="2" column="1">
+        <widget class="QLabel" name="lblQuantity">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -159,21 +141,32 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>0</height>
-          </size>
-         </property>
+       <item row="7" column="1">
+        <widget class="QLabel" name="lblDesign">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
-          <string>Tên lot</string>
+          <string>-</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Sản lượng</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -193,8 +186,8 @@
          </property>
         </widget>
        </item>
-       <item row="10" column="1">
-        <widget class="QLabel" name="lblIVProgram">
+       <item row="5" column="1">
+        <widget class="QLabel" name="lblModelName">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -204,20 +197,98 @@
          <property name="text">
           <string>-</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLabel" name="lblModelCode">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>-</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="3" column="1">
+        <widget class="QLabel" name="lblSerialStart">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>MAC cuối</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
         <widget class="QLabel" name="label_2">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
           <string>Tên model</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Bộ đếm đầu</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Tên lot</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -229,6 +300,7 @@
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
@@ -258,51 +330,23 @@
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
-        <widget class="QLabel" name="label_6">
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_7">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
-          <string>Mẫu thiết kế</string>
+          <string>Chương trình IV</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="lblSerialStart">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="1">
-        <widget class="QLabel" name="lblDesign">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>-</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="11" column="0">
+       <item row="9" column="0">
         <widget class="QLabel" name="label_10">
          <property name="minimumSize">
           <size>
@@ -313,6 +357,7 @@
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="text">
@@ -323,11 +368,12 @@
          </property>
         </widget>
        </item>
-       <item row="11" column="1">
+       <item row="9" column="1">
         <widget class="QProgressBar" name="pgbProgress">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <bold>false</bold>
           </font>
          </property>
          <property name="value">
@@ -344,82 +390,38 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_13">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Bộ đếm đầu</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="lblCounterStart">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Sản lượng</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="lblQuantity">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>-</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Thông tin chung</string>
+    <item row="1" column="1">
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <layout class="QGridLayout" name="gridLayout_6">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Mã code</string>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>53</height>
+       </size>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="lblBarcode">
+         <property name="font">
+          <font>
+           <pointsize>-1</pointsize>
+           <bold>true</bold>
+          </font>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_9">
+         <property name="styleSheet">
+          <string notr="true">color:green;
+font-size:32px;</string>
+         </property>
          <property name="text">
-          <string>Dữ liệu các block</string>
+          <string>-</string>
          </property>
         </widget>
        </item>
@@ -436,6 +438,13 @@
          </property>
          <property name="text">
           <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Mã code</string>
          </property>
         </widget>
        </item>
@@ -466,37 +475,72 @@
          </attribute>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="lblBarcode">
-         <property name="font">
-          <font>
-           <pointsize>-1</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color:green;
-font-size:32px;</string>
-         </property>
+       <item row="2" column="0" colspan="2">
+        <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>-</string>
+          <string>Dữ liệu các block</string>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="3" column="0" colspan="2">
-     <widget class="HxTableView" name="tbvErrors">
-      <property name="editTriggers">
-       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_12">
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
       </property>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>125</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
+      <property name="text">
+       <string>Thông tin lỗi</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLabel" name="lblStatus">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>150</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>50</pointsize>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>---</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_16">
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Thông tin khắc</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_15">
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Thông tin chung</string>
+      </property>
      </widget>
     </item>
    </layout>

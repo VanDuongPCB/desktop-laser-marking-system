@@ -1,10 +1,13 @@
 #pragma once
 #include "vector"
+#include "vector"
+#include "memory"
+
 #include "QString"
 #include "QMap"
 #include "QJsonObject"
-#include "vector"
-#include "memory"
+
+#include "HxDefines.h"
 #include "HxPosition.h"
 #include "HxObject.h"
 #include "HxSettings.h"
@@ -71,17 +74,8 @@ private:
     int m_stopper = 1;
     std::map<int, HxPosition> m_positions;
     std::map<QString, QString> m_comments;
-    QString filePath;
 
 public:
-    // static std::vector<std::shared_ptr<HxModel>> items;
-    // static std::shared_ptr<HxModel> create( QString name, QString code );
-    // static void save( std::shared_ptr<HxModel> model );
-    // static void save();
-    // static void load();
-    // static QStringList names();
-    // static std::shared_ptr<HxModel> find( QString name );
-
     static QStringList paramNames();
 };
 
@@ -96,15 +90,15 @@ public:
     QStringList ParamNames();
     HxModelPtrMap GetModels();
     HxModelPtr GetModel( const QString& code );
-    void Save( HxModelPtr pModel );
-    void Removes( const QStringList& names );
+    ReturnCode Save( HxModelPtr pModel );
+    ReturnCode Removes( const QStringList& names );
     void AddComments( const QStringList& keys );
     void RemoveComments( const QStringList& keys );
-    void Migration( const QString& dir );
+    ReturnCode DeleteAll();
+    void ReloadSetting();
 
 private:
     HxRegistrySetting m_settings;
-    bool eventFilter( QObject* watched, QEvent* event );
 };
 
 HxModelManager* ModelManager();
