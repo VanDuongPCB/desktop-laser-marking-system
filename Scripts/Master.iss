@@ -2,12 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName                 "Laser Marking System"
-#define MyAppVersion              "2025.1.1"
+#define MyAppVersion              "25.1.1"
 #define MyAppPublisher            "My Company, Inc."
 #define MyAppURL                  "https://www.example.com/"
 #define MyAppExeName              "LMS.exe"
 #define MyAppIconName             "../Assets/Icons/lms.ico"
-#define MyInputDir                "../_build/25.1.0"
+#define MyInputDir                "../_build/25.1.1"
 #define MyOutputDir               "/"
 ;#define MyAppAssocName MyAppName + " File"
 ;#define MyAppAssocExt ".myp"
@@ -26,7 +26,7 @@ AppPublisherURL=                  {#MyAppURL}
 AppSupportURL=                    {#MyAppURL}
 AppUpdatesURL=                    {#MyAppURL}
 DefaultDirName=                   {autopf}\{#MyAppName}\{#MyAppVersion}
-UninstallDisplayIcon=             {app}\{#MyAppExeName}
+UninstallDisplayIcon=             {app}\{#MyAppExeName}          
 OutputDir=                        {#MyOutputDir}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.

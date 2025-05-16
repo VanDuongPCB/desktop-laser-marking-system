@@ -286,13 +286,16 @@ HxLOTPtrMap HxLOTManager::GetLOTs( const QDate& fromTime )
         return map;
     HxQuery query( db );
     QString sTime = fromTime.toString( "yyyy-MM-dd" );
-    QString cmd = QString( "SELECT Name,CounterStart,MACStart,MACEnd,Quantity,Progress,Model,IsRePrint FROM LOTs WHERE FinishDate>'%1'" ).arg( sTime );
+    QString cmd = QString( "SELECT Name FROM LOTs WHERE FinishDate>'%1'" ).arg( sTime );
     if ( !query.exec( cmd ) )
         return map;
 
+    std::set<QString> lotNames;
+
     while ( query.next() )
     {
-        HxLOTPtr pLOT = Create();
+        lotNames.insert( query.value( 0 ).toString() );
+        /*HxLOTPtr pLOT = Create();
         pLOT->SetName( query.value( 0 ).toString() );
         pLOT->SetCounterStart( query.value( 1 ).toString() );
         pLOT->SetMACStart( query.value( 2 ).toString() );
@@ -307,7 +310,17 @@ HxLOTPtrMap HxLOTManager::GetLOTs( const QDate& fromTime )
 
         QString statusIndex = QString::number( pLOT->Status() );
 
-        map[ statusIndex + "_" + pLOT->Name()] = pLOT;
+        map[ statusIndex + "_" + pLOT->Name()] = pLOT;*/
+    }
+
+    for ( auto &name : lotNames )
+    {
+        HxLOTPtr pLOT = GetLOT( name );
+        if ( !pLOT )
+            continue;
+
+        QString statusIndex = QString::number( pLOT->Status() );
+        map[ statusIndex + "_" + pLOT->Name() ] = pLOT;
     }
 
     return map;

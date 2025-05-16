@@ -174,11 +174,13 @@ void HxMarker::Test()
 void HxMarker::Pause()
 {
     m_state = eOnFree;
+    PLC()->SetEnable( false );
 }
 
 void HxMarker::Stop()
 {
     m_state = eOnFree;
+    PLC()->SetEnable( false );
 }
 
 HxLOTPtr HxMarker::LOT() const
@@ -205,6 +207,26 @@ void HxMarker::CheckAndPostEvent( State& lastState, State currentState, HxEvent:
 {
     if ( lastState == currentState )
         return;
+
+    if ( currentState == eOnMarking )
+    {
+        PLC()->SetTransferMode( false );
+        PLC()->SetEnable( true );
+    }
+    else if ( currentState == eOnTransfering )
+    {
+        PLC()->SetTransferMode( true );
+        PLC()->SetEnable( true );
+    }
+    else if ( currentState == eOnFree )
+    {
+        PLC()->SetEnable( false );
+    }
+    else if ( currentState == eOnStopping )
+    {
+        PLC()->SetEnable( false );
+    }
+
     qApp->postEvent( qApp, new HxEvent( eventType ) );
     lastState = currentState;
 }
@@ -260,6 +282,8 @@ void HxMarker::Task()
                     Laser()->SetupPosition( m_pDesign->Name(), position, m_pDesign, m_pStopper );
                     Laser()->SetupBlockData( m_pDesign->Name(), dataBlocks );
                     Laser()->Burn();
+                    m_pLOT->SetProgress( m_pLOT->Progress() + 1 );
+                    m_pLOT->Evaluate();
                 }
                 catch ( HxException ex )
                 {
@@ -384,6 +408,7 @@ void HxMarker::Task()
                             // chỗ này nên ném exeption
                             if ( checkCode != RtNormal )
                             {
+                                PLC()->SetMarkResult( false );
                                 m_state = eOnError;
                                 goto START_LOOP;
                             }
@@ -421,9 +446,12 @@ void HxMarker::Task()
                         // chỗ này nên ném exeption
                         if ( savePrintCode != RtNormal )
                         {
+                            PLC()->SetMarkResult( false );
                             m_state = eOnError;
                             goto START_LOOP;
                         }
+
+                        PLC()->SetMarkResult( true );
 
                         if ( m_pLOT->IsCompleted() )
                         {
@@ -435,6 +463,7 @@ void HxMarker::Task()
 
                         QThread::msleep( 50 );
                     }
+
                 }
             }
             catch ( HxException ex )

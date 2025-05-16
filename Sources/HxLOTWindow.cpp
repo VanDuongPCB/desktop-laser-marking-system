@@ -100,8 +100,8 @@ void HxLOTWindow::OnNew()
     if ( dialog.exec() )
     {
         HxLOTPtr pLOT = dialog.GetLOT();
-        m_lotToSaves[ pLOT->Name() ] = pLOT;
-        m_LOTs[ pLOT->Name() ] = pLOT;
+        m_lotToSaves[ "1_" + pLOT->Name()] = pLOT;
+        m_LOTs[ "1_" + pLOT->Name() ] = pLOT;
         m_pSearchTextBox->setText( pLOT->Name() );
         OnFilter( pLOT->Name() );
     }
