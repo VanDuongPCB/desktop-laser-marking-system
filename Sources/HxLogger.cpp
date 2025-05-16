@@ -192,6 +192,46 @@ ReturnCode HxLogger::Get( QDate fromDate, QDate toDate, HxLogArray& items )
     return RtNormal;
 }
 
+ReturnCode HxLogger::Get( const QString& serial, HxLogArray& items )
+{
+    items.clear();
+    QString dbFilePath = m_settings.String( DatabaseFilePath );
+    if ( !HxDatabase::CheckDatabaseFileExisting( dbFilePath ) )
+        return RtDBFileNotFound;
+    HxDatabase db = HxDatabase::database( "SQLITE" );
+    db.setDatabaseName( dbFilePath );
+    if ( !db.open() )
+    {
+        return RtDBOpenFailed;
+    }
+
+    QString cmd = QString( "SELECT Time,Serial,LOT,Model,Data "
+                           "FROM PrintLogs "
+                           "WHERE Serial='%1' OR Data like '%2%'" )
+        .arg( serial )
+        .arg( serial );
+
+    HxQuery query( db );
+    if ( !query.exec( cmd ) )
+    {
+        db.close();
+        return RtDBQueryFailed;
+    }
+
+    while ( query.next() )
+    {
+        HxLog log;
+        log.Time = query.value( 0 ).toString();
+        log.Serial = query.value( 1 ).toString();
+        log.LOT = query.value( 2 ).toString();
+        log.Model = query.value( 3 ).toString();
+        log.items = query.value( 4 ).toString().split( "," );
+        items.push_back( log );
+    }
+    db.close();
+    return RtNormal;
+}
+
 void HxLogger::Export( HxLogArray& items, QDate fromDate, QDate toDate )
 {
     QString tempFile;

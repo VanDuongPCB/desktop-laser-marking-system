@@ -17,7 +17,7 @@ public:
     HxLaser();
     bool SetProgram( const QString& name );
     bool SetupBlockData( const QString& program, std::map<int, QString> dataMap );
-    bool SetupPosition( const QString& program, HxPosition pos, int stopper, HxDesignPtr pDesign );
+    bool SetupPosition( const QString& program, HxPosition pos, HxDesignPtr pDesign, HxStopperPtr pStopper );
     bool Burn();
     void ReLoadSetting();
 private:

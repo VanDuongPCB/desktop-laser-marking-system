@@ -13,7 +13,7 @@ public:
     bool Clear();
     QString Read();
     bool SendFeedback( bool status );
-    void Save( const QString& code );
+    //void Save( const QString& code );
     void ReLoadSetting();
 private:
     HxRegistrySetting m_settings;

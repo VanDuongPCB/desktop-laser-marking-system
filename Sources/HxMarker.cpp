@@ -59,7 +59,6 @@ void HxMarker::DeInit()
 
 bool HxMarker::Setup( SetupMode mode, const QString& param )
 {
-    //disconnect( this, &HxMarker::SaveData, this, &HxMarker::OnSaveData );
     if ( m_state != eOnFree && m_state != eOnFinish )
     {
         HxMsgError( tr( "Đang khắc hoặc đang vận chuyển!" ), tr( "Cài đặt không thành công" ) );
@@ -80,7 +79,6 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
             return false;
         }
 
-#ifndef DEBUG_MODE
         try
         {
             PLC()->SetCvWidth( pModel->CvWidth() );
@@ -92,7 +90,6 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
             HxMsgError( ex.Message(), ex.Where() );
             return false;
         }
-#endif // !DEBUG_MODE
 
         m_pModel = pModel;
         qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerSetupChanged ) );
@@ -134,7 +131,6 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
         m_pDesign = pDesign;
         m_pStopper = pStopper;
 
-#ifndef DEBUG_MODE
         try
         {
             Laser()->SetProgram( pDesign->Name() );
@@ -147,7 +143,6 @@ bool HxMarker::Setup( SetupMode mode, const QString& param )
             HxMsgError( ex.Message(), ex.Where() );
             return false;
         }
-#endif // !DEBUG_MODE
 
         qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerSetupChanged ) );
         if ( m_state == eOnFinish )
@@ -245,79 +240,162 @@ void HxMarker::Task()
         case HxMarker::eOnError:
             CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoError );
             break;
+
+
+
         case HxMarker::eOnTesting:
-        case HxMarker::eOnMarking:
         {
-            bool bIsTest = m_state == eOnTesting;
-            CheckAndPostEvent( lastState, m_state, bIsTest ? HxEvent::eMarkerGoTest : HxEvent::eMarkerGoMark );
+            CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoTest );
 
             auto& positions = m_pModel->Positions();
             int patternCnt = positions.size();
             int blockCodeIndex = m_pDesign->IndexOfBlockCode();
-            bool bIsRePrint = ( false ) || ( false );
-
+            bool bIsSucceed = true;
             for ( auto& [index, position] : positions )
             {
-                if ( !bIsTest )
-                {
-                    m_pLOT->Evaluate();
-                    if ( m_pLOT->IsCompleted() )
-                    {
-                        m_state = eOnFinish;
-                        CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoFinish );
-                        break;
-                    }
-                }
-
                 std::map<int, QString> dataBlocks = GenMarkData( m_pDesign, m_pLOT, m_pModel );
-                QString code = dataBlocks[ blockCodeIndex ];
-
-                if ( !bIsRePrint && !bIsTest )
-                {
-                    ReturnCode checkCode{};
-                    QMetaObject::invokeMethod( this, [ & ]()
-                                               {
-                                                   checkCode = Logger()->CheckSerialExisting( code );
-                                                   if ( checkCode != RtNormal )
-                                                   {
-                                                       if ( checkCode == RtDBDataExisting )
-                                                       {
-                                                           HxMsgError( tr( "PHÁT HIỆN TRÙNG TEM\n"
-                                                                           "LIÊN LẠC QUẢN LÝ NGAY !!!\n\n"
-                                                                           "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
-                                                                       tr( "Tên LOT: %1\n"
-                                                                           "Số seri trùng: %2" )
-                                                                       .arg( m_pLOT->Name() )
-                                                                       .arg( code ),
-                                                                       tr( "Trùng lặp tem" ), true );
-                                                       }
-                                                       else
-                                                       {
-
-                                                       }
-                                                   }
-                                               }, Qt::BlockingQueuedConnection );
-
-                    // chỗ này nên ném exeption
-                    if ( checkCode != RtNormal )
-                    {
-                        m_state = eOnError;
-                        goto START_LOOP;
-                    }
-
-                }
 
                 try
                 {
-#ifndef DEBUG_MODE
-                    Laser()->SetupPosition( m_pDesign->Name(), position, m_pModel->Stopper(), m_pDesign );
+                    Laser()->SetupPosition( m_pDesign->Name(), position, m_pDesign, m_pStopper );
                     Laser()->SetupBlockData( m_pDesign->Name(), dataBlocks );
                     Laser()->Burn();
-#endif // !DEBUG_MODE
+                }
+                catch ( HxException ex )
+                {
+                    // ném exception
+                    QMetaObject::invokeMethod( this, [ & ]()
+                                               {
+                                                   HxMsgError( tr( "Không khắc được.\n%1." ).arg( ex.Message() ),
+                                                               tr( "Lỗi khắc thử." ) );
+                                               }, Qt::BlockingQueuedConnection );
+                    qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError, ex.toJsonObject() ) );
+                    m_state = eOnFree;
+                    bIsSucceed = false;
+                    break;
+                }
+            }
+            if ( bIsSucceed )
+            {
+                QMetaObject::invokeMethod( this, [ & ]()
+                                           {
+                                               HxMsgInfo( tr( "Đã hoàn thành khắc bản test." ),
+                                                           tr( "Hoàn thành khắc." ) );
+                                           }, Qt::BlockingQueuedConnection );
+            }
+            m_state = eOnFree;
+        }
+        break;
 
-                    qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerMarked ) );
-                    if ( !bIsTest )
+
+
+        case HxMarker::eOnMarking:
+        {
+            CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoMark );
+
+            try
+            {
+                if ( Barcode()->IsHasData() )
+                {
+                    Barcode()->Clear();
+                    QString code = Barcode()->Read().trimmed();
+                    if ( code.length() > 0 && code.startsWith( "ERROR" ) == false )
                     {
+                        ReturnCode saveCode{};
+                        QMetaObject::invokeMethod( this, [ & ]()
+                                                   {
+                                                       saveCode = Logger()->SaveBarcode( code );
+                                                   }, Qt::BlockingQueuedConnection );
+                        Barcode()->SendFeedback( true );
+                    }
+                    else
+                    {
+                        Barcode()->SendFeedback( false );
+                    }
+                }
+            }
+            catch ( HxException ex )
+            {
+                QMetaObject::invokeMethod( this, [ & ]()
+                                           {
+                                               HxMsgError( tr( "Không đọc được barcode sau khi khắc." ),
+                                                           tr( "Lỗi đọc barcode." ), false );
+                                           }, Qt::BlockingQueuedConnection );
+
+                qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError, ex.toJsonObject() ) );
+                m_state = eOnError;
+                goto START_LOOP;
+            }
+
+
+
+            try
+            {
+                if ( PLC()->IsHasTrigger() )
+                {
+                    PLC()->ConfirmTrigger();
+
+                    auto& positions = m_pModel->Positions();
+                    int patternCnt = positions.size();
+                    int blockCodeIndex = m_pDesign->IndexOfBlockCode();
+                    bool bIsRePrint = ( m_pLOT->IsRePrint() ) || ( m_pModel->IsPrintLo() );
+
+                    for ( auto& [index, position] : positions )
+                    {
+                        m_pLOT->Evaluate();
+                        if ( m_pLOT->IsCompleted() )
+                        {
+                            m_state = eOnFinish;
+                            CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoFinish );
+                            break;
+                        }
+
+                        std::map<int, QString> dataBlocks = GenMarkData( m_pDesign, m_pLOT, m_pModel );
+                        QString code = dataBlocks[ blockCodeIndex ];
+
+                        if ( !bIsRePrint )
+                        {
+                            ReturnCode checkCode{};
+                            QMetaObject::invokeMethod( this, [ & ]()
+                                                       {
+                                                           checkCode = Logger()->CheckSerialExisting( code );
+                                                           if ( checkCode != RtNormal )
+                                                           {
+                                                               if ( checkCode == RtDBDataExisting )
+                                                               {
+                                                                   HxMsgError( tr( "PHÁT HIỆN TRÙNG TEM\n"
+                                                                                   "LIÊN LẠC QUẢN LÝ NGAY !!!\n\n"
+                                                                                   "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
+                                                                               tr( "Tên LOT: %1\n"
+                                                                                   "Số seri trùng: %2" )
+                                                                               .arg( m_pLOT->Name() )
+                                                                               .arg( code ),
+                                                                               tr( "Trùng lặp tem" ), true );
+                                                               }
+                                                               else
+                                                               {
+                                                                   HxMsgError( tr( "Không kiểm tra được trùng tem\n"
+                                                                                   "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
+                                                                               tr( "Lỗi kiểm tra trùng tem" ) );
+                                                               }
+                                                           }
+                                                       }, Qt::BlockingQueuedConnection );
+
+                            // chỗ này nên ném exeption
+                            if ( checkCode != RtNormal )
+                            {
+                                m_state = eOnError;
+                                goto START_LOOP;
+                            }
+
+                        }
+
+                        Laser()->SetupPosition( m_pDesign->Name(), position, m_pDesign, m_pStopper );
+                        Laser()->SetupBlockData( m_pDesign->Name(), dataBlocks );
+                        Laser()->Burn();
+
+                        qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerMarked ) );
+
                         m_pLOT->SetProgress( m_pLOT->Progress() + 1 );
                         m_pLOT->Evaluate();
 
@@ -349,6 +427,7 @@ void HxMarker::Task()
 
                         if ( m_pLOT->IsCompleted() )
                         {
+                            PLC()->SetCompleteBit();
                             m_state = eOnFinish;
                             CheckAndPostEvent( lastState, m_state, HxEvent::eMarkerGoFinish );
                             break;
@@ -357,14 +436,20 @@ void HxMarker::Task()
                         QThread::msleep( 50 );
                     }
                 }
-                catch ( HxException ex )
-                {
-
-                }
             }
+            catch ( HxException ex )
+            {
+                QMetaObject::invokeMethod( this, [ & ]()
+                                           {
+                                               HxMsgError( tr( "Quá trình khắc đã dừng lại do phát hiện lỗi!" ),
+                                                           tr( "Có lỗi trong quá trình khắc" ) );
+                                           }, Qt::BlockingQueuedConnection );
 
-            if ( m_state == eOnTesting )
-                m_state = eOnFree;
+                m_state = eOnError;
+                qApp->postEvent( qApp, new HxEvent( HxEvent::eMarkerGoError, ex.toJsonObject() ) );
+                m_state = eOnError;
+                goto START_LOOP;
+            }
         }
         break;
         default:

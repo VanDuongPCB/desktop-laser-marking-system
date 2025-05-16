@@ -126,8 +126,8 @@ void HxControlWindow::on_btnMark_clicked()
         pos.y = ui->spxMarkY->value();
         pos.angle = ui->spxMarkAngle->value();
         HxDesignPtr pDesign= DesignManager()->Create();
-
-        Laser()->SetupPosition( program, pos, stopper, pDesign );
+        HxStopperPtr pStopper = StopperManager()->GetStopper( stopper );
+        Laser()->SetupPosition( program, pos, pDesign, pStopper );
     }
 
     if ( ui->chxChangeContent->isChecked() )

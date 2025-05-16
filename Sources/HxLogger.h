@@ -26,7 +26,10 @@ public:
     ReturnCode SavePrint( HxLOTPtr pLOT, HxModelPtr pModel, HxDesignPtr pDesign, std::map<int, QString>& blockdata );
     ReturnCode SaveError( const QString& time, const QString& where, const QString& message );
     ReturnCode SaveBarcode( const QString& code );
+
     ReturnCode Get( QDate fromDate, QDate toDate, HxLogArray& items );
+    ReturnCode Get( const QString& serial, HxLogArray& items );
+
     void Export( HxLogArray& items, QDate fromDate, QDate toDate );
     void ReLoadSetting();
 private:

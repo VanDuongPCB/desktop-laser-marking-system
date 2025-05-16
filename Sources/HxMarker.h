@@ -53,16 +53,12 @@ private:
     HxDesignPtr m_pDesign;
     HxStopperPtr m_pStopper;
     State m_state = eOnUnInit;
-    std::atomic_bool runFlag = false;
+
     void CheckAndPostEvent( State& lastState, State currentState, HxEvent::Type eventType );
     void Task();
 
 private:
     HxRegistrySetting m_settings;
-
-signals:
-    void requestSaveLOT( HxLOTPtr pLOT );
-    void requestSavePrintData( std::map<int, QString>& blockdata, HxLOTPtr pLOT, HxModelPtr pModel, HxDesignPtr pDesign );
 };
 
 

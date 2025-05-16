@@ -17,6 +17,12 @@ HxLogWindow::HxLogWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui:
     m_pDateTo->setDisplayFormat( "dd/MM/yyyy" );
     m_pDateTo->setDate( QDate::currentDate() );
     ui->toolBar->addWidget( m_pDateTo );
+
+    ui->toolBar->addWidget( new QLabel( tr( "Số serial" ) ) );
+    m_pSerial = new QLineEdit();
+    m_pSerial->setSizePolicy( m_pDateTo->sizePolicy() );
+    ui->toolBar->addWidget( m_pSerial );
+
     ui->toolBar->addActions( { ui->actionSearch, ui->actionExport } );
 
     QStringList columnNames = { "Thời gian","Serial","LOT","Model" };
@@ -38,7 +44,13 @@ HxLogWindow::~HxLogWindow()
 
 void HxLogWindow::OnSearch()
 {
-    Logger()->Get( m_pDateFrom->date(), m_pDateTo->date(), m_logData );
+    QString serial = m_pSerial->text().trimmed().toUpper();
+    if ( serial.isEmpty() )
+        Logger()->Get( m_pDateFrom->date(), m_pDateTo->date(), m_logData );
+    else
+        Logger()->Get( serial, m_logData );
+
+
     ui->tbvLogs->setRowCount( m_logData.size() );
     int row = 0;
     for ( auto& log : m_logData )

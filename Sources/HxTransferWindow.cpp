@@ -11,7 +11,7 @@
 HxTransferWindow::HxTransferWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::TransferWindow )
 {
     ui->setupUi( this );
-
+    qApp->installEventFilter( this );
     connect( ui->cbxModel, &QComboBox::currentTextChanged, this, &HxTransferWindow::OnSelect );
     connect( ui->spxCvWidth, &QDoubleSpinBox::valueChanged, this, &HxTransferWindow::OnCvWidthChanged );
     connect( ui->btnPass, &QToolButton::clicked, this, &HxTransferWindow::OnTransfer );
@@ -91,6 +91,7 @@ void HxTransferWindow::OnSelect( const QString& modelName )
             ui->spxCvWidth->setValue( pModel->CvWidth() );
         }
     }
+    UpdateUI();
 }
 
 void HxTransferWindow::OnCvWidthChanged( double width )

@@ -150,7 +150,7 @@ void HxMainWindow::OnLockUI()
     ui->tabWidget->setTabVisible( 6, false );
     ui->tabWidget->setTabVisible( 7, false );
     ui->tabWidget->setTabVisible( 8, false );
-    ui->tabWidget->setTabVisible( 9, false );
+    //ui->tabWidget->setTabVisible( 9, false );
 }
 
 void HxMainWindow::OnUnLockUIForLeader()

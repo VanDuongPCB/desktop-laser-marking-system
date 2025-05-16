@@ -14,6 +14,7 @@
 QString HxLaser::SendData( const QString& data, int timeout )
 {
     QString portName = m_settings.String( LaserConnPort );
+    //qDebug() << portName << " -> " << data;
     QSerialPort port( portName );
     port.setBaudRate( 9600 );
 
@@ -59,29 +60,21 @@ QString HxLaser::SendData( const QString& data, int timeout )
 HxLaser::HxLaser() : QObject( nullptr )
 {
     m_settings.Load();
-    qApp->installEventFilter( this );
 }
 
 bool HxLaser::SetProgram( const QString& name )
 {
     QString cmd = "GA," + name + "\r";
-    try
+    //qDebug() << "HxLaser::SetProgram -> " << name;
+
+    QString fb = SendData( cmd, 3000 );
+    if ( fb != "GA,0" )
     {
-        QString fb = SendData( cmd, 3000 );
-        if ( fb != "GA,0" )
-        {
-            QString msg = tr( "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-                              "Dữ liệu: %1" )
-                .arg( fb );
-            throw HxException( "Laser", msg );
-        }
+        QString msg = tr( "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+                          "Dữ liệu: %1" )
+            .arg( fb );
+        throw HxException( "Laser", msg );
     }
-    catch ( HxException ex )
-    {
-        ex.SetWhere( "Laser" );
-        throw ex;
-    }
-    
     return true;
 }
 
@@ -99,7 +92,8 @@ bool HxLaser::SetupBlockData( const QString& program, std::map<int, QString> dat
         items.push_back( data );
     }
 
-    if ( items.length() <= 2 ) return true;
+    if ( items.length() <= 2 )
+        return true;
     QString cmd = items.join( "," ) + "\r";
     try
     {
@@ -122,30 +116,30 @@ bool HxLaser::SetupBlockData( const QString& program, std::map<int, QString> dat
     return true;
 }
 
-bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper, HxDesignPtr pDesign )
+bool HxLaser::SetupPosition( const QString& program, HxPosition pos, HxDesignPtr pDesign, HxStopperPtr pStopper )
 {
     if ( pos.angle % 90 != 0 )
     {
-        QString cmd = tr(
+        QString msg = tr(
             "Phát hiện góc cài đặt tem không đúng (0,90,180,270)\n"
             "Góc hiện tại: %1" )
             .arg( pos.angle );
-        throw HxException( "Laser", cmd);
+        throw HxException( "Laser", msg );
     }
 
     // 1. lấy tọa độ hiện tại dx, dy
     QString cmdCUR = "B1," + program + ",000\r";
-    QString fb = SendData( cmdCUR, 3000 );
+    QString fb = SendData( cmdCUR );
     QStringList fbItems = fb.split( ',' );
     if ( fbItems.size() != 4 )
     {
-        QString cmd = tr(
+        QString msg = tr(
             "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
             "Dữ liệu: %1" )
             .arg( fb );
-        throw HxException( cmd );
+        throw HxException( msg );
     }
-
+    //qDebug() << cmdCUR;
 
     double dx = fbItems[ 2 ].toDouble( 0 );
     double dy = fbItems[ 3 ].toDouble( 0 );
@@ -159,23 +153,17 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdORG = items.join( "," ) + "\r";
-    try
+    fb = SendData( cmdORG );
+    if ( fb != "AG,0" )
     {
-        fb = SendData( cmdORG, 3000 );
-        if ( fb != "AG,0" )
-        {
-            QString cmd = tr(
-                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-                "Dữ liệu: %1" )
-                .arg( fb );
-            throw HxException( cmd );
-        }
+        QString msg = tr(
+            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+            "Dữ liệu: %1" )
+            .arg( fb );
+        throw HxException( "Laser", msg );
     }
-    catch ( HxException ex )
-    {
-        ex.SetWhere( "Laser" );
-        throw ex;
-    }
+
+    //qDebug() << cmdORG;
 
     // 3. xoay góc yêu cầu
     int angle = ( 90 * pos.angle / 90 ) % 360;
@@ -189,32 +177,22 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0" );
     items.push_back( QString::number( angle ) );
     QString cmdRotate = items.join( "," ) + "\r";
-    try
+    //qDebug() << cmdRotate;
+    fb = SendData( cmdRotate );
+    qDebug() << fb;
+    if ( fb != "VG,0" )
     {
-        fb = SendData( cmdRotate, 3000 );
-        if ( fb != "VG,0" )
-        {
-            QString cmd = tr(
-                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-                "Dữ liệu: %1" )
-                .arg( fb );
-            throw HxException( cmd );
-        }
+        QString msg = tr(
+            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+            "Dữ liệu: %1" )
+            .arg( fb );
+        throw HxException( "Laser", msg );
     }
-    catch ( HxException ex )
-    {
-        ex.SetWhere( "Laser" );
-        throw ex;
-    }
-    
+
     // 4. lấy thông tin stopper đang dùng
-    auto stp = StopperManager()->GetStopper( stopper );
-    if ( stp == nullptr )
+    if ( !pStopper )
     {
-        QString cmd = tr(
-            "Không xác nhận được thông tin stopper!\n"
-            "Stopper: %1" )
-            .arg( stopper );
+        QString cmd = tr( "Không xác nhận được thông tin stopper!\n" );
         throw HxException( items.join( '\n' ) );
     }
 
@@ -224,32 +202,32 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     // 5.1. với góc 0
     if ( angle == 0 )
     {
-        mx = stp->x + pos.x;
-        my = stp->y + pos.y;
+        mx = pStopper->x + pos.x;
+        my = pStopper->y + pos.y;
     }
     // 5.2. với góc 90 độ
     else if ( angle == 90 )
     {
         // thay đổi mx sẽ thay đổi y trên mẫu in
-        mx = pos.y + stp->y;
+        mx = pos.y + pStopper->y;
         // thay đổi my sẽ thay đổi x trên mẫu in
         // my càng lớn thì x di chuyển theo chiều âm Ox;
-        my = -( pos.x + stp->x + pDesign->Height() );
+        my = -( pos.x + pStopper->x + pDesign->Height() );
     }
 
     // 5.3. với góc 180 độ
     else if ( angle == 180 )
     {
         // mx càng dương thì x trên bản in càng chạy về chiều âm Ox
-        mx = -( pos.x + stp->x + pDesign->Width() );
-        my = -( pos.y + stp->y + pDesign->Height() );
+        mx = -( pos.x + pStopper->x + pDesign->Width() );
+        my = -( pos.y + pStopper->y + pDesign->Height() );
     }
 
     // 5.4 với góc 270 độ (-90 độ)
     else if ( angle == -90 )
     {
-        mx = -( pos.y + stp->y + pDesign->Width() );
-        my = pos.x + stp->x;
+        mx = -( pos.y + pStopper->y + pDesign->Width() );
+        my = pos.x + pStopper->x;
     }
     else
     {
@@ -261,9 +239,9 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
         QString cmd = tr(
             "Phát hiện tọa độ cần in vượt ngoài khoảng quy định (-150 ~ 150)!\n"
             "Tọa độ: %1,%2\n"
-            "Stopper: %3, offset = %4,%5." )
+            "Stopper = %3,%4." )
             .arg( mx ).arg( my )
-            .arg( stopper ).arg( stp->x ).arg( stp->y );
+            .arg( pStopper->x ).arg( pStopper->y );
         throw HxException( cmd );
     }
 
@@ -275,22 +253,15 @@ bool HxLaser::SetupPosition( const QString& program, HxPosition pos, int stopper
     items.push_back( "0000.00" );
     items.push_back( "0000" );
     QString cmdMove = items.join( "," ) + "\r";
-    try
+
+    fb = SendData( cmdMove );
+    if ( fb != "AG,0" )
     {
-        fb = SendData( cmdMove, 3000 );
-        if ( fb != "AG,0" )
-        {
-            QString cmd = tr(
-                "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
-                "Dữ liệu: %1" )
-                .arg( fb );
-            throw HxException( cmd );
-        }
-    }
-    catch ( HxException ex )
-    {
-        ex.SetWhere( "Laser" );
-        throw ex;
+        QString msg = tr(
+            "Dữ liệu phản hồi từ máy khắc laser không đúng!\n"
+            "Dữ liệu: %1" )
+            .arg( fb );
+        throw HxException( "Laser", msg );
     }
 
     return true;
