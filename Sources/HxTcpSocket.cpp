@@ -1,45 +1,44 @@
+
 #include "HxTcpSocket.h"
 #include "HxException.h"
-#include "HxSystemError.h"
+#include "HxSystemReport.h"
 
 HxTcpSocket::HxTcpSocket( QObject* parent ) : QTcpSocket{ parent }
 {
 
 }
 
-HxTcpSocket::HxTcpSocket( QString ip, int port, QObject* parent )
+HxTcpSocket::HxTcpSocket( const QString& ip, int port, QObject* parent )
 {
-    this->ip = ip;
-    this->port = port;
+    this->m_ip = ip;
+    this->m_port = port;
 }
 
 bool HxTcpSocket::Connect( int timeout )
 {
-    connectToHost( ip, port );
+    connectToHost( m_ip, m_port );
     if ( !waitForConnected( timeout ) )
     {
-        QStringList items = {
-            "Kết nối tới plc hết hạn !",
-            "IP : " + ip,
-            "Port : " + QString::number( port )
-        };
-        throw HxException( items.join( "\n" ) );
+        QString msg = QString(
+            "Kết nối tới plc hết hạn!\n"
+            "IP: %1\n"
+            "Port: %2" ).arg( m_ip ).arg( m_port );
+        throw HxException( msg );
     }
     return true;
 }
 
-bool HxTcpSocket::WriteLine( QString data, int timeout )
+bool HxTcpSocket::WriteLine( const QString& data, int timeout )
 {
     std::string s = data.toStdString();
     this->write( s.data(), s.length() );
     if ( !waitForBytesWritten( timeout ) )
     {
-        QStringList items = {
-            "Gửi dữ liệu đến plc hết hạn !",
-            "IP : " + ip,
-            "Port : " + QString::number( port )
-        };
-        throw HxException( items.join( "\n" ) );
+        QString msg = QString(
+            "Gửi dữ liệu đến plc hết hạn !\n"
+            "IP: %1\n"
+            "Port: %2" ).arg( m_ip ).arg( m_port );
+        throw HxException( msg );
     }
     return true;
 }
@@ -48,12 +47,11 @@ QString HxTcpSocket::ReadLine( int timeout )
 {
     if ( !waitForReadyRead( timeout ) )
     {
-        QStringList items = {
-            "Plc không phản hồi !",
-            "IP : " + ip,
-            "Port : " + QString::number( port )
-        };
-        throw HxException( items.join( "\n" ) );
+        QString msg = QString(
+            "Plc không phản hồi !\n"
+            "IP: %1\n"
+            "Port: %2" ).arg( m_ip ).arg( m_port );
+        throw HxException( msg );
     }
     char buffer[ 4096 ]{ 0 };
     this->read( buffer, 4095 );

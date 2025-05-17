@@ -1,6 +1,5 @@
 #pragma once
-#include <QMainWindow>
-#include "HxMainWindow.h"
+#include "QMainWindow"
 
 namespace Ui
 {
@@ -12,24 +11,20 @@ class HxTransferWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit HxTransferWindow( QWidget* parent = 0 );
+    explicit HxTransferWindow( QWidget* parent = nullptr );
     ~HxTransferWindow();
-
-private slots:
-    void PassStarted();
-    void PassStopped();
-
-    void on_btnPass_clicked();
-
-    void on_btnReload_clicked();
-
-    void on_spxCvWidth_valueChanged( double arg1 );
-
-    void on_cbxModel_currentTextChanged( const QString& arg1 );
-
-    void on_btnStop_clicked();
 
 private:
     Ui::TransferWindow* ui;
-    HxMainWindow* mainWindow = nullptr;
+    void showEvent( QShowEvent* );
+    bool eventFilter( QObject* watched, QEvent* event );
+    void OnShowModels();
+    void OnSelect( const QString& modelName );
+    void OnCvWidthChanged( double width );
+    void OnTransfer();
+    void OnStop();
+
+    void LockUI();
+    void UpdateUI();
 };
+

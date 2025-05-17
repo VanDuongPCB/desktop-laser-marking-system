@@ -2,18 +2,20 @@
 #include "ui_hxtransferwindow.h"
 #include "HxModel.h"
 #include "HxMarker.h"
-#include "HxActuator.h"
+#include "HxPLC.h"
 #include "HxMessage.h"
 #include "HxException.h"
-#include "HxSystemError.h"
+#include "HxSystemReport.h"
+#include "HxEvent.h"
 
 HxTransferWindow::HxTransferWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::TransferWindow )
 {
     ui->setupUi( this );
-    mainWindow = ( HxMainWindow* )parent;
-    connect( HxMarker::Instance(), &HxMarker::started, this, &HxTransferWindow::PassStarted );
-    connect( HxMarker::Instance(), &HxMarker::stopped, this, &HxTransferWindow::PassStopped );
-    on_btnReload_clicked();
+    qApp->installEventFilter( this );
+    connect( ui->cbxModel, &QComboBox::currentTextChanged, this, &HxTransferWindow::OnSelect );
+    connect( ui->spxCvWidth, &QDoubleSpinBox::valueChanged, this, &HxTransferWindow::OnCvWidthChanged );
+    connect( ui->btnPass, &QToolButton::clicked, this, &HxTransferWindow::OnTransfer );
+    connect( ui->btnStop, &QToolButton::clicked, this, &HxTransferWindow::OnStop );
 }
 
 HxTransferWindow::~HxTransferWindow()
@@ -21,103 +23,116 @@ HxTransferWindow::~HxTransferWindow()
     delete ui;
 }
 
-void HxTransferWindow::PassStarted()
+void HxTransferWindow::showEvent( QShowEvent* )
+{
+    OnShowModels();
+    UpdateUI();
+}
+
+bool HxTransferWindow::eventFilter( QObject* watched, QEvent* event )
+{
+    HxEvent* hxEvent( nullptr );
+    HxEvent::Type type;
+    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
+        return QMainWindow::eventFilter( watched, event );
+
+    switch ( type )
+    {
+    case HxEvent::eDesignAdded:
+    case HxEvent::eDesignDeleted:
+    case HxEvent::eDesignChanged:
+    case HxEvent::eModelAdded:
+    case HxEvent::eModelDeleted:
+    case HxEvent::eModelChanged:
+    case HxEvent::eLOTAdded:
+    case HxEvent::eLOTDeleted:
+    case HxEvent::eLOTChanged:
+    case HxEvent::eSettingChanged:
+        OnShowModels();
+        break;
+    case HxEvent::eMarkerSetupChanged:
+    case HxEvent::eMarkerGoFree:
+    case HxEvent::eMarkerGoTransfer:
+    case HxEvent::eMarkerGoMark:
+        UpdateUI();
+        break;
+    case HxEvent::eMarkerStopped:
+        break;
+    case HxEvent::eMarkerGoError:
+        break;
+    default:
+        break;
+    }
+
+    return QMainWindow::eventFilter( watched, event );
+}
+
+void HxTransferWindow::OnShowModels()
+{
+    QSignalBlocker blocker( ui->cbxModel );
+    QString old = ui->cbxModel->currentText();
+    ui->cbxModel->clear();
+    auto Models = ModelManager()->GetModels();
+    for ( auto& [name, md] : Models )
+    {
+        ui->cbxModel->addItem( md->Name() );
+    }
+    ui->cbxModel->setCurrentText( old );
+}
+
+void HxTransferWindow::OnSelect( const QString& modelName )
+{
+    if ( Marker()->Setup( HxMarker::eModeTransfer, modelName ) )
+    {
+        HxModelPtr pModel = Marker()->Model();
+        if ( pModel )
+        {
+            QSignalBlocker blocker( ui->spxCvWidth );
+            ui->spxCvWidth->setValue( pModel->CvWidth() );
+        }
+    }
+    UpdateUI();
+}
+
+void HxTransferWindow::OnCvWidthChanged( double width )
+{
+    try
+    {
+        PLC()->SetCvWidth( ui->spxCvWidth->value() );
+    }
+    catch ( HxException ex )
+    {
+        HxMsgError( ex.Message(), ex.Where() );
+    }
+}
+
+void HxTransferWindow::OnTransfer()
+{
+    LockUI();
+    Marker()->Transfer();
+}
+
+void HxTransferWindow::OnStop()
+{
+    LockUI();
+    Marker()->Pause();
+}
+
+void HxTransferWindow::LockUI()
 {
     ui->cbxModel->setEnabled( false );
     ui->spxCvWidth->setEnabled( false );
     ui->btnPass->setEnabled( false );
-    ui->btnStop->setEnabled( true );
-}
-
-void HxTransferWindow::PassStopped()
-{
-    ui->cbxModel->setEnabled( true );
-    ui->spxCvWidth->setEnabled( true );
-    ui->btnPass->setEnabled( true );
     ui->btnStop->setEnabled( false );
 }
 
-
-void HxTransferWindow::on_btnReload_clicked()
+void HxTransferWindow::UpdateUI()
 {
-    QString old = ui->cbxModel->currentText();
-    ui->cbxModel->setEnabled( false );
-    ui->cbxModel->clear();
-    for ( auto& md : HxModel::items )
-    {
-        ui->cbxModel->addItem( md->name );
-    }
-    ui->cbxModel->setCurrentText( old );
-    ui->cbxModel->setEnabled( true );
+    auto pModel = Marker()->Model();
+    auto state = Marker()->GetState();
+
+    ui->cbxModel->setEnabled( state == HxMarker::eOnFree );
+    ui->spxCvWidth->setEnabled( state == HxMarker::eOnFree );
+    ui->btnPass->setEnabled( state == HxMarker::eOnFree && pModel != nullptr );
+    ui->btnStop->setEnabled( state == HxMarker::eOnTransfering );
 }
-
-
-void HxTransferWindow::on_spxCvWidth_valueChanged( double arg1 )
-{
-    try
-    {
-        HxActuator::SetCvWidth( ui->spxCvWidth->value() );
-    }
-    catch ( HxException ex )
-    {
-        HxSystemError::Instance()->ErrorReport( ex );
-    }
-}
-
-
-void HxTransferWindow::on_cbxModel_currentTextChanged( const QString& arg1 )
-{
-    if ( ui->cbxModel->isEnabled() == false ) return;
-    auto model = HxModel::Find( arg1 );
-    if ( model != nullptr )
-    {
-        ui->spxCvWidth->setValue( model->cvWidth );
-    }
-}
-
-void HxTransferWindow::on_btnPass_clicked()
-{
-    try
-    {
-        HxActuator::SetCvWidth( ui->spxCvWidth->value() );
-        //        Actuator::setEnable(true);
-        HxActuator::SetTransferMode( true );
-        ui->btnPass->setEnabled( false );
-        ui->btnStop->setEnabled( true );
-        ui->cbxModel->setEnabled( false );
-        ui->spxCvWidth->setEnabled( false );
-        ui->btnReload->setEnabled( false );
-        if ( mainWindow != nullptr )
-        {
-            mainWindow->SetNavEnable( false );
-        }
-    }
-    catch ( HxException ex )
-    {
-        HxSystemError::Instance()->ErrorReport( ex );
-    }
-}
-
-
-void HxTransferWindow::on_btnStop_clicked()
-{
-    try
-    {
-        //        Actuator::setEnable(false);
-        HxActuator::SetTransferMode( false );
-        ui->btnPass->setEnabled( true );
-        ui->btnStop->setEnabled( false );
-        ui->cbxModel->setEnabled( true );
-        ui->spxCvWidth->setEnabled( true );
-        ui->btnReload->setEnabled( true );
-        if ( mainWindow != nullptr )
-        {
-            mainWindow->SetNavEnable( true );
-        }
-    }
-    catch ( HxException ex )
-    {
-        HxSystemError::Instance()->ErrorReport( ex );
-    }
-}
-

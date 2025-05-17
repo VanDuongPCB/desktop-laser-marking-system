@@ -1,5 +1,5 @@
 #pragma once
-#include <QMainWindow>
+#include "QMainWindow"
 
 namespace Ui
 {
@@ -28,4 +28,3 @@ private slots:
 private:
     Ui::ControlWindow* ui;
 };
-

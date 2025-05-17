@@ -31,5 +31,9 @@
         <file>sparkler_48px.png</file>
         <file>flash_on_48px.png</file>
         <file>data_transfer_48px.png</file>
+	<file>protect-01.png</file>
+	<file>protect-02.png</file>
+	<file>protect-03.png</file>
+	<file>database.png</file>
     </qresource>
 </RCC>

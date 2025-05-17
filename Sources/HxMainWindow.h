@@ -1,6 +1,19 @@
 #pragma once
 #include <QMainWindow>
+#include "QLabel"
 #include "HxException.h"
+#include "HxLOT.h"
+
+#include "HxMarkWindow.h"
+#include "HxSettingsWindow.h"
+#include "HxTransferWindow.h"
+#include "HxControlWindow.h"
+#include "HxModelWindow.h"
+#include "HxLOTWindow.h"
+#include "HxDesignWindow.h"
+#include "HxLoginDialog.h"
+#include "HxIVProgramWindow.h"
+#include "HxLogWindow.h"
 
 namespace Ui
 {
@@ -14,19 +27,33 @@ class HxMainWindow : public QMainWindow
 public:
     explicit HxMainWindow( QWidget* parent = 0 );
     ~HxMainWindow();
-    void SetNavEnable( bool en );
 private slots:
     void ErrorReported( HxException ex );
-    void LoginChanged();
-    void UpdateUI();
-    void MenuTabToggled( bool checked );
-    void on_actionLogin_triggered();
 
 private:
     Ui::MainWindow* ui;
-    std::vector<QAction*> actions;
-    std::vector<QWidget*> pages;
-    void showEvent( QShowEvent* );
+    QLabel* m_pLblVersion = nullptr;
+    int m_currentTabIndex = 0;
+
+    HxMarkWindow* m_pMarkWindow = nullptr;
+    HxTransferWindow* m_pTransferWindow = nullptr;
+    HxLOTWindow* m_pLOTWindow = nullptr;
+    HxModelWindow* m_pModelWindow = nullptr;
+    HxDesignWindow* m_pDesignWindow = nullptr;
+    HxIVProgramWindow* m_pIVProgramWindow = nullptr;
+    HxSettingsWindow* m_pSettingsWindow = nullptr;
+    HxControlWindow* m_pControlWindow = nullptr;
+    HxLogWindow* m_pLogWindow = nullptr;
+
+
+    void resizeEvent( QResizeEvent* event );
     void closeEvent( QCloseEvent* );
+    bool eventFilter( QObject* watched, QEvent* event );
+    void OnLoginOrLogout();
+    void OnLockUI();
+    void OnUnLockUIForLeader();
+    void OnUnLockUIForSuper();
+    void OnUnLockUIForAdmin();
+    void OnTabChanged( int index );
 };
 

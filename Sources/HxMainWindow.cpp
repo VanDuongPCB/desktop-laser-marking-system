@@ -1,7 +1,11 @@
 #include "HxMainWindow.h"
 #include "ui_hxmainwindow.h"
 
-#include "HxSettingWindow.h"
+#include "QSignalBlocker"
+#include "QCloseEvent"
+#include "QCoreApplication"
+
+#include "HxSettingsWindow.h"
 #include "HxMarkWindow.h"
 #include "HxControlWindow.h"
 #include "HxModelWindow.h"
@@ -9,154 +13,184 @@
 #include "HxDesignWindow.h"
 #include "HxTransferWindow.h"
 #include "HxLoginDialog.h"
+#include "HxIVProgramWindow.h"
+#include "HxLogWindow.h"
 
 #include "HxProtector.h"
 #include "HxMessage.h"
-
+#include "HxEvent.h"
 #include "HxSystemError.h"
+#include "HxLicense.h"
+#include "HxLOT.h"
+#include "HxMarker.h"
+#include "HxLogger.h"
 
-
+#include "HxTheme.h"
 
 HxMainWindow::HxMainWindow( QWidget* parent ) : QMainWindow( parent ), ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
 
-    ui->pageSetting->layout()->addWidget( new HxSettingsWindow( this ) );
-    ui->pagePass->layout()->addWidget( new HxTransferWindow( this ) );
-    ui->pageMark->layout()->addWidget( new HxMarkWindow( this ) );
-    ui->pageControl->layout()->addWidget( new HxControlWindow( this ) );
-    ui->pageModel->layout()->addWidget( new HxModelWindow( this ) );
-    ui->pageScheddule->layout()->addWidget( new HxLOTWindow( this ) );
-    ui->pageDesign->layout()->addWidget( new HxDesignWindow( this ) );
+    m_pMarkWindow = new HxMarkWindow();
+    m_pTransferWindow = new HxTransferWindow();
+    m_pLOTWindow = new HxLOTWindow();
+    m_pModelWindow = new HxModelWindow();
+    m_pDesignWindow = new HxDesignWindow();
+    m_pIVProgramWindow = new HxIVProgramWindow();
+    m_pSettingsWindow = new HxSettingsWindow();
+    m_pControlWindow = new HxControlWindow();
+    m_pLogWindow = new HxLogWindow();
 
+    ui->tabMark->layout()->addWidget( m_pMarkWindow );
+    ui->tabTransfer->layout()->addWidget( m_pTransferWindow );
+    ui->tabPlans->layout()->addWidget( m_pLOTWindow );
+    ui->tabModel->layout()->addWidget( m_pModelWindow );
+    ui->tabDesign->layout()->addWidget( m_pDesignWindow );
+    ui->tabIV->layout()->addWidget( m_pIVProgramWindow );
+    ui->tabSetting->layout()->addWidget( m_pSettingsWindow );
+    ui->tabControl->layout()->addWidget( m_pControlWindow );
+    ui->tabData->layout()->addWidget( m_pLogWindow );
 
-    actions.push_back( ui->actionSettings );
-    actions.push_back( ui->actionPass );
-    actions.push_back( ui->actionMark );
-    actions.push_back( ui->actionControl );
-    actions.push_back( ui->actionLot );
-    actions.push_back( ui->actionModel );
-    actions.push_back( ui->actionDesign );
-    actions.push_back( ui->actionIVProgram );
+    qApp->installEventFilter( this );
 
-    pages.push_back( ui->pageSetting );
-    pages.push_back( ui->pagePass );
-    pages.push_back( ui->pageMark );
-    pages.push_back( ui->pageControl );
-    pages.push_back( ui->pageScheddule );
-    pages.push_back( ui->pageModel );
-    pages.push_back( ui->pageDesign );
-    pages.push_back( ui->pageIV );
-
-    for ( auto& action : actions )
-    {
-        connect( action, &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
-    }
-    ui->actionMark->setChecked( true );
+    m_currentTabIndex = ui->tabWidget->currentIndex();
 
     connect( HxSystemError::Instance(), &HxSystemError::Reported, this, &HxMainWindow::ErrorReported );
-    connect( HxProtector::Instance(), &HxProtector::LoginChanged, this, &HxMainWindow::LoginChanged );
+    connect( ui->tabWidget, &QTabWidget::currentChanged, this, &HxMainWindow::OnTabChanged );
 
+    Marker()->moveToThread( QCoreApplication::instance()->thread() );
+    Marker()->Init();
+
+    OnLockUI();
+
+    Theme()->SetTheme( "Default" );
     setWindowState( Qt::WindowMaximized );
 }
 
 HxMainWindow::~HxMainWindow()
 {
+    Marker()->DeInit();
     delete ui;
 }
 
-void HxMainWindow::SetNavEnable( bool en )
+void HxMainWindow::resizeEvent( QResizeEvent* event )
 {
-    ui->toolBar->setEnabled( en );
+    if ( !m_pLblVersion )
+    {
+        m_pLblVersion = new QLabel( this );
+        m_pLblVersion->setGeometry( 0, 0, 100, 35 );
+        m_pLblVersion->setText( tr("Phiên bản\n") + Licensing()->GetVersion());
+        m_pLblVersion->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+        m_pLblVersion->setStyleSheet( "color:#808; font-weight:bold;" );
+    }
+    QRect mainGeo = geometry();
+    m_pLblVersion->setGeometry( mainGeo.width() - m_pLblVersion->width()-5, 5, 100, 35 );
 }
 
-void HxMainWindow::showEvent( QShowEvent* )
+void HxMainWindow::closeEvent( QCloseEvent* event)
 {
-
+    if ( HxMsgQuestion( tr( "Xác nhận thoát chương trình" ), tr( "Thoát chương trình?" ) ) != HxMsgButton::Yes )
+    {
+        event->ignore();
+        return;
+    }
 }
 
-void HxMainWindow::closeEvent( QCloseEvent* )
+bool HxMainWindow::eventFilter( QObject* watched, QEvent* event )
 {
+    HxEvent* hxEvent( nullptr );
+    HxEvent::Type type;
+    if ( !HxEvent::IsCustomEvent( event, hxEvent, type ) )
+        return QMainWindow::eventFilter( watched, event );
 
+    switch ( type )
+    {
+    case HxEvent::eLoginEvent:
+    case HxEvent::eLogoutEvent:
+    {
+        HxProfilePtr pProfile = Protector()->Profile();
+        if ( !pProfile )
+            OnLockUI();
+        else if ( pProfile->Permission( "ADMIN" ) )
+            OnUnLockUIForAdmin();
+        else if ( pProfile->Permission( "SUPER" ) )
+            OnUnLockUIForSuper();
+        else if ( pProfile->Permission( "LEADER" ) )
+            OnUnLockUIForLeader();
+    }
+        break;
+    default:
+        break;
+    }
+
+    return QMainWindow::eventFilter( watched, event );
+}
+
+void HxMainWindow::OnLoginOrLogout()
+{
+    if ( Protector()->Profile() != nullptr )
+    {
+        int res = HxMsgQuestion( "Bạn có chắc chắn muốn đăng xuất không ?", "Khoan đã" );
+        if ( res == QMessageBox::StandardButton::Yes )
+            Protector()->Logout();
+    }
+    else
+    {
+        HxLoginDialog( this ).exec();
+    }
+}
+
+void HxMainWindow::OnLockUI()
+{
+    OnUnLockUIForAdmin();
+    ui->tabWidget->setTabText( 0, tr( "Đăng nhập" ) );
+    ui->tabWidget->setTabVisible( 3, false );
+    ui->tabWidget->setTabVisible( 4, false );
+    ui->tabWidget->setTabVisible( 5, false );
+    //ui->tabWidget->setTabVisible( 6, false );
+    ui->tabWidget->setTabVisible( 7, false );
+    ui->tabWidget->setTabVisible( 8, false );
+    //ui->tabWidget->setTabVisible( 9, false );
+}
+
+void HxMainWindow::OnUnLockUIForLeader()
+{
+    OnUnLockUIForAdmin();
+    ui->tabWidget->setTabVisible( 4, false );
+    ui->tabWidget->setTabVisible( 5, false );
+    ui->tabWidget->setTabVisible( 7, false );
+    ui->tabWidget->setTabVisible( 8, false );
+}
+
+void HxMainWindow::OnUnLockUIForSuper()
+{
+    OnUnLockUIForAdmin();
+    ui->tabWidget->setTabVisible( 7, false );
+    ui->tabWidget->setTabVisible( 8, false );
+}
+
+void HxMainWindow::OnUnLockUIForAdmin()
+{
+    ui->tabWidget->setTabText( 0, tr( "Đăng xuất" ) );
+    for ( int i = 0; i < ui->tabWidget->count(); i++ )
+        ui->tabWidget->setTabVisible( i, true );
+}
+
+void HxMainWindow::OnTabChanged( int index )
+{
+    if ( !ui->tabWidget->currentWidget()->isEnabled() || index == 0 )
+    {
+        QSignalBlocker blocker( ui->tabWidget );
+        ui->tabWidget->setCurrentIndex( m_currentTabIndex );
+        if ( index == 0 )
+            OnLoginOrLogout();
+        return;
+    }
+
+    m_currentTabIndex = index;
 }
 
 void HxMainWindow::ErrorReported( HxException ex )
 {
-    HxMessage::error( ex.message, ex.where );
+    HxMsgError( ex.Message(), ex.Where());
 }
-
-void HxMainWindow::LoginChanged()
-{
-    UpdateUI();
-}
-
-void HxMainWindow::UpdateUI()
-{
-    HxUserProfile* user = HxProtector::Instance()->CurrentUser();
-    if ( user == nullptr )
-    {
-        ui->actionLogin->setText( "Đăng nhập" );
-        ui->actionSettings->setEnabled( false );
-        ui->actionControl->setEnabled( false );
-        ui->actionLot->setEnabled( false );
-        ui->actionModel->setEnabled( false );
-        ui->actionDesign->setEnabled( false );
-        ui->actionIVProgram->setEnabled( false );
-    }
-    else
-    {
-        ui->actionLogin->setText( "Đăng xuất" );
-        bool isAdmin = user->isAdmin;
-        bool isSuper = user->isSuper;
-        bool isWorking = false;
-        ui->actionSettings->setEnabled( isAdmin );
-        ui->actionControl->setEnabled( isAdmin );
-        ui->actionLot->setEnabled( isAdmin || isSuper );
-        ui->actionModel->setEnabled( isAdmin );
-        ui->actionDesign->setEnabled( isAdmin );
-        ui->actionIVProgram->setEnabled( isAdmin );
-    }
-}
-
-void HxMainWindow::MenuTabToggled( bool )
-{
-    for ( int i = 0; i < actions.size(); i++ )
-    {
-        QAction* _sender = ( QAction* )sender();
-        bool match = _sender == actions[ i ];
-        disconnect( actions[ i ], &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
-        if ( match )
-        {
-            ui->stackedWidget->setCurrentWidget( pages[ i ] );
-            actions[ i ]->setChecked( true );
-        }
-        else
-        {
-            actions[ i ]->setChecked( false );
-        }
-        connect( actions[ i ], &QAction::toggled, this, &HxMainWindow::MenuTabToggled );
-    }
-}
-
-
-void HxMainWindow::on_actionLogin_triggered()
-{
-    if ( HxProtector::Instance()->CurrentUser() != nullptr )
-    {
-        int res = HxMessage::warning( "Bạn có chắc chắn muốn đăng xuất không ?", "Khoan đã" );
-        if ( res == QMessageBox::StandardButton::Yes )
-        {
-            HxProtector::Instance()->Logout();
-            ui->actionMark->setChecked( true );
-        }
-    }
-    else
-    {
-        HxLoginDialog dlg( this );
-        if ( dlg.exec() )
-        {
-
-        }
-    }
-}
-

@@ -1,5 +1,5 @@
 #include "HxRemoveParamDialog.h"
-#include "ui_hxremoveparamdialog.h"
+#include "ui_HxRemoveParamDialog.h"
 
 HxRemoveParamDialog::HxRemoveParamDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::RemoveParamDialog )
 {
@@ -11,7 +11,7 @@ HxRemoveParamDialog::~HxRemoveParamDialog()
     delete ui;
 }
 
-void HxRemoveParamDialog::SetParams( QStringList names )
+void HxRemoveParamDialog::setParams( QStringList names )
 {
     ui->txtParamNames->setPlainText( names.join( ',' ) );
 }

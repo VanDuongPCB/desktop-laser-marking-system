@@ -5,6 +5,14 @@
 HxLoginDialog::HxLoginDialog( QWidget* parent ) : QDialog( parent ), ui( new Ui::LoginDialog )
 {
     ui->setupUi( this );
+    ui->cbxProfile->setFocus();
+    auto setPasswordFocus = [ & ]()
+        {
+            ui->txtPassword->setFocus();
+        };
+    connect( ui->cbxProfile, &QComboBox::currentTextChanged, this, setPasswordFocus );
+    connect( ui->btnLogin, &QPushButton::clicked, this, &HxLoginDialog::OnLogin );
+    setPasswordFocus();
 }
 
 HxLoginDialog::~HxLoginDialog()
@@ -12,28 +20,11 @@ HxLoginDialog::~HxLoginDialog()
     delete ui;
 }
 
-bool HxLoginDialog::CheckInputs()
+void HxLoginDialog::OnLogin()
 {
-    QString user = ui->txtUserName->text().trimmed().toUpper();
+    QString user = ui->cbxProfile->currentText().trimmed();
     QString pass = ui->txtPassword->text().trimmed();
-    return user.length() > 0 && pass.length() > 0;
-}
-
-void HxLoginDialog::on_txtUserName_textChanged( const QString& arg1 )
-{
-    ui->btnLogin->setEnabled( CheckInputs() );
-}
-
-void HxLoginDialog::on_txtPassword_textChanged( const QString& arg1 )
-{
-    ui->btnLogin->setEnabled( CheckInputs() );
-}
-
-void HxLoginDialog::on_btnLogin_clicked()
-{
-    QString user = ui->txtUserName->text().trimmed().toUpper();
-    QString pass = ui->txtPassword->text().trimmed();
-    if ( HxProtector::Instance()->Login( user, pass ) )
+    if ( Protector()->Login(user, pass) )
     {
         this->close();
         this->setResult( 1 );

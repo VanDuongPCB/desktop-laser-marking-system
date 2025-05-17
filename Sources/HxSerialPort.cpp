@@ -1,27 +1,28 @@
+
 #include "HxSerialPort.h"
 #include "HxException.h"
-#include "HxSystemError.h"
+#include "HxSystemReport.h"
 
 HxSerialPort::HxSerialPort( QObject* parent ) : QSerialPort{ parent }
 {
 
 }
 
-HxSerialPort::HxSerialPort( QString port, QObject* parent ) : QSerialPort{ parent }
+HxSerialPort::HxSerialPort( const QString& port, QObject* parent ) : QSerialPort{ parent }
 {
     this->setPortName( port );
 }
 
-HxSerialPort::HxSerialPort( QString port, int baud, QObject* parent ) : QSerialPort{ parent }
+HxSerialPort::HxSerialPort( const QString& port, int baud, QObject* parent ) : QSerialPort{ parent }
 {
     this->setPortName( port );
     this->setBaudRate( baud );
 }
 
-bool HxSerialPort::WriteLine( QString data, int timeout )
+bool HxSerialPort::WriteLine( const QString& data, int timeout )
 {
-    data += "\n";
-    this->write( data.toStdString().c_str() );
+    std::string wdata = data.toStdString() + "\n";
+    this->write( wdata.c_str() );
     if ( !waitForBytesWritten( timeout ) )
     {
         QStringList items = {

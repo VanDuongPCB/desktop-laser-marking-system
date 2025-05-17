@@ -31,9 +31,34 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="pageSetting">
-       <layout class="QGridLayout" name="gridLayout_9">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+      <widget class="QWidget" name="tabLogin">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/protect-01.png</normaloff>:/protect-01.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Đăng nhập</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabMark">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/laser_beam_48px.png</normaloff>:/laser_beam_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Khắc</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -48,7 +73,37 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pagePass">
+      <widget class="QWidget" name="tabTransfer">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/data_transfer_48px.png</normaloff>:/data_transfer_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Pass</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabPlans">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/schedule_48px.png</normaloff>:/schedule_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Kế hoạch</string>
+       </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <property name="leftMargin">
          <number>0</number>
@@ -64,8 +119,15 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageMark">
-       <layout class="QGridLayout" name="gridLayout_10">
+      <widget class="QWidget" name="tabModel">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/prototype_48px.png</normaloff>:/prototype_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Model</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -80,8 +142,15 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageControl">
-       <layout class="QGridLayout" name="gridLayout_11">
+      <widget class="QWidget" name="tabDesign">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/text_width_48px.png</normaloff>:/text_width_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Thiết kế</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -96,7 +165,14 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageScheddule">
+      <widget class="QWidget" name="tabIV">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/iris_scan_48px.png</normaloff>:/iris_scan_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Chương trình IV</string>
+       </attribute>
        <layout class="QGridLayout" name="gridLayout_8">
         <property name="leftMargin">
          <number>0</number>
@@ -112,8 +188,15 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageModel">
-       <layout class="QGridLayout" name="gridLayout_12">
+      <widget class="QWidget" name="tabSetting">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/settings_48px.png</normaloff>:/settings_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Cài đặt</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_9">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -128,8 +211,15 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageDesign">
-       <layout class="QGridLayout" name="gridLayout_13">
+      <widget class="QWidget" name="tabControl">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/joystick_48px.png</normaloff>:/joystick_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Điều khiển</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -144,8 +234,15 @@
         </property>
        </layout>
       </widget>
-      <widget class="QWidget" name="pageIV">
-       <layout class="QGridLayout" name="gridLayout_14">
+      <widget class="QWidget" name="tabData">
+       <attribute name="icon">
+        <iconset resource="../Assets/Icons/icons.qrc">
+         <normaloff>:/microsoft_excel_2019_48px.png</normaloff>:/microsoft_excel_2019_48px.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>Dữ liệu</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_11">
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -163,39 +260,6 @@
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="movable">
-    <bool>true</bool>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>90</width>
-     <height>30</height>
-    </size>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonStyle::ToolButtonTextUnderIcon</enum>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionLogin"/>
-   <addaction name="actionSettings"/>
-   <addaction name="actionControl"/>
-   <addaction name="actionPass"/>
-   <addaction name="actionMark"/>
-   <addaction name="actionLot"/>
-   <addaction name="actionModel"/>
-   <addaction name="actionDesign"/>
-   <addaction name="actionIVProgram"/>
   </widget>
   <action name="actionLogin">
    <property name="icon">
@@ -217,7 +281,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">
@@ -250,7 +314,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">
@@ -268,7 +332,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">
@@ -286,7 +350,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">
@@ -304,7 +368,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">
@@ -322,7 +386,7 @@
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../Assets/Icons/icons.qrc">

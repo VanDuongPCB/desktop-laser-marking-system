@@ -6,47 +6,60 @@
 #include "HxDesign.h"
 #include "HxModel.h"
 #include "HxStopper.h"
-
+#include "HxEvent.h"
 
 
 
 class HxMarker : public QObject
 {
     Q_OBJECT
-private:
-    std::atomic_bool runFlag = false;
 public:
-    std::shared_ptr<HxLOT> lot;
-    std::shared_ptr<HxModel> model;
-    std::shared_ptr<HxDesign> design;
-    std::shared_ptr<HxStopper> stopper;
+    enum State
+    {
+        eOnUnInit,
+        eOnFree,
+        eOnTesting,
+        eOnTransfering,
+        eOnMarking,
+        eOnFinish,
+        eOnStopping,
+        eOnError
+    };
 
-    explicit HxMarker( QObject* parent = 0 );
+    enum SetupMode
+    {
+        eModeTransfer,
+        eModeMarking
+    };
+
+    HxMarker();
     ~HxMarker();
-
-    void Clear();
-    bool Select( std::shared_ptr<HxLOT> lot );
-    bool Mark( bool test = false );
-
-
-    bool IsBusy();
-
-    void Start();
+    State GetState() const;
+    void Init();
+    void DeInit();
+    bool Setup( SetupMode mode, const QString& param );
+    void Mark();
+    void Transfer();
+    void Test();
+    void Pause();
     void Stop();
-signals:
-    void started();
-    void printed( std::shared_ptr<HxLOT> lot );
-    void stopped();
-public slots:
+    HxLOTPtr LOT() const;
+    HxModelPtr Model() const;
+    HxDesignPtr Design() const;
+    void ReLoadSetting();
+private:
+    HxLOTPtr m_pLOT;
+    HxModelPtr m_pModel;
+    HxDesignPtr m_pDesign;
+    HxStopperPtr m_pStopper;
+    State m_state = eOnUnInit;
+
+    void CheckAndPostEvent( State& lastState, State currentState, HxEvent::Type eventType );
     void Task();
 
-
-    /* ----------- */
 private:
-    static QThread worker;
-    static HxMarker* _instance;
-public:
-    static void Initialize();
-    static void Terminate();
-    static HxMarker* Instance();
+    HxRegistrySetting m_settings;
 };
+
+
+HxMarker* Marker();
